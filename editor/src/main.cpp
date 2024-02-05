@@ -7,7 +7,6 @@ int main() {
   if (!err.has_value()) {
     return EXIT_FAILURE;
   }
-
   auto app = err.value();
 
   app.run();

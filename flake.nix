@@ -24,11 +24,16 @@
             meson
             muon
             ninja
+
           ];
 
           buildInputs = with pkgs; [
             SDL2
             boost
+            vulkan-validation-layers
+            vulkan-headers
+            vulkan-loader
+            vulkan-tools
           ];
         };
       }
