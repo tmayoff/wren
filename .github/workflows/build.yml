@@ -18,5 +18,5 @@ jobs:
         name: tmayoff
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - uses: DeterminateSystems/magic-nix-cache-action@v2
-    - run: nix-build
+    - run: nix build
     - run: nix-shell --run "echo OK"
