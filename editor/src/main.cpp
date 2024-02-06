@@ -4,7 +4,7 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/std.h>
 
-int main() {
+auto main() -> int {
   const auto &err = wren::Application::Create("Editor");
   if (!err.has_value()) {
     spdlog::error("{}", err.error());

@@ -15,15 +15,11 @@ public:
   static auto Create(const std::string &application_name)
       -> tl::expected<Window, std::error_code>;
 
-  auto operator=(const Window &other) {
-    return Window(other.window);
-  }
-
   void Shutdown();
 
   void DispatchEvents(const Event::Dispatcher &dispatcher);
 
-  auto GetRequiredVulkanExtension() const
+  [[nodiscard]] auto GetRequiredVulkanExtension() const
       -> tl::expected<std::vector<std::string_view>, std::error_code>;
 
 private:

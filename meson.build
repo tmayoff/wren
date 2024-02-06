@@ -10,7 +10,7 @@ endif
 boost = dependency('boost')
 spdlog = dependency('spdlog')
 sdl = dependency('SDL2')
-expected = dependency('tl-expected')
+expected = dependency('tl-expected', modules: ['tl::expected'])
 vulkan = dependency('vulkan')
 
 subdir('wren')

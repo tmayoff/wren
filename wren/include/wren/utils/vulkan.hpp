@@ -6,7 +6,7 @@
 
 namespace wren::vulkan {
 
-inline bool IsExtensionSupport(const std::string_view &name) {
+inline auto IsExtensionSupport(const std::string_view &name) -> bool {
   auto res = vk::enumerateInstanceExtensionProperties();
 
   bool found = false;
@@ -20,7 +20,7 @@ inline bool IsExtensionSupport(const std::string_view &name) {
   return found;
 }
 
-inline bool IsLayerSupported(const std::string_view &name) {
+inline auto IsLayerSupported(const std::string_view &name) -> bool {
   auto res = vk::enumerateInstanceLayerProperties();
 
   bool found = false;

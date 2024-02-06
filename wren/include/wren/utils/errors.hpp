@@ -3,6 +3,7 @@
 #include "enums.hpp"
 #include <system_error>
 
+// NOLINTNEXTLINE
 #define ERROR_CODE(NAMESPACE, ERROR_ENUM, ...)                                 \
   namespace std {                                                              \
   template <> struct is_error_code_enum<NAMESPACE::ERROR_ENUM> : true_type {}; \
@@ -27,6 +28,7 @@
     return {static_cast<int32_t>(ec), ERROR_ENUM##_category()};                \
   }
 
+// NOLINTNEXTLINE
 #define ERROR_ENUM(NS, E, ...)                                                 \
   namespace NS {                                                               \
   DESCRIBED_ENUM(E, __VA_ARGS__)                                               \
