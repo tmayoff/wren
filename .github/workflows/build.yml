@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: Build
 
 on:
   push:
@@ -12,6 +12,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - run: apt-get install -y meson ninja-build
 
     - name: Setup
       run: meson setup build
