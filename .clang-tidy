@@ -1,0 +1,4 @@
+---
+Checks: 'cppcoreguidelines-*, modernize-*'
+FormatStyle: google
+...
