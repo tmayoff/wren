@@ -29,6 +29,8 @@ auto GraphicsContext::Create(
   return graphics_context;
 }
 
+void GraphicsContext::Shutdown() { instance.destroy(); }
+
 auto GraphicsContext::CreateInstance(
     const std::string &application_name,
     const std::vector<std::string_view> &requested_extensions,
@@ -37,7 +39,7 @@ auto GraphicsContext::CreateInstance(
   const auto appInfo = vk::ApplicationInfo(application_name.c_str(), 1, "wren",
                                            1, VK_API_VERSION_1_1);
 
-  spdlog::debug("Requesting extensions");
+  spdlog::debug("Requesting extensions:");
   std::vector<const char *> extensions;
   for (const auto &ext : requested_extensions) {
     spdlog::debug("\t{}", ext);
@@ -49,11 +51,21 @@ auto GraphicsContext::CreateInstance(
   }
 
   std::vector<const char *> layers;
-  for (const auto &ext : requested_layers) {
-    if (vulkan::IsLayerSupported(ext)) {
-      extensions.push_back(ext.data());
+
+#ifdef WREN_DEBUG
+  if (vulkan::IsLayerSupported("VK_LAYER_KHRONOS_validation")) {
+    spdlog::debug("Validation layer supported, adding to instance");
+    layers.push_back("VK_LAYER_KHRONOS_validation");
+  }
+#endif
+
+  spdlog::debug("Requesting layers:");
+  for (const auto &layer : requested_layers) {
+    spdlog::debug("\t{}", layer);
+    if (vulkan::IsLayerSupported(layer)) {
+      extensions.push_back(layer.data());
     } else {
-      spdlog::warn("Requested vulkan layer {}, is not supported", ext);
+      spdlog::warn("Requested vulkan layer {}, is not supported", layer);
     }
   }
 

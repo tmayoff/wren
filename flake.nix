@@ -14,6 +14,7 @@
 
         devShell = pkgs.mkShell.override { stdenv = pkgs.clangStdenv; } {
           NIX_CFLAGS_COMPILE = "-U_FORTIFY_SOURCE";
+          VK_LAYER_PATH = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d";
 
           nativeBuildInputs = with pkgs; [
             clang-tools
