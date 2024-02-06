@@ -1,13 +1,14 @@
 #pragma once
 
+#include <string>
 #include <boost/describe.hpp>
 
-template <class E> char const *enum_to_string(E e) {
-  char const *r = "(unnamed)";
+template <class E> std::string enum_to_string(E e) {
+  std::string r = "(unnamed)";
   boost::mp11::mp_for_each<boost::describe::describe_enumerators<E>>(
       [&](auto D) {
         if (e == D.value)
-          r = D.name;
+          r = std::string(D.name);
       });
   return r;
 }

@@ -17,6 +17,7 @@
 
           nativeBuildInputs = with pkgs; [
             clang-tools
+            gdb
 
             pkg-config
 

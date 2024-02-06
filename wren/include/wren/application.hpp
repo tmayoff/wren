@@ -1,8 +1,9 @@
 #pragma once
 
 #include "context.hpp"
-#include "tl/expected.hpp"
 #include <memory>
+#include <spdlog/spdlog.h>
+#include <tl/expected.hpp>
 
 namespace wren {
 
@@ -10,7 +11,10 @@ class Application {
 public:
   enum class errors {};
 
-  static auto Create() -> tl::expected<Application, std::error_code>;
+  static auto Create(const std::string &application_name)
+      -> tl::expected<std::shared_ptr<Application>, std::error_code>;
+
+  ~Application() { ctx->window.Shutdown(); }
 
   void run();
 
@@ -19,7 +23,7 @@ private:
 
   std::shared_ptr<Context> ctx;
 
-  bool running ;
+  bool running;
 };
 
 } // namespace wren
