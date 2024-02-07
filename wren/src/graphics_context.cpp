@@ -30,7 +30,9 @@ auto GraphicsContext::Create(
     }
   }
 
+#ifdef WREN_DEBUG
   { graphics_context.CreateDebugMessenger(); }
+#endif
 
   return graphics_context;
 }
@@ -121,6 +123,7 @@ auto GraphicsContext::IsDeviceSuitable(const vk::PhysicalDevice &device)
   return true;
 }
 
+#ifdef WREN_DEBUG
 auto GraphicsContext::CreateDebugMessenger()
     -> tl::expected<void, std::error_code> {
   vk::DebugUtilsMessageSeverityFlagsEXT severity_flags(
@@ -144,5 +147,6 @@ auto GraphicsContext::CreateDebugMessenger()
 
   return {};
 }
+#endif
 
 } // namespace wren
