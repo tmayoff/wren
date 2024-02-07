@@ -11,3 +11,4 @@ template <> auto enum_to_string<vk::Result>(vk::Result e) -> std::string {
 }
 
 ERROR_CODE(vk, Result, eInitializationFailed, eSuccess, eOutofHostMemory)
+ERROR_ENUM(wren, VulkanErrors, NoDevicesFound, QueueFamilyNotSupported)
