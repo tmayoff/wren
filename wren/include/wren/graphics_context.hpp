@@ -17,7 +17,14 @@ public:
          const std::vector<std::string_view> &requested_layers = {})
       -> tl::expected<GraphicsContext, std::error_code>;
 
+  auto InitializeSurface() -> tl::expected<void, std::error_code>;
+
   void Shutdown();
+
+  [[nodiscard]] auto Instance() const { return instance; }
+  void Surface(const vk::SurfaceKHR &surface) { this->surface = surface; }
+
+  auto CreateDevice() -> tl::expected<void, std::error_code>;
 
 private:
   auto
@@ -33,6 +40,8 @@ private:
   vk::PhysicalDevice physical_device;
 
   vulkan::Device device;
+
+  vk::SurfaceKHR surface;
 
 #ifdef WREN_DEBUG
   auto CreateDebugMessenger() -> tl::expected<void, std::error_code>;

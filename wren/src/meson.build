@@ -4,5 +4,6 @@ sources += files(
   'window.cpp',
   'utils/queue.cpp',
   'utils/vulkan.cpp',
+  'utils/device.cpp',
   'utils/vulkan_errors.cpp',
 )

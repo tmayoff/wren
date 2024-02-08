@@ -15,7 +15,7 @@ auto Application::Create(const std::string &application_name)
 
   spdlog::debug("Initializing application");
 
-  const auto &window = Window::Create(application_name);
+  auto window = Window::Create(application_name);
   if (!window.has_value()) {
     return tl::make_unexpected(window.error());
   }
@@ -24,10 +24,23 @@ auto Application::Create(const std::string &application_name)
   if (!extensions.has_value())
     return tl::make_unexpected(extensions.error());
 
-  const auto graphics_context =
+  auto graphics_context =
       GraphicsContext::Create(application_name, *extensions);
   if (!graphics_context.has_value())
     return tl::make_unexpected(graphics_context.error());
+
+  {
+    auto res = window->CreateSurface(graphics_context->Instance());
+    if (!res.has_value())
+      return tl::make_unexpected(res.error());
+    graphics_context->Surface(res.value());
+  }
+
+  {
+    auto res = graphics_context->CreateDevice();
+    if (!res.has_value())
+      return tl::make_unexpected(res.error());
+  }
 
   auto ctx = std::make_shared<Context>(*window, Event::Dispatcher(),
                                        *graphics_context);

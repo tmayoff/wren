@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 #include <system_error>
 #include <tl/expected.hpp>
+#include <vulkan/vulkan.hpp>
 
 namespace wren {
 
@@ -16,6 +17,9 @@ public:
       -> tl::expected<Window, std::error_code>;
 
   void Shutdown();
+
+  auto CreateSurface(const vk::Instance &instance)
+      -> tl::expected<vk::SurfaceKHR, std::error_code>;
 
   void DispatchEvents(const Event::Dispatcher &dispatcher);
 

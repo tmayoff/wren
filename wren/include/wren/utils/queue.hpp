@@ -9,11 +9,14 @@ namespace wren::vulkan {
 
 struct QueueFamilyIndices {
   uint32_t graphics_index;
+  uint32_t present_index;
 };
 
 class Queue {
 public:
-  static auto FindQueueFamilyIndices(const vk::PhysicalDevice &physical_device)
+  static auto
+  FindQueueFamilyIndices(const vk::PhysicalDevice &physical_device,
+                         const std::optional<vk::SurfaceKHR> &surface = {})
       -> tl::expected<QueueFamilyIndices, std::error_code>;
 };
 

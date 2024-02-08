@@ -31,8 +31,10 @@ auto GraphicsContext::Create(
   }
 
 #ifdef WREN_DEBUG
-  { graphics_context.CreateDebugMessenger(); }
+  graphics_context.CreateDebugMessenger();
 #endif
+
+  graphics_context.PickPhysicalDevice();
 
   return graphics_context;
 }
@@ -117,10 +119,21 @@ auto GraphicsContext::PickPhysicalDevice()
 auto GraphicsContext::IsDeviceSuitable(const vk::PhysicalDevice &device)
     -> bool {
   auto res = vulkan::Queue::FindQueueFamilyIndices(device);
-  if (!res.has_value())
+  if (!res.has_value()) {
+    spdlog::error("{}", res.error().message());
     return false;
+  }
 
   return true;
+}
+
+auto GraphicsContext::CreateDevice() -> tl::expected<void, std::error_code> {
+  auto res = vulkan::Device::Create(instance, physical_device, surface);
+  if (!res.has_value())
+    return tl::make_unexpected(res.error());
+  device = res.value();
+
+  return {};
 }
 
 #ifdef WREN_DEBUG
@@ -133,7 +146,7 @@ auto GraphicsContext::CreateDebugMessenger()
       vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
 
   vk::DebugUtilsMessageTypeFlagsEXT message_type_flags(
-      vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+      // vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
       vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
       vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance);
 

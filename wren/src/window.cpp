@@ -3,6 +3,8 @@
 #include "SDL_events.h"
 #include "SDL_video.h"
 #include "tl/expected.hpp"
+#include "vulkan/vulkan_core.h"
+#include "vulkan/vulkan_handles.hpp"
 #include "wren/event.hpp"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
@@ -29,6 +31,14 @@ auto Window::Create(const std::string &application_name)
 }
 
 void Window::Shutdown() { SDL_Quit(); }
+
+auto Window::CreateSurface(const vk::Instance &instance)
+    -> tl::expected<vk::SurfaceKHR, std::error_code> {
+  VkSurfaceKHR surface{};
+  SDL_Vulkan_CreateSurface(window, instance, &surface);
+
+  return surface;
+}
 
 auto Window::GetRequiredVulkanExtension() const
     -> tl::expected<std::vector<std::string_view>, std::error_code> {
