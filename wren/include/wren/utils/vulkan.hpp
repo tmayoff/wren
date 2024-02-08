@@ -23,7 +23,7 @@ inline auto IsExtensionSupport(const std::string_view &name) -> bool {
 
   bool found = false;
   for (const auto &ext : res.value) {
-    if (ext.extensionName == name) {
+    if (ext.extensionName == name.data()) {
       found = true;
       break;
     }
@@ -37,7 +37,7 @@ inline auto IsLayerSupported(const std::string_view &name) -> bool {
 
   bool found = false;
   for (const auto &ext : res.value) {
-    if (ext.layerName == name) {
+    if (ext.layerName == name.data()) {
       found = true;
       break;
     }
