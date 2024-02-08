@@ -2,8 +2,6 @@
 
 namespace wren {
 
-class Renderer {
-public:
-};
+class GraphBuilder {};
 
 } // namespace wren

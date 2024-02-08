@@ -58,6 +58,9 @@
               clang-tools
               gdb
               muon
+
+              mkdocs
+              python311Packages.mkdocs-material
             ] ++ rawNativeBuildInputs;
 
             buildInputs = with pkgs; [
