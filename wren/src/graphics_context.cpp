@@ -23,18 +23,32 @@ auto GraphicsContext::Create(
   GraphicsContext graphics_context;
 
   {
+    spdlog::debug("Creating instance...");
     auto res = graphics_context.CreateInstance(
         application_name, requested_extensions, requested_layers);
     if (!res.has_value()) {
       return tl::make_unexpected(res.error());
     }
+    spdlog::debug("Created instance.");
   }
 
 #ifdef WREN_DEBUG
-  graphics_context.CreateDebugMessenger();
+  {
+    spdlog::debug("Creating debug messenger...");
+    auto res = graphics_context.CreateDebugMessenger();
+    if (!res.has_value())
+      return tl::make_unexpected(res.error());
+    spdlog::debug("Created debug messenger.");
+  }
 #endif
 
-  graphics_context.PickPhysicalDevice();
+  {
+    spdlog::debug("Picking physical device...");
+    auto res = graphics_context.PickPhysicalDevice();
+    if (!res.has_value())
+      return tl::make_unexpected(res.error());
+    spdlog::debug("Picked physical device.");
+  }
 
   return graphics_context;
 }
@@ -82,17 +96,33 @@ auto GraphicsContext::CreateInstance(
     spdlog::debug("Debug utils extension supported, adding to instance");
     extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
   }
+
+  vk::DebugUtilsMessageSeverityFlagsEXT severity_flags(
+      vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
+      vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
+      vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+      vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
+
+  vk::DebugUtilsMessageTypeFlagsEXT message_type_flags(
+      // vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+      vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
+      vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance);
+
+  vk::DebugUtilsMessengerCreateInfoEXT debugMessengerCreateInfo(
+      {}, severity_flags, message_type_flags, &vulkan::DebugCallback);
 #endif
 
   vk::InstanceCreateInfo createInfo({}, &appInfo, layers, extensions);
-  vk::ResultValue<vk::Instance> res = vk::createInstance(createInfo);
-  if (res.result != vk::Result::eSuccess) {
-    return tl::make_unexpected(make_error_code(res.result));
+#ifdef WREN_DEBUG
+  createInfo.setPNext(&debugMessengerCreateInfo);
+#endif
+
+  auto [res, instance] = vk::createInstance(createInfo);
+  if (res != vk::Result::eSuccess) {
+    return tl::make_unexpected(make_error_code(res));
   }
 
-  instance = res.value;
-
-  spdlog::debug("Vulkan instance created");
+  this->instance = instance;
 
   return {};
 }
@@ -153,10 +183,13 @@ auto GraphicsContext::CreateDebugMessenger()
   vk::DebugUtilsMessengerCreateInfoEXT createInfo(
       {}, severity_flags, message_type_flags, &vulkan::DebugCallback);
 
-  auto res = instance.createDebugUtilsMessengerEXT(createInfo, nullptr);
-  if (res.result != vk::Result::eSuccess) {
-    return tl::unexpected(make_error_code(res.result));
+  auto [res, debug_messenger] =
+      instance.createDebugUtilsMessengerEXT(createInfo, nullptr);
+  if (res != vk::Result::eSuccess) {
+    return tl::unexpected(make_error_code(res));
   }
+
+  this->debug_messenger = debug_messenger;
 
   return {};
 }

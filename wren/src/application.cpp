@@ -29,6 +29,8 @@ auto Application::Create(const std::string &application_name)
   if (!graphics_context.has_value())
     return tl::make_unexpected(graphics_context.error());
 
+  spdlog::trace("Created graphics context");
+
   {
     auto res = window->CreateSurface(graphics_context->Instance());
     if (!res.has_value())

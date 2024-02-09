@@ -37,12 +37,13 @@
 
             nativeBuildInputs = rawNativeBuildInputs;
             buildInputs = rawBuildInputs;
-            
+
             installPhase = ''
-                mkdir -p $out/bin
-                ninja install
+              mkdir -p $out/bin
+              ninja install
             '';
           };
+
           default = wren_editor;
         };
 
@@ -61,6 +62,7 @@
 
               mkdocs
               python311Packages.mkdocs-material
+              python311Packages.mkdocs-mermaid2-plugin
             ] ++ rawNativeBuildInputs;
 
             buildInputs = with pkgs; [

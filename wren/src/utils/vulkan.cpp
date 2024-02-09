@@ -4,8 +4,7 @@
 #include <vulkan/vulkan_to_string.hpp>
 
 PFN_vkCreateDebugUtilsMessengerEXT pfnVkCreateDebugUtilsMessengerEXT;
-PFN_vkDestroyDebugUtilsMessengerEXT pfnVkDestroyDebugUtilsMessengerEXT =
-    nullptr;
+PFN_vkDestroyDebugUtilsMessengerEXT pfnVkDestroyDebugUtilsMessengerEXT;
 
 VKAPI_ATTR auto VKAPI_CALL vkCreateDebugUtilsMessengerEXT(
     VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
@@ -15,6 +14,10 @@ VKAPI_ATTR auto VKAPI_CALL vkCreateDebugUtilsMessengerEXT(
     pfnVkCreateDebugUtilsMessengerEXT =
         reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(
             vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT"));
+  }
+
+  if (pfnVkCreateDebugUtilsMessengerEXT == nullptr) {
+    return VkResult::VK_ERROR_EXTENSION_NOT_PRESENT;
   }
 
   return pfnVkCreateDebugUtilsMessengerEXT(instance, pCreateInfo, pAllocator,
