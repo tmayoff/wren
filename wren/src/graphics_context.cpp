@@ -64,7 +64,7 @@ auto GraphicsContext::CreateInstance(
                                            1, VK_API_VERSION_1_3);
 
   spdlog::debug("Requesting extensions:");
-  std::vector<const char *> extensions;
+  std::vector<const char *> extensions = {};
   for (const auto &ext : requested_extensions) {
     spdlog::debug("\t{}", ext);
     if (vulkan::IsExtensionSupport(ext)) {
@@ -114,7 +114,7 @@ auto GraphicsContext::CreateInstance(
 
   vk::InstanceCreateInfo createInfo({}, &appInfo, layers, extensions);
 #ifdef WREN_DEBUG
-  createInfo.setPNext(&debugMessengerCreateInfo);
+  // createInfo.setPNext(&debugMessengerCreateInfo);
 #endif
 
   auto [res, instance] = vk::createInstance(createInfo);
@@ -153,6 +153,11 @@ auto GraphicsContext::IsDeviceSuitable(const vk::PhysicalDevice &device)
     spdlog::error("{}", res.error().message());
     return false;
   }
+
+  bool swapchain_support = vulkan::IsDeviceExtensionSupported(
+      VK_KHR_SWAPCHAIN_EXTENSION_NAME, device);
+  if (!swapchain_support)
+    return false;
 
   return true;
 }

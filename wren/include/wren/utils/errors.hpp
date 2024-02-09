@@ -4,7 +4,7 @@
 #include <system_error>
 
 // NOLINTNEXTLINE
-#define ERROR_CODE(NAMESPACE, ERROR_ENUM, ...)                                 \
+#define ERROR_CODE(NAMESPACE, ERROR_ENUM)                                      \
   namespace std {                                                              \
   template <> struct is_error_code_enum<NAMESPACE::ERROR_ENUM> : true_type {}; \
   }                                                                            \
@@ -33,4 +33,4 @@
   namespace NS {                                                               \
   DESCRIBED_ENUM(E, __VA_ARGS__)                                               \
   }                                                                            \
-  ERROR_CODE(NS, E, __VA_ARGS__)
+  ERROR_CODE(NS, E)

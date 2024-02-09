@@ -2,6 +2,7 @@
 #include "wren/utils/queue.hpp"
 #include "wren/utils/vulkan_errors.hpp"
 #include <tl/expected.hpp>
+#include <vulkan/vulkan_core.h>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
@@ -31,8 +32,9 @@ auto Device::CreateDevice(const vk::Instance &instance,
   float queue_prio = 0.0f;
   vk::DeviceQueueCreateInfo queue_create_info({}, indices->graphics_index, 1,
                                               &queue_prio);
+  std::array extensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
   {
-    vk::DeviceCreateInfo createInfo({}, queue_create_info);
+    vk::DeviceCreateInfo createInfo({}, queue_create_info, {}, extensions);
     auto res = physical_device.createDevice(createInfo);
     if (res.result != vk::Result::eSuccess) {
       return tl::make_unexpected(make_error_code(res.result));

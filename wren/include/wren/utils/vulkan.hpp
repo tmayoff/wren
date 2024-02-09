@@ -1,5 +1,6 @@
 #pragma once
 
+#include <spdlog/spdlog.h>
 #include <string>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_core.h>
@@ -23,7 +24,7 @@ inline auto IsExtensionSupport(const std::string_view &name) -> bool {
 
   bool found = false;
   for (const auto &ext : res.value) {
-    if (ext.extensionName == name.data()) {
+    if (std::strcmp(ext.extensionName.data(), name.data())) {
       found = true;
       break;
     }
@@ -37,7 +38,22 @@ inline auto IsLayerSupported(const std::string_view &name) -> bool {
 
   bool found = false;
   for (const auto &ext : res.value) {
-    if (ext.layerName == name.data()) {
+    if (std::strcmp(ext.layerName, name.data())) {
+      found = true;
+      break;
+    }
+  }
+
+  return found;
+}
+
+inline auto IsDeviceExtensionSupported(const std::string_view &name,
+                                       const vk::PhysicalDevice &device) {
+  auto res = device.enumerateDeviceExtensionProperties();
+
+  bool found = false;
+  for (const auto &ext : res.value) {
+    if (std::strcmp(ext.extensionName, name.data())) {
       found = true;
       break;
     }

@@ -7,7 +7,7 @@
 auto main() -> int {
   const auto &err = wren::Application::Create("Editor");
   if (!err.has_value()) {
-    spdlog::error("{}", err.error());
+    spdlog::error("{}", err.error().message());
     return EXIT_FAILURE;
   }
   auto app = err.value();

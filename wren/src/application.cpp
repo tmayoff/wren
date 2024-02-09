@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <spdlog/spdlog.h>
+#include <vulkan/vulkan_core.h>
 
 namespace wren {
 
