@@ -3,17 +3,21 @@
 #include <vulkan/vulkan_core.h>
 #include <vulkan/vulkan_to_string.hpp>
 
+// NOLINTBEGIN
 PFN_vkCreateDebugUtilsMessengerEXT pfnVkCreateDebugUtilsMessengerEXT;
 PFN_vkDestroyDebugUtilsMessengerEXT pfnVkDestroyDebugUtilsMessengerEXT;
+// NOLINTEND
 
 VKAPI_ATTR auto VKAPI_CALL vkCreateDebugUtilsMessengerEXT(
     VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
     const VkAllocationCallbacks *pAllocator,
     VkDebugUtilsMessengerEXT *pMessenger) -> VkResult {
   if (pfnVkCreateDebugUtilsMessengerEXT == nullptr) {
+    // NOLINTBEGIN
     pfnVkCreateDebugUtilsMessengerEXT =
         reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(
             vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT"));
+    // NOLINTEND
   }
 
   if (pfnVkCreateDebugUtilsMessengerEXT == nullptr) {
@@ -33,7 +37,8 @@ auto DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
                    const VkDebugUtilsMessengerCallbackDataEXT *msg_data,
                    void *user_data) -> VkBool32 {
 
-  std::string msg = fmt::format("{}", msg_data->pMessage);
+  std::string msg =
+      fmt::format("[{}] {}", msg_data->pMessageIdName, msg_data->pMessage);
 
   switch (severity) {
   case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
@@ -52,6 +57,31 @@ auto DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
   }
 
   return VK_TRUE;
+}
+
+auto GetSwapchainSupportDetails(const vk::PhysicalDevice &physical_device,
+                                const vk::SurfaceKHR &surface)
+    -> tl::expected<SwapchainSupportDetails, std::error_code> {
+  SwapchainSupportDetails details;
+
+  vk::Result res = vk::Result::eSuccess;
+
+  std::tie(res, details.surface_capabilites) =
+      physical_device.getSurfaceCapabilitiesKHR(surface);
+  if (res != vk::Result::eSuccess)
+    return tl::make_unexpected(make_error_code(res));
+
+  std::tie(res, details.surface_formats) =
+      physical_device.getSurfaceFormatsKHR(surface);
+  if (res != vk::Result::eSuccess)
+    return tl::make_unexpected(make_error_code(res));
+
+  std::tie(res, details.present_modes) =
+      physical_device.getSurfacePresentModesKHR(surface);
+  if (res != vk::Result::eSuccess)
+    return tl::make_unexpected(make_error_code(res));
+
+  return details;
 }
 
 } // namespace wren::vulkan

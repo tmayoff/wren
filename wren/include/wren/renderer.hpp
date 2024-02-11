@@ -1,19 +1,39 @@
 #pragma once
 
+#include <memory>
 #include <system_error>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 namespace wren {
 
+struct Context;
+
 class Renderer {
 public:
-  static auto Create() -> tl::expected<Renderer, std::error_code>;
+  static auto Create(const std::shared_ptr<Context> &ctx)
+      -> tl::expected<std::shared_ptr<Renderer>, std::error_code>;
 
 private:
-  auto CreateSwapchain() -> tl::expected<void, std::error_code>;
+  explicit Renderer(const std::shared_ptr<Context> &ctx) : ctx(ctx) {}
 
+  auto create_swapchain() -> tl::expected<void, std::error_code>;
+
+  auto choose_swapchain_format(const std::vector<vk::SurfaceFormatKHR> &formats)
+      -> vk::SurfaceFormatKHR;
+  auto choose_swapchain_presentation_mode(
+      const std::vector<vk::PresentModeKHR> &formats) -> vk::PresentModeKHR;
+  auto choose_swapchain_extent(
+      const vk::SurfaceCapabilitiesKHR &surface_capabilities) -> vk::Extent2D;
+
+  std::shared_ptr<Context> ctx;
   vk::SwapchainKHR swapchain;
+  std::vector<vk::Image> swapchain_images;
+  std::vector<vk::ImageView> swapchain_image_views;
+  vk::Format swapchain_image_format;
+  vk::Extent2D swapchain_extent;
 };
 
 } // namespace wren

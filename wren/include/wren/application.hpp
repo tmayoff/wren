@@ -1,6 +1,7 @@
 #pragma once
 
 #include "context.hpp"
+#include "wren/renderer.hpp"
 #include <memory>
 #include <spdlog/spdlog.h>
 #include <tl/expected.hpp>
@@ -14,14 +15,14 @@ public:
   static auto Create(const std::string &application_name)
       -> tl::expected<std::shared_ptr<Application>, std::error_code>;
 
-  ~Application() { ctx->window.Shutdown(); }
-
   void run();
 
 private:
-  explicit Application(const std::shared_ptr<Context> &ctx);
+  explicit Application(const std::shared_ptr<Context> &ctx,
+                       const std::shared_ptr<Renderer> &renderer);
 
   std::shared_ptr<Context> ctx;
+  std::shared_ptr<Renderer> renderer;
 
   bool running;
 };

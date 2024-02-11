@@ -1,10 +1,15 @@
 #pragma once
 
+#include "wren/utils/vulkan_errors.hpp"
 #include <spdlog/spdlog.h>
 #include <string>
+#include <tl/expected.hpp>
+#include <vector>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 VKAPI_ATTR auto VKAPI_CALL vkCreateDebugUtilsMessengerEXT(
     VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
@@ -12,6 +17,16 @@ VKAPI_ATTR auto VKAPI_CALL vkCreateDebugUtilsMessengerEXT(
     VkDebugUtilsMessengerEXT *pMessenger) -> VkResult;
 
 namespace wren::vulkan {
+
+struct SwapchainSupportDetails {
+  vk::SurfaceCapabilitiesKHR surface_capabilites;
+  std::vector<vk::SurfaceFormatKHR> surface_formats;
+  std::vector<vk::PresentModeKHR> present_modes;
+};
+
+auto GetSwapchainSupportDetails(const vk::PhysicalDevice &physical_device,
+                                const vk::SurfaceKHR &surface)
+    -> tl::expected<SwapchainSupportDetails, std::error_code>;
 
 VKAPI_ATTR auto VKAPI_CALL
 DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

@@ -2,6 +2,7 @@
 #include "wren/context.hpp"
 #include "wren/event.hpp"
 #include "wren/graphics_context.hpp"
+#include "wren/renderer.hpp"
 #include <tl/expected.hpp>
 
 #include <memory>
@@ -40,7 +41,7 @@ auto Application::Create(const std::string &application_name)
   }
 
   {
-    auto res = graphics_context->CreateDevice();
+    auto res = graphics_context->SetupDevice();
     if (!res.has_value())
       return tl::make_unexpected(res.error());
   }
@@ -48,11 +49,16 @@ auto Application::Create(const std::string &application_name)
   auto ctx = std::make_shared<Context>(*window, Event::Dispatcher(),
                                        *graphics_context);
 
-  return std::shared_ptr<Application>(new Application(ctx));
+  auto renderer = Renderer::Create(ctx);
+  if (!renderer.has_value())
+      return tl::make_unexpected(renderer.error());
+
+  return std::shared_ptr<Application>(new Application(ctx, renderer.value()));
 }
 
-Application::Application(const std::shared_ptr<Context> &ctx)
-    : ctx(ctx), running(true) {}
+Application::Application(const std::shared_ptr<Context> &ctx,
+                         const std::shared_ptr<Renderer> &renderer)
+    : ctx(ctx), renderer(renderer), running(true) {}
 
 void Application::run() {
   this->ctx->event_dispatcher.on<Event::WindowClose>([this]() {

@@ -42,14 +42,6 @@ auto GraphicsContext::Create(
   }
 #endif
 
-  {
-    spdlog::debug("Picking physical device...");
-    auto res = graphics_context.PickPhysicalDevice();
-    if (!res.has_value())
-      return tl::make_unexpected(res.error());
-    spdlog::debug("Picked physical device.");
-  }
-
   return graphics_context;
 }
 
@@ -98,13 +90,13 @@ auto GraphicsContext::CreateInstance(
   }
 
   vk::DebugUtilsMessageSeverityFlagsEXT severity_flags(
-      vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
+      // vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
       vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
       vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
       vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
 
   vk::DebugUtilsMessageTypeFlagsEXT message_type_flags(
-      // vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+      vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
       vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
       vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance);
 
@@ -114,7 +106,7 @@ auto GraphicsContext::CreateInstance(
 
   vk::InstanceCreateInfo createInfo({}, &appInfo, layers, extensions);
 #ifdef WREN_DEBUG
-  // createInfo.setPNext(&debugMessengerCreateInfo);
+  createInfo.setPNext(&debugMessengerCreateInfo);
 #endif
 
   auto [res, instance] = vk::createInstance(createInfo);
@@ -123,6 +115,26 @@ auto GraphicsContext::CreateInstance(
   }
 
   this->instance = instance;
+
+  return {};
+}
+
+auto GraphicsContext::SetupDevice() -> tl::expected<void, std::error_code> {
+  {
+    spdlog::debug("Picking physical device...");
+    auto res = PickPhysicalDevice();
+    if (!res.has_value())
+      return tl::make_unexpected(res.error());
+    spdlog::debug("Picked physical device.");
+  }
+
+  {
+    spdlog::debug("Creating logical device...");
+    auto res = CreateDevice();
+    if (!res.has_value())
+      return tl::make_unexpected(res.error());
+    spdlog::debug("Created logical device.");
+  }
 
   return {};
 }
@@ -157,6 +169,15 @@ auto GraphicsContext::IsDeviceSuitable(const vk::PhysicalDevice &device)
   bool swapchain_support = vulkan::IsDeviceExtensionSupported(
       VK_KHR_SWAPCHAIN_EXTENSION_NAME, device);
   if (!swapchain_support)
+    return false;
+
+  auto swapchain_details = vulkan::GetSwapchainSupportDetails(device, surface);
+  if (!swapchain_details.has_value()) {
+    return false;
+  }
+
+  if (swapchain_details->present_modes.empty() ||
+      swapchain_details->surface_formats.empty())
     return false;
 
   return true;

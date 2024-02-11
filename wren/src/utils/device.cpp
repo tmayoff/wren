@@ -15,9 +15,8 @@ auto Device::Create(const vk::Instance &instance,
   Device device;
 
   auto res = device.CreateDevice(instance, physical_device, surface);
-  if (!res.has_value()) {
+  if (!res.has_value())
     return tl::make_unexpected(res.error());
-  }
 
   return device;
 }

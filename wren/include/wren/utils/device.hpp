@@ -14,6 +14,8 @@ public:
                      const vk::SurfaceKHR &surface)
       -> tl::expected<Device, std::error_code>;
 
+  [[nodiscard]] auto get() const -> vk::Device { return device; }
+
 private:
   auto CreateDevice(const vk::Instance &instance,
                     const vk::PhysicalDevice &physical_device,

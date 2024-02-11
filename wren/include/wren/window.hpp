@@ -26,6 +26,12 @@ public:
   [[nodiscard]] auto GetRequiredVulkanExtension() const
       -> tl::expected<std::vector<std::string_view>, std::error_code>;
 
+  auto GetSize() -> std::pair<int32_t, int32_t> {
+    int w = 0, h = 0;
+    SDL_GetWindowSize(window, &w, &h);
+    return {w, h};
+  }
+
 private:
   explicit Window(SDL_Window *window) : window(window) {}
 

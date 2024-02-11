@@ -2,6 +2,7 @@
 
 #include "wren/utils/device.hpp"
 #include "wren/utils/errors.hpp"
+#include "wren/utils/vulkan.hpp"
 #include <system_error>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
@@ -23,8 +24,19 @@ public:
 
   [[nodiscard]] auto Instance() const { return instance; }
   void Surface(const vk::SurfaceKHR &surface) { this->surface = surface; }
+  [[nodiscard]] auto Surface() const -> vk::SurfaceKHR { return surface; }
 
-  auto CreateDevice() -> tl::expected<void, std::error_code>;
+  [[nodiscard]] auto PhysicalDevice() const -> vk::PhysicalDevice {
+    return physical_device;
+  }
+
+  [[nodiscard]] auto Device() const -> const vulkan::Device & { return device; }
+
+  auto SetupDevice() -> tl::expected<void, std::error_code>;
+
+  auto GetSwapchainSupport() {
+    return vulkan::GetSwapchainSupportDetails(physical_device, surface);
+  }
 
 private:
   auto
@@ -33,6 +45,7 @@ private:
                  const std::vector<std::string_view> &requested_layers = {})
       -> tl::expected<void, std::error_code>;
 
+  auto CreateDevice() -> tl::expected<void, std::error_code>;
   auto PickPhysicalDevice() -> tl::expected<void, std::error_code>;
   auto IsDeviceSuitable(const vk::PhysicalDevice &device) -> bool;
 
