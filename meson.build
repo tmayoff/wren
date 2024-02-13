@@ -13,6 +13,7 @@ spdlog = dependency('spdlog')
 sdl = dependency('SDL2')
 expected = dependency('tl-expected', modules: ['tl::expected'])
 vulkan = dependency('vulkan')
+gsl = dependency('gsl-lite', modules: ['gsl::gsl-lite'])
 
 subdir('wren')
 subdir('editor')

@@ -22,6 +22,7 @@
           spdlog
           tl-expected
           boost
+          gsl-lite
           vulkan-validation-layers
           vulkan-headers
           vulkan-loader
@@ -59,6 +60,7 @@
               clang-tools
               gdb
               muon
+              just
 
               mkdocs
               python311Packages.mkdocs-material

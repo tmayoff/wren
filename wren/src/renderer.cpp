@@ -2,6 +2,7 @@
 #include "wren/context.hpp"
 #include "wren/utils/queue.hpp"
 #include "wren/utils/vulkan.hpp"
+#include <gsl/gsl-lite.hpp>
 #include <system_error>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan_enums.hpp>
@@ -11,13 +12,13 @@ namespace wren {
 
 auto Renderer::Create(const std::shared_ptr<Context> &ctx)
     -> tl::expected<std::shared_ptr<Renderer>, std::error_code> {
-  Renderer renderer(ctx);
+  auto renderer = gsl::owner<Renderer*>(new Renderer(ctx));
 
-  auto res = renderer.create_swapchain();
+  auto res = renderer->create_swapchain();
   if (!res.has_value())
     return tl::make_unexpected(res.error());
 
-  return std::shared_ptr<Renderer>(new Renderer(ctx));
+  return std::shared_ptr<Renderer>(std::move(renderer));
 }
 
 auto Renderer::create_swapchain() -> tl::expected<void, std::error_code> {
@@ -75,7 +76,7 @@ auto Renderer::create_swapchain() -> tl::expected<void, std::error_code> {
   swapchain_extent = extent;
 
   swapchain_image_views.resize(swapchain_images.size());
-  for (size_t i = 0; swapchain_images.size(); i++) {
+  for (size_t i = 0; i < swapchain_images.size(); i++) {
     vk::ImageViewCreateInfo create_info(
         {}, swapchain_images[i], vk::ImageViewType::e2D, swapchain_image_format,
         {},
