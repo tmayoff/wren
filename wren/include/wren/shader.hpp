@@ -2,18 +2,33 @@
 
 #include "vulkan/vulkan.hpp"
 #include <shaderc/shaderc.h>
+#include <spirv_cross/spirv_cross.hpp>
 #include <string>
 #include <system_error>
 #include <tl/expected.hpp>
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_handles.hpp>
+#include <vulkan/vulkan_structs.hpp>
 #include <wren/utils/device.hpp>
 
 namespace wren {
 
-struct ShaderModule {
-  std::vector<uint32_t> spirv;
-  vk::ShaderModule module;
+using spirv_t = std::vector<uint32_t>;
 
-  void load_reflection_info();
+struct ShaderModule {
+  spirv_t spirv;
+  vk::ShaderModule module;
+ 
+  std::shared_ptr<spirv_cross::Compiler> glsl;
+
+  ShaderModule() = default;
+  ShaderModule(spirv_t spirv, const vk::ShaderModule &module);
+
+  [[nodiscard]] auto get_shader_stage_info() const
+      -> vk::PipelineShaderStageCreateInfo;
+
+  [[nodiscard]] auto get_vertex_input() const
+      -> vk::PipelineVertexInputStateCreateInfo;
 };
 
 class Shader {
@@ -36,6 +51,8 @@ public:
   void vertex_shader(const ShaderModule &vertex) {
     vertex_shader_module = vertex;
   }
+
+  auto reflect_pipeline_layout() -> vk::PipelineLayoutCreateInfo;
 
 private:
   ShaderModule vertex_shader_module;

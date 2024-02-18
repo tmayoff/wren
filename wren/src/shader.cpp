@@ -1,6 +1,7 @@
 #include "wren/shader.hpp"
 #include "tl/expected.hpp"
 #include "vulkan/vulkan_structs.hpp"
+#include "wren/utils/spirv_cross.hpp"
 #include "wren/utils/vulkan_errors.hpp"
 #include "wren/window.hpp"
 #include <shaderc/shaderc.h>
@@ -8,13 +9,36 @@
 #include <shaderc/status.h>
 #include <spirv_cross/spirv_glsl.hpp>
 #include <system_error>
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_handles.hpp>
 
 namespace wren {
 
-void ShaderModule::load_reflection_info() {
-  spirv_cross::CompilerGLSL glsl(spirv);
-  const auto& resource = glsl.get_shader_resources();
+ShaderModule::ShaderModule(spirv_t spirv, const vk::ShaderModule &module)
+    : spirv(std::move(spirv)), module(module),
+      glsl(std::make_shared<spirv_cross::CompilerGLSL>(spirv)) {}
+
+auto ShaderModule::get_shader_stage_info() const -> vk::PipelineShaderStageCreateInfo {
+  const auto entry_points = glsl->get_entry_points_and_stages();
+  const auto entry_point = entry_points.front();
+  const auto stage =
+      wren::spirv::get_vk_shader_stage(entry_point.execution_model);
+
+  return {{}, stage.value(), module, entry_point.name.c_str()};
 }
+
+
+auto ShaderModule::get_vertex_input() const -> vk::PipelineVertexInputStateCreateInfo {
+  const auto resources = glsl->get_shader_resources();
+
+  // TODO Vertex binding descriptors
+  std::vector<vk::VertexInputBindingDescription> binding_descriptions;
+
+  // TODO Vertex attribute descriptors
+  std::vector<vk::VertexInputAttributeDescription> attribute_descriptions;
+
+  return {{}, binding_descriptions, attribute_descriptions};
+  }
 
 auto Shader::Create(const vulkan::Device &device,
                     const std::string &vertex_shader,
@@ -68,6 +92,23 @@ auto Shader::compile_shader(const vk::Device &device,
   }
 
   return ShaderModule{{spirv.begin(), spirv.end()}, module};
+}
+
+auto Shader::reflect_pipeline_layout() -> vk::PipelineLayoutCreateInfo {
+  const auto v_stage_create_info = vertex_shader_module.get_shader_stage_info();
+  const auto f_stage_create_info =
+      fragment_shader_module.get_shader_stage_info();
+
+  std::array shader_stages = {v_stage_create_info, f_stage_create_info};
+
+  std::array dynamic_states = {vk::DynamicState::eViewport,
+                               vk::DynamicState::eScissor};
+  vk::PipelineDynamicStateCreateInfo dynamic_state({}, dynamic_states);
+
+  const auto vertex_input_info = vertex_shader_module.get_vertex_input();
+
+  vk::PipelineInputAssemblyStateCreateInfo input_assembly(
+      {}, vk::PrimitiveTopology::eTriangleList, false);
 }
 
 } // namespace wren
