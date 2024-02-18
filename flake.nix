@@ -27,14 +27,18 @@
           vulkan-headers
           vulkan-loader
           vulkan-tools
+          shaderc 
+          spirv-cross
         ];
-      in
-      {
+      in rec {
+
+        vulkan_layer_path = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d";
+ 
         packages = rec {
           wren_editor = pkgs.stdenv.mkDerivation {
             name = "wren_editor";
             src = ./.;
-            VK_LAYER_PATH = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d";
+            VK_LAYER_PATH = vulkan_layer_path;
 
             nativeBuildInputs = rawNativeBuildInputs;
             buildInputs = rawBuildInputs;
@@ -48,14 +52,10 @@
           default = wren_editor;
         };
 
-        devShell = pkgs.mkShell.override
-          {
-            stdenv = pkgs.clangStdenv;
-          }
-          {
+        devShell = pkgs.mkShell.override { stdenv = pkgs.clangStdenv; } {
             NIX_CFLAGS_COMPILE = "-U_FORTIFY_SOURCE";
-            VK_LAYER_PATH = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d";
-
+            VK_LAYER_PATH = vulkan_layer_path;
+           
             nativeBuildInputs = with pkgs; [
               clang-tools
               gdb
@@ -70,6 +70,10 @@
             buildInputs = with pkgs; [
             ] ++ rawBuildInputs;
           };
+
+          shellHook = ''
+            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${pkgs.spirv-cross}"
+          '';
       }
     );
 }

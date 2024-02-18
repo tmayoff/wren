@@ -1,5 +1,7 @@
 #include "wren/renderer.hpp"
 #include "wren/context.hpp"
+#include "wren/shader.hpp"
+#include "wren/shaders/triangle.hpp"
 #include "wren/utils/queue.hpp"
 #include "wren/utils/vulkan.hpp"
 #include <gsl/gsl-lite.hpp>
@@ -12,11 +14,16 @@ namespace wren {
 
 auto Renderer::Create(const std::shared_ptr<Context> &ctx)
     -> tl::expected<std::shared_ptr<Renderer>, std::error_code> {
-  auto renderer = gsl::owner<Renderer*>(new Renderer(ctx));
+  auto renderer = gsl::owner<Renderer *>(new Renderer(ctx));
 
   auto res = renderer->create_swapchain();
   if (!res.has_value())
     return tl::make_unexpected(res.error());
+
+  // TODO Create pipeline
+  auto shader =
+      Shader::Create(ctx->graphics_context.Device(),
+                     TRIANGLE_VERT_SHADER.data(), TRIANGLE_FRAG_SHADER.data());
 
   return std::shared_ptr<Renderer>(std::move(renderer));
 }

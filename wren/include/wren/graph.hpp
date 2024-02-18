@@ -7,7 +7,7 @@ class Node {};
 class Graph {};
 
 class GraphBuilder {
-    public:
+public:
 };
 
 } // namespace wren

@@ -14,6 +14,8 @@ sdl = dependency('SDL2')
 expected = dependency('tl-expected', modules: ['tl::expected'])
 vulkan = dependency('vulkan')
 gsl = dependency('gsl-lite', modules: ['gsl::gsl-lite'])
+shaderc = dependency('shaderc')
+cross = dependency('spirv-cross-c')
 
 subdir('wren')
 subdir('editor')

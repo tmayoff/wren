@@ -3,6 +3,7 @@ sources += files(
   'graphics_context.cpp',
   'window.cpp',
   'renderer.cpp',
+  'shader.cpp',
   'utils/queue.cpp',
   'utils/vulkan.cpp',
   'utils/device.cpp',
