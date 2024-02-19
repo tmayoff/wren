@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vulkan/vulkan.hpp"
+#include "wren/utils/spirv_cross.hpp"
 #include <shaderc/shaderc.h>
 #include <spirv_cross/spirv_cross.hpp>
 #include <string>
@@ -19,7 +20,7 @@ struct ShaderModule {
   spirv_t spirv;
   vk::ShaderModule module;
  
-  std::shared_ptr<spirv_cross::Compiler> glsl;
+  std::shared_ptr<spirv::CompilerGLSL> glsl;
 
   ShaderModule() = default;
   ShaderModule(spirv_t spirv, const vk::ShaderModule &module);

@@ -16,20 +16,22 @@ namespace wren {
 
 ShaderModule::ShaderModule(spirv_t spirv, const vk::ShaderModule &module)
     : spirv(std::move(spirv)), module(module),
-      glsl(std::make_shared<spirv_cross::CompilerGLSL>(spirv)) {}
+      glsl(std::make_shared<spirv::CompilerGLSL>(this->spirv)) {}
 
 auto ShaderModule::get_shader_stage_info() const -> vk::PipelineShaderStageCreateInfo {
-  const auto entry_points = glsl->get_entry_points_and_stages();
-  const auto entry_point = entry_points.front();
-  const auto stage =
-      wren::spirv::get_vk_shader_stage(entry_point.execution_model);
+  const auto entry_points = glsl->get_entry_point_and_shader_stages();
+  // const auto entry_point = entry_points.front();
+  // const auto stage =
+  //       wren::spirv::get_vk_shader_stage(entry_point.execution_model);
 
-  return {{}, stage.value(), module, entry_point.name.c_str()};
+  // return {{}, stage.value(), module, entry_point.name.c_str()};
+
+  return {};
 }
 
 
 auto ShaderModule::get_vertex_input() const -> vk::PipelineVertexInputStateCreateInfo {
-  const auto resources = glsl->get_shader_resources();
+  // const auto resources = glsl->get_shader_resources();
 
   // TODO Vertex binding descriptors
   std::vector<vk::VertexInputBindingDescription> binding_descriptions;
@@ -38,7 +40,7 @@ auto ShaderModule::get_vertex_input() const -> vk::PipelineVertexInputStateCreat
   std::vector<vk::VertexInputAttributeDescription> attribute_descriptions;
 
   return {{}, binding_descriptions, attribute_descriptions};
-  }
+}
 
 auto Shader::Create(const vulkan::Device &device,
                     const std::string &vertex_shader,

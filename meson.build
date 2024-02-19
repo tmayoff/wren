@@ -8,6 +8,8 @@ if get_option('buildtype') == 'debug'
   add_project_arguments('-DWREN_DEBUG', language: 'cpp')
 endif
 
+cpp = meson.get_compiler('cpp')
+
 boost = dependency('boost')
 spdlog = dependency('spdlog')
 sdl = dependency('SDL2')
@@ -15,7 +17,9 @@ expected = dependency('tl-expected', modules: ['tl::expected'])
 vulkan = dependency('vulkan')
 gsl = dependency('gsl-lite', modules: ['gsl::gsl-lite'])
 shaderc = dependency('shaderc')
-cross = dependency('spirv-cross-c')
+spirv_cross_c = dependency('spirv-cross-c', static: true)
+
+#subdir('external')
 
 subdir('wren')
 subdir('editor')

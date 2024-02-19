@@ -8,4 +8,5 @@ sources += files(
   'utils/vulkan.cpp',
   'utils/device.cpp',
   'utils/vulkan_errors.cpp',
+  'utils/spirv.cpp'
 )
