@@ -20,10 +20,11 @@ auto Renderer::Create(const std::shared_ptr<Context> &ctx)
   if (!res.has_value())
     return tl::make_unexpected(res.error());
 
-  // TODO Create pipeline
   auto shader =
       Shader::Create(ctx->graphics_context.Device(),
                      TRIANGLE_VERT_SHADER.data(), TRIANGLE_FRAG_SHADER.data());
+
+  shader.value().reflect_pipeline_layout();
 
   return std::shared_ptr<Renderer>(std::move(renderer));
 }
