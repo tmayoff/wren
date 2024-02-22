@@ -102,7 +102,7 @@ auto Shader::compile_shader(const vk::Device &device,
   return ShaderModule{{spirv.begin(), spirv.end()}, module};
 }
 
-auto Shader::reflect_pipeline_layout()
+auto Shader::reflect_graphics_pipeline()
     -> vk::GraphicsPipelineCreateInfo {
   const auto v_stage_create_info =
       vertex_shader_module.get_shader_stage_info();
@@ -117,7 +117,7 @@ auto Shader::reflect_pipeline_layout()
   vk::PipelineDynamicStateCreateInfo dynamic_state({},
                                                    dynamic_states);
 
-  const auto vertex_input_info =
+  vk::PipelineVertexInputStateCreateInfo vertex_input_info =
       vertex_shader_module.get_vertex_input();
 
   vk::PipelineInputAssemblyStateCreateInfo input_assembly(
@@ -131,7 +131,10 @@ auto Shader::reflect_pipeline_layout()
   vk::PipelineColorBlendStateCreateInfo colour_blend(
       {}, {}, {}, colour_blend_attachment);
 
-  return {};
+  return vk::GraphicsPipelineCreateInfo(
+      {}, shader_stages, &vertex_input_info, &input_assembly, {}, {},
+      &rasterization, &multisample, {}, &colour_blend,
+      &dynamic_state);
 }
 
 }  // namespace wren

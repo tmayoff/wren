@@ -11,6 +11,9 @@ auto RenderPass::Create(const vk::Device& device,
     -> tl::expected<RenderPass, std::error_code> {
   RenderPass pass(name, resources);
 
+  const auto& shader = resources.shader;
+  auto pipeline_create_info = shader->reflect_graphics_pipeline();
+
   std::vector<vk::AttachmentDescription> attachments;
   attachments.reserve(resources.render_targets.size());
 
@@ -32,6 +35,12 @@ auto RenderPass::Create(const vk::Device& device,
   vk::RenderPassCreateInfo create_info({}, attachments, subpass);
 
   auto [res, renderpass] = device.createRenderPass(create_info);
+
+  pipeline_create_info.setRenderPass(renderpass);
+  vk::Pipeline pipeline;
+  std::tie(res, pipeline) =
+      device.createGraphicsPipeline({}, pipeline_create_info);
+
   return pass;
 }
 

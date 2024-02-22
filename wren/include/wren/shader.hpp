@@ -53,7 +53,7 @@ class Shader {
     vertex_shader_module = vertex;
   }
 
-  auto reflect_pipeline_layout() -> vk::GraphicsPipelineCreateInfo;
+  auto reflect_graphics_pipeline() -> vk::GraphicsPipelineCreateInfo;
 
  private:
   ShaderModule vertex_shader_module;

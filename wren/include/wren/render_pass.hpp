@@ -21,7 +21,8 @@ struct PassResources {
 
 class RenderPass {
  public:
-  static auto Create(const vk::Device& device, const std::string& name,
+  static auto Create(const vk::Device& device,
+                     const std::string& name,
                      const PassResources& resources)
       -> tl::expected<RenderPass, std::error_code>;
 
@@ -31,6 +32,7 @@ class RenderPass {
 
   std::string name;
   PassResources resources;
+  vk::Pipeline pipeline;
 };
 
 }  // namespace wren

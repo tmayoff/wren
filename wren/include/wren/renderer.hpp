@@ -1,6 +1,5 @@
 #pragma once
 
-#include "wren/graph.hpp"
 #include <memory>
 #include <system_error>
 #include <tl/expected.hpp>
@@ -8,26 +7,31 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
+#include "wren/graph.hpp"
+
 namespace wren {
 
 struct Context;
 
 class Renderer {
-public:
+ public:
   static auto Create(const std::shared_ptr<Context> &ctx)
       -> tl::expected<std::shared_ptr<Renderer>, std::error_code>;
 
-private:
+ private:
   explicit Renderer(const std::shared_ptr<Context> &ctx) : ctx(ctx) {}
 
   auto create_swapchain() -> tl::expected<void, std::error_code>;
 
-  auto choose_swapchain_format(const std::vector<vk::SurfaceFormatKHR> &formats)
+  auto choose_swapchain_format(
+      const std::vector<vk::SurfaceFormatKHR> &formats)
       -> vk::SurfaceFormatKHR;
   auto choose_swapchain_presentation_mode(
-      const std::vector<vk::PresentModeKHR> &formats) -> vk::PresentModeKHR;
+      const std::vector<vk::PresentModeKHR> &formats)
+      -> vk::PresentModeKHR;
   auto choose_swapchain_extent(
-      const vk::SurfaceCapabilitiesKHR &surface_capabilities) -> vk::Extent2D;
+      const vk::SurfaceCapabilitiesKHR &surface_capabilities)
+      -> vk::Extent2D;
 
   void build_3D_render_graph();
 
@@ -41,4 +45,4 @@ private:
   Graph render_graph;
 };
 
-} // namespace wren
+}  // namespace wren
