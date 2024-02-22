@@ -1,5 +1,6 @@
 #pragma once
 
+#include "wren/graph.hpp"
 #include <memory>
 #include <system_error>
 #include <tl/expected.hpp>
@@ -28,12 +29,16 @@ private:
   auto choose_swapchain_extent(
       const vk::SurfaceCapabilitiesKHR &surface_capabilities) -> vk::Extent2D;
 
+  void build_3D_render_graph();
+
   std::shared_ptr<Context> ctx;
   vk::SwapchainKHR swapchain;
   std::vector<vk::Image> swapchain_images;
   std::vector<vk::ImageView> swapchain_image_views;
-  vk::Format swapchain_image_format;
+  vk::Format swapchain_image_format = vk::Format::eB8G8R8Srgb;
   vk::Extent2D swapchain_extent;
+
+  Graph render_graph;
 };
 
 } // namespace wren

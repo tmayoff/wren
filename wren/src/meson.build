@@ -8,6 +8,7 @@ sources += files(
     'application.cpp',
     'graph.cpp',
     'graphics_context.cpp',
+    'render_pass.cpp',
     'renderer.cpp',
     'shader.cpp',
     'window.cpp',

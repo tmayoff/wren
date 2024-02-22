@@ -2,13 +2,18 @@
 
 namespace wren {
 
-auto GraphBuilder::AddPass() -> GraphBuilder & {
-  // TODO add node
+auto GraphBuilder::add_pass(const std::string &name,
+                            const PassResources &resources)
+    -> GraphBuilder & {
   node_t n;
+
+  auto pass = RenderPass::Create(device, name, resources);
 
   graph.nodes.push_back(n);
 
   return *this;
 }
 
-} // namespace wren
+auto GraphBuilder::compile() -> Graph { return Graph{}; }
+
+}  // namespace wren

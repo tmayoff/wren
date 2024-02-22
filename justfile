@@ -1,9 +1,9 @@
-default: build run
+default: build
 
 build:
     ninja -C build
 
-run:
+run: build
     ./build/editor/wren_editor
 
 clean:

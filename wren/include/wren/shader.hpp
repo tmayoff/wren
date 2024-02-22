@@ -1,16 +1,17 @@
 #pragma once
 
-#include "vulkan/vulkan.hpp"
-#include "wren/shader_reflection/parser.hpp"
 #include <shaderc/shaderc.h>
+
 #include <spirv_cross/spirv_cross.hpp>
 #include <string>
 #include <system_error>
 #include <tl/expected.hpp>
-#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
-#include <wren/utils/device.hpp>
+
+#include "wren/shader_reflection/parser.hpp"
+#include "wren/utils/device.hpp"
 
 namespace wren {
 
@@ -32,11 +33,11 @@ struct ShaderModule {
 };
 
 class Shader {
-public:
+ public:
   static auto Create(const vulkan::Device &device,
                      const std::string &vertex_shader,
                      const std::string &fragment_shader)
-      -> tl::expected<Shader, std::error_code>;
+      -> tl::expected<std::shared_ptr<Shader>, std::error_code>;
 
   static auto compile_shader(const vk::Device &device,
                              const shaderc_shader_kind &shader_kind,
@@ -54,9 +55,9 @@ public:
 
   auto reflect_pipeline_layout() -> vk::GraphicsPipelineCreateInfo;
 
-private:
+ private:
   ShaderModule vertex_shader_module;
   ShaderModule fragment_shader_module;
 };
 
-} // namespace wren
+}  // namespace wren

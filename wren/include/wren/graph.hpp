@@ -3,6 +3,9 @@
 #include <memory>
 #include <vector>
 
+#include "render_pass.hpp"
+#include "shader.hpp"
+
 namespace wren {
 
 class Node {};
@@ -16,11 +19,17 @@ struct Graph {
 };
 
 class GraphBuilder {
-public:
-  auto AddPass() -> GraphBuilder &;
+ public:
+  explicit GraphBuilder(const vk::Device &device) : device(device) {}
 
-private:
+  auto compile() -> Graph;
+
+  auto add_pass(const std::string &name,
+                const PassResources &resources) -> GraphBuilder &;
+
+ private:
+  vk::Device device;
   Graph graph;
 };
 
-} // namespace wren
+}  // namespace wren
