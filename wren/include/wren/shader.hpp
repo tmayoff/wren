@@ -1,7 +1,7 @@
 #pragma once
 
 #include "vulkan/vulkan.hpp"
-#include "wren/utils/spirv_cross.hpp"
+#include "wren/shader_reflection/parser.hpp"
 #include <shaderc/shaderc.h>
 #include <spirv_cross/spirv_cross.hpp>
 #include <string>
@@ -19,8 +19,7 @@ using spirv_t = std::vector<uint32_t>;
 struct ShaderModule {
   spirv_t spirv;
   vk::ShaderModule module;
- 
-  std::shared_ptr<spirv::CompilerGLSL> glsl;
+  std::shared_ptr<spirv::Parser> parser;
 
   ShaderModule() = default;
   ShaderModule(spirv_t spirv, const vk::ShaderModule &module);
@@ -53,7 +52,7 @@ public:
     vertex_shader_module = vertex;
   }
 
-  auto reflect_pipeline_layout() -> vk::PipelineLayoutCreateInfo;
+  auto reflect_pipeline_layout() -> vk::GraphicsPipelineCreateInfo;
 
 private:
   ShaderModule vertex_shader_module;

@@ -1,7 +1,7 @@
 #include "wren/shader.hpp"
 #include "tl/expected.hpp"
 #include "vulkan/vulkan_structs.hpp"
-#include "wren/utils/spirv_cross.hpp"
+#include "wren/utils/spirv.hpp"
 #include "wren/utils/vulkan_errors.hpp"
 #include "wren/window.hpp"
 #include <shaderc/shaderc.h>
@@ -11,22 +11,20 @@
 #include <system_error>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
+#include "wren/shader_reflection/parser.hpp"
 
 namespace wren {
 
 ShaderModule::ShaderModule(spirv_t spirv, const vk::ShaderModule &module)
     : spirv(std::move(spirv)), module(module),
-      glsl(std::make_shared<spirv::CompilerGLSL>(this->spirv)) {}
+      parser(std::make_shared<spirv::Parser>(this->spirv)) {}
 
 auto ShaderModule::get_shader_stage_info() const -> vk::PipelineShaderStageCreateInfo {
-  const auto entry_points = glsl->get_entry_point_and_shader_stages();
-  // const auto entry_point = entry_points.front();
-  // const auto stage =
-  //       wren::spirv::get_vk_shader_stage(entry_point.execution_model);
+  const auto entry_point = parser->entry_points().front();
+  const auto stage =
+      wren::spirv::get_vk_shader_stage(entry_point.exeuction_model);
 
-  // return {{}, stage.value(), module, entry_point.name.c_str()};
-
-  return {};
+  return {{}, stage.value(), module, entry_point.name.c_str()};
 }
 
 
@@ -96,7 +94,7 @@ auto Shader::compile_shader(const vk::Device &device,
   return ShaderModule{{spirv.begin(), spirv.end()}, module};
 }
 
-auto Shader::reflect_pipeline_layout() -> vk::PipelineLayoutCreateInfo {
+auto Shader::reflect_pipeline_layout() -> vk::GraphicsPipelineCreateInfo {
   const auto v_stage_create_info = vertex_shader_module.get_shader_stage_info();
   const auto f_stage_create_info =
       fragment_shader_module.get_shader_stage_info();
@@ -111,6 +109,14 @@ auto Shader::reflect_pipeline_layout() -> vk::PipelineLayoutCreateInfo {
 
   vk::PipelineInputAssemblyStateCreateInfo input_assembly(
       {}, vk::PrimitiveTopology::eTriangleList, false);
+
+  vk::PipelineRasterizationStateCreateInfo rasterization({}, false, false);
+  vk::PipelineMultisampleStateCreateInfo multisample;
+
+  vk::PipelineColorBlendAttachmentState colour_blend_attachment;
+  vk::PipelineColorBlendStateCreateInfo colour_blend({}, {}, {}, colour_blend_attachment);
+
+  return {};
 }
 
 } // namespace wren
