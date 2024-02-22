@@ -5,7 +5,7 @@ add_project_arguments('-DVULKAN_HPP_NO_EXCEPTIONS', language: 'cpp')
 add_project_arguments('-DVULKAN_HPP_ASSERT_ON_RESULT(x)', language: 'cpp')
 
 if get_option('buildtype') == 'debug'
-  add_project_arguments('-DWREN_DEBUG', language: 'cpp')
+    add_project_arguments('-DWREN_DEBUG', language: 'cpp')
 endif
 
 cpp = meson.get_compiler('cpp')
@@ -17,9 +17,7 @@ expected = dependency('tl-expected', modules: ['tl::expected'])
 vulkan = dependency('vulkan')
 gsl = dependency('gsl-lite', modules: ['gsl::gsl-lite'])
 shaderc = dependency('shaderc')
-spirv_cross_c = dependency('spirv-cross-c', static: true)
-
-#subdir('external')
+#spirv_headers = dependency('spirv-headers')
 
 subdir('wren')
 subdir('editor')
