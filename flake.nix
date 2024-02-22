@@ -15,6 +15,7 @@
           meson
           cmake
           ninja
+          vscode-extensions.llvm-org.lldb-vscode
         ];
 
         rawBuildInputs = with pkgs; [
@@ -29,6 +30,7 @@
           vulkan-tools
           shaderc 
           spirv-cross
+          spirv-headers
         ];
       in rec {
 
