@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <vulkan/vulkan.hpp>
 
 #include "render_pass.hpp"
 #include "shader.hpp"
@@ -20,7 +21,8 @@ struct Graph {
 
 class GraphBuilder {
  public:
-  explicit GraphBuilder(const vk::Device &device) : device(device) {}
+  explicit GraphBuilder(const std::shared_ptr<Context> &ctx)
+      : ctx(ctx) {}
 
   auto compile() -> Graph;
 
@@ -28,8 +30,8 @@ class GraphBuilder {
                 const PassResources &resources) -> GraphBuilder &;
 
  private:
-  vk::Device device;
   Graph graph;
+  std::shared_ptr<Context> ctx;
 };
 
 }  // namespace wren

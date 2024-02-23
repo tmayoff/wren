@@ -7,7 +7,7 @@ auto GraphBuilder::add_pass(const std::string &name,
     -> GraphBuilder & {
   node_t n;
 
-  auto pass = RenderPass::Create(device, name, resources);
+  auto pass = RenderPass::Create(ctx, name, resources);
 
   graph.nodes.push_back(n);
 

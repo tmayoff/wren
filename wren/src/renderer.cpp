@@ -1,5 +1,6 @@
 #include "wren/renderer.hpp"
 
+#include <cstdint>
 #include <gsl/gsl-lite.hpp>
 #include <system_error>
 #include <tl/expected.hpp>
@@ -15,9 +16,20 @@
 
 namespace wren {
 
+void Renderer::draw() {
+  begin_frame();
+
+  end_frame();
+}
+
+void Renderer::begin_frame() {}
+
+void Renderer::end_frame() {}
+
 auto Renderer::Create(const std::shared_ptr<Context> &ctx)
     -> tl::expected<std::shared_ptr<Renderer>, std::error_code> {
-  auto renderer = gsl::owner<Renderer *>(new Renderer(ctx));
+  auto renderer = std::shared_ptr<Renderer>(new Renderer(ctx));
+  ctx->renderer = renderer;
 
   auto res = renderer->create_swapchain();
   if (!res.has_value()) return tl::make_unexpected(res.error());
@@ -28,7 +40,7 @@ auto Renderer::Create(const std::shared_ptr<Context> &ctx)
 
   renderer->build_3D_render_graph();
 
-  return std::shared_ptr<Renderer>(std::move(renderer));
+  return renderer;
 }
 
 auto Renderer::create_swapchain()
@@ -167,16 +179,17 @@ auto Renderer::choose_swapchain_extent(
 }
 
 void Renderer::build_3D_render_graph() {
-  GraphBuilder builder(ctx->graphics_context.Device().get());
+  GraphBuilder builder(ctx);
 
   auto shader = Shader::Create(ctx->graphics_context.Device(),
                                TRIANGLE_VERT_SHADER.data(),
                                TRIANGLE_FRAG_SHADER.data())
                     .value();
-  builder.add_pass("triangle",
-                   {shader,
-                    {RenderTarget{swapchain_image_format,
-                                  vk::SampleCountFlagBits::e1}}});
+  builder.add_pass(
+      "triangle",
+      {shader,
+       {RenderTarget{swapchain_extent, swapchain_image_format,
+                     vk::SampleCountFlagBits::e1}}});
 
   render_graph = builder.compile();
 }

@@ -18,8 +18,15 @@ class Renderer {
   static auto Create(const std::shared_ptr<Context> &ctx)
       -> tl::expected<std::shared_ptr<Renderer>, std::error_code>;
 
+  void draw();
+
+  auto get_swapchain_images_views() { return swapchain_image_views; }
+
  private:
   explicit Renderer(const std::shared_ptr<Context> &ctx) : ctx(ctx) {}
+
+  void begin_frame();
+  void end_frame();
 
   auto create_swapchain() -> tl::expected<void, std::error_code>;
 

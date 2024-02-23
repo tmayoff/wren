@@ -1,13 +1,15 @@
 #include "wren/application.hpp"
+
+#include <spdlog/spdlog.h>
+#include <vulkan/vulkan_core.h>
+
+#include <memory>
+#include <tl/expected.hpp>
+
 #include "wren/context.hpp"
 #include "wren/event.hpp"
 #include "wren/graphics_context.hpp"
 #include "wren/renderer.hpp"
-#include <tl/expected.hpp>
-
-#include <memory>
-#include <spdlog/spdlog.h>
-#include <vulkan/vulkan_core.h>
 
 namespace wren {
 
@@ -35,15 +37,13 @@ auto Application::Create(const std::string &application_name)
 
   {
     auto res = window->CreateSurface(graphics_context->Instance());
-    if (!res.has_value())
-      return tl::make_unexpected(res.error());
+    if (!res.has_value()) return tl::make_unexpected(res.error());
     graphics_context->Surface(res.value());
   }
 
   {
     auto res = graphics_context->SetupDevice();
-    if (!res.has_value())
-      return tl::make_unexpected(res.error());
+    if (!res.has_value()) return tl::make_unexpected(res.error());
   }
 
   auto ctx = std::make_shared<Context>(*window, Event::Dispatcher(),
@@ -51,9 +51,10 @@ auto Application::Create(const std::string &application_name)
 
   auto renderer = Renderer::Create(ctx);
   if (!renderer.has_value())
-      return tl::make_unexpected(renderer.error());
+    return tl::make_unexpected(renderer.error());
 
-  return std::shared_ptr<Application>(new Application(ctx, renderer.value()));
+  return std::shared_ptr<Application>(
+      new Application(ctx, renderer.value()));
 }
 
 Application::Application(const std::shared_ptr<Context> &ctx,
@@ -68,7 +69,9 @@ void Application::run() {
 
   while (running) {
     ctx->window.DispatchEvents(ctx->event_dispatcher);
+
+    ctx->renderer->draw();
   }
 }
 
-} // namespace wren
+}  // namespace wren

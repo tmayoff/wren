@@ -9,7 +9,10 @@
 
 namespace wren {
 
+struct Context;
+
 struct RenderTarget {
+  vk::Extent2D size;
   vk::Format format;
   vk::SampleCountFlagBits sample_count;
 };
@@ -21,7 +24,7 @@ struct PassResources {
 
 class RenderPass {
  public:
-  static auto Create(const vk::Device& device,
+  static auto Create(const std::shared_ptr<Context>& ctx,
                      const std::string& name,
                      const PassResources& resources)
       -> tl::expected<RenderPass, std::error_code>;
@@ -33,6 +36,12 @@ class RenderPass {
   std::string name;
   PassResources resources;
   vk::Pipeline pipeline;
+
+  vk::RenderPass render_pass;
+
+  vk::CommandPool command_pool;
+  std::vector<vk::CommandBuffer> command_buffer;
+  std::vector<std::vector<vk::Framebuffer>> framebuffers;
 };
 
 }  // namespace wren
