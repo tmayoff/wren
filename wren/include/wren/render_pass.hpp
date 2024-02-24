@@ -29,7 +29,7 @@ class RenderPass {
                      const PassResources& resources)
       -> tl::expected<std::shared_ptr<RenderPass>, std::error_code>;
 
-  void execute();
+  void execute(uint32_t image_index);
 
   [[nodiscard]] auto get_command_buffers() const {
     return command_buffers;

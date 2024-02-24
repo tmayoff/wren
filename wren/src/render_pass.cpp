@@ -17,7 +17,7 @@ auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
   auto pass =
       std::shared_ptr<RenderPass>(new RenderPass(name, resources));
 
-  const auto& device = ctx->graphics_context.Device();
+  const auto& device = ctx->graphics_context->Device();
   const auto& swapchain_images =
       ctx->renderer->get_swapchain_images_views();
 
@@ -84,8 +84,8 @@ auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
     std::vector<vk::CommandBuffer> cmds;
     auto [res, pool] =
         device.get().createCommandPool(vk::CommandPoolCreateInfo{
-            {},
-            ctx->graphics_context.FindQueueFamilyIndices()
+            vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+            ctx->graphics_context->FindQueueFamilyIndices()
                 .value()
                 .graphics_index});
 
@@ -101,10 +101,26 @@ auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
   return pass;
 }
 
-void RenderPass::execute() {
+void RenderPass::execute(uint32_t image_index) {
   const auto& cmd = command_buffers.front();
 
-  cmd.reset();
+  auto res = cmd.begin(vk::CommandBufferBeginInfo{});
+  if (res != vk::Result::eSuccess) return;
+
+  auto extent = resources.render_targets.front().size;
+
+  vk::ClearValue clear_value(vk::ClearColorValue{
+      std::array<float, 4>{0.5f, 0.2f, 0.0, 1.0}});
+
+  vk::RenderPassBeginInfo rp_begin(
+      render_pass, framebuffers.at(image_index).front(), {{}, extent},
+      clear_value);
+
+  cmd.beginRenderPass(rp_begin, vk::SubpassContents::eInline);
+
+  cmd.endRenderPass();
+
+  cmd.end();
 }
 
 }  // namespace wren

@@ -1,17 +1,20 @@
 #include "wren/graphics_context.hpp"
+
+#include <spdlog/fmt/ranges.h>
+#include <vulkan/vulkan_core.h>
+
+#include <algorithm>
+#include <system_error>
+#include <tl/expected.hpp>
+#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_handles.hpp>
+#include <vulkan/vulkan_structs.hpp>
+
 #include "spdlog/spdlog.h"
 #include "wren/utils/queue.hpp"
 #include "wren/utils/vulkan.hpp"
 #include "wren/utils/vulkan_errors.hpp"
-#include <algorithm>
-#include <spdlog/fmt/ranges.h>
-#include <system_error>
-#include <tl/expected.hpp>
-#include <vulkan/vulkan.hpp>
-#include <vulkan/vulkan_core.h>
-#include <vulkan/vulkan_enums.hpp>
-#include <vulkan/vulkan_handles.hpp>
-#include <vulkan/vulkan_structs.hpp>
 
 namespace wren {
 
@@ -19,12 +22,14 @@ auto GraphicsContext::Create(
     const std::string &application_name,
     const std::vector<std::string_view> &requested_extensions,
     const std::vector<std::string_view> &requested_layers)
-    -> tl::expected<GraphicsContext, std::error_code> {
-  GraphicsContext graphics_context;
+    -> tl::expected<std::shared_ptr<GraphicsContext>,
+                    std::error_code> {
+  auto graphics_context =
+      std::shared_ptr<GraphicsContext>(new GraphicsContext());
 
   {
     spdlog::debug("Creating instance...");
-    auto res = graphics_context.CreateInstance(
+    auto res = graphics_context->CreateInstance(
         application_name, requested_extensions, requested_layers);
     if (!res.has_value()) {
       return tl::make_unexpected(res.error());
@@ -35,9 +40,8 @@ auto GraphicsContext::Create(
 #ifdef WREN_DEBUG
   {
     spdlog::debug("Creating debug messenger...");
-    auto res = graphics_context.CreateDebugMessenger();
-    if (!res.has_value())
-      return tl::make_unexpected(res.error());
+    auto res = graphics_context->CreateDebugMessenger();
+    if (!res.has_value()) return tl::make_unexpected(res.error());
     spdlog::debug("Created debug messenger.");
   }
 #endif
@@ -45,15 +49,15 @@ auto GraphicsContext::Create(
   return graphics_context;
 }
 
-void GraphicsContext::Shutdown() { instance.destroy(); }
+GraphicsContext::~GraphicsContext() { instance.destroy(); }
 
 auto GraphicsContext::CreateInstance(
     const std::string &application_name,
     const std::vector<std::string_view> &requested_extensions,
     const std::vector<std::string_view> &requested_layers)
     -> tl::expected<void, std::error_code> {
-  const auto appInfo = vk::ApplicationInfo(application_name.c_str(), 1, "wren",
-                                           1, VK_API_VERSION_1_3);
+  const auto appInfo = vk::ApplicationInfo(
+      application_name.c_str(), 1, "wren", 1, VK_API_VERSION_1_3);
 
   spdlog::debug("Requesting extensions:");
   std::vector<const char *> extensions = {};
@@ -62,7 +66,8 @@ auto GraphicsContext::CreateInstance(
     if (vulkan::IsExtensionSupport(ext)) {
       extensions.push_back(ext.data());
     } else {
-      spdlog::warn("Requested vulkan extension {}, is not supported", ext);
+      spdlog::warn("Requested vulkan extension {}, is not supported",
+                   ext);
     }
   }
 
@@ -74,7 +79,8 @@ auto GraphicsContext::CreateInstance(
     if (vulkan::IsLayerSupported(layer)) {
       extensions.push_back(layer.data());
     } else {
-      spdlog::warn("Requested vulkan layer {}, is not supported", layer);
+      spdlog::warn("Requested vulkan layer {}, is not supported",
+                   layer);
     }
   }
 
@@ -85,7 +91,8 @@ auto GraphicsContext::CreateInstance(
   }
 
   if (vulkan::IsExtensionSupport(VK_EXT_DEBUG_UTILS_EXTENSION_NAME)) {
-    spdlog::debug("Debug utils extension supported, adding to instance");
+    spdlog::debug(
+        "Debug utils extension supported, adding to instance");
     extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
   }
 
@@ -106,7 +113,7 @@ auto GraphicsContext::CreateInstance(
 
   vk::InstanceCreateInfo createInfo({}, &appInfo, layers, extensions);
 #ifdef WREN_DEBUG
-  createInfo.setPNext(&debugMessengerCreateInfo);
+  // createInfo.setPNext(&debugMessengerCreateInfo);
 #endif
 
   auto [res, instance] = vk::createInstance(createInfo);
@@ -119,20 +126,19 @@ auto GraphicsContext::CreateInstance(
   return {};
 }
 
-auto GraphicsContext::SetupDevice() -> tl::expected<void, std::error_code> {
+auto GraphicsContext::SetupDevice()
+    -> tl::expected<void, std::error_code> {
   {
     spdlog::debug("Picking physical device...");
     auto res = PickPhysicalDevice();
-    if (!res.has_value())
-      return tl::make_unexpected(res.error());
+    if (!res.has_value()) return tl::make_unexpected(res.error());
     spdlog::debug("Picked physical device.");
   }
 
   {
     spdlog::debug("Creating logical device...");
     auto res = CreateDevice();
-    if (!res.has_value())
-      return tl::make_unexpected(res.error());
+    if (!res.has_value()) return tl::make_unexpected(res.error());
     spdlog::debug("Created logical device.");
   }
 
@@ -141,7 +147,6 @@ auto GraphicsContext::SetupDevice() -> tl::expected<void, std::error_code> {
 
 auto GraphicsContext::PickPhysicalDevice()
     -> tl::expected<void, std::error_code> {
-
   auto devices = instance.enumeratePhysicalDevices();
 
   for (const auto &device : devices.value) {
@@ -152,14 +157,15 @@ auto GraphicsContext::PickPhysicalDevice()
   }
 
   if (!physical_device) {
-    return tl::make_unexpected(make_error_code(VulkanErrors::NoDevicesFound));
+    return tl::make_unexpected(
+        make_error_code(VulkanErrors::NoDevicesFound));
   }
 
   return {};
 }
 
-auto GraphicsContext::IsDeviceSuitable(const vk::PhysicalDevice &device)
-    -> bool {
+auto GraphicsContext::IsDeviceSuitable(
+    const vk::PhysicalDevice &device) -> bool {
   auto res = vulkan::Queue::FindQueueFamilyIndices(device);
   if (!res.has_value()) {
     spdlog::error("{}", res.error().message());
@@ -168,10 +174,10 @@ auto GraphicsContext::IsDeviceSuitable(const vk::PhysicalDevice &device)
 
   bool swapchain_support = vulkan::IsDeviceExtensionSupported(
       VK_KHR_SWAPCHAIN_EXTENSION_NAME, device);
-  if (!swapchain_support)
-    return false;
+  if (!swapchain_support) return false;
 
-  auto swapchain_details = vulkan::GetSwapchainSupportDetails(device, surface);
+  auto swapchain_details =
+      vulkan::GetSwapchainSupportDetails(device, surface);
   if (!swapchain_details.has_value()) {
     return false;
   }
@@ -183,10 +189,11 @@ auto GraphicsContext::IsDeviceSuitable(const vk::PhysicalDevice &device)
   return true;
 }
 
-auto GraphicsContext::CreateDevice() -> tl::expected<void, std::error_code> {
-  auto res = vulkan::Device::Create(instance, physical_device, surface);
-  if (!res.has_value())
-    return tl::make_unexpected(res.error());
+auto GraphicsContext::CreateDevice()
+    -> tl::expected<void, std::error_code> {
+  auto res =
+      vulkan::Device::Create(instance, physical_device, surface);
+  if (!res.has_value()) return tl::make_unexpected(res.error());
   device = res.value();
 
   return {};
@@ -221,4 +228,4 @@ auto GraphicsContext::CreateDebugMessenger()
 }
 #endif
 
-} // namespace wren
+}  // namespace wren

@@ -13,6 +13,6 @@ auto GraphBuilder::add_pass(const std::string &name,
   return *this;
 }
 
-auto GraphBuilder::compile() -> Graph { return Graph{}; }
+auto GraphBuilder::compile() -> Graph { return graph; }
 
 }  // namespace wren

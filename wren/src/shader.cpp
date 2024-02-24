@@ -2,6 +2,7 @@
 
 #include <shaderc/shaderc.h>
 #include <shaderc/status.h>
+#include <vulkan/vulkan_core.h>
 
 #include <shaderc/shaderc.hpp>
 #include <system_error>

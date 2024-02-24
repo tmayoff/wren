@@ -18,11 +18,16 @@ class GraphicsContext {
       const std::string &application_name,
       const std::vector<std::string_view> &requested_extensions = {},
       const std::vector<std::string_view> &requested_layers = {})
-      -> tl::expected<GraphicsContext, std::error_code>;
+      -> tl::expected<std::shared_ptr<GraphicsContext>,
+                      std::error_code>;
+
+  GraphicsContext(const GraphicsContext &) = delete;
+  GraphicsContext(GraphicsContext &&) = delete;
+  auto operator=(const GraphicsContext &) = delete;
+  auto operator=(GraphicsContext &&) = delete;
+  ~GraphicsContext();
 
   auto InitializeSurface() -> tl::expected<void, std::error_code>;
-
-  void Shutdown();
 
   [[nodiscard]] auto Instance() const { return instance; }
   void Surface(const vk::SurfaceKHR &surface) {
@@ -53,6 +58,8 @@ class GraphicsContext {
   }
 
  private:
+  GraphicsContext() = default;
+
   auto CreateInstance(
       const std::string &application_name,
       const std::vector<std::string_view> &requested_extensions = {},

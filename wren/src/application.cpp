@@ -30,10 +30,11 @@ auto Application::Create(const std::string &application_name)
   if (!extensions.has_value())
     return tl::make_unexpected(extensions.error());
 
-  auto graphics_context =
+  auto graphics_context_res =
       GraphicsContext::Create(application_name, *extensions);
-  if (!graphics_context.has_value())
-    return tl::make_unexpected(graphics_context.error());
+  if (!graphics_context_res.has_value())
+    return tl::make_unexpected(graphics_context_res.error());
+  auto graphics_context = graphics_context_res.value();
 
   spdlog::trace("Created graphics context");
 
@@ -49,7 +50,7 @@ auto Application::Create(const std::string &application_name)
   }
 
   auto ctx = std::make_shared<Context>(*window, Event::Dispatcher(),
-                                       *graphics_context);
+                                       graphics_context);
 
   auto renderer = Renderer::Create(ctx);
   if (!renderer.has_value())

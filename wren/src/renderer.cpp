@@ -26,37 +26,37 @@ void Renderer::draw() {
 
 void Renderer::begin_frame() {
   ZoneScoped;
+  vk::Result res = vk::Result::eSuccess;
 
-  const auto &device = ctx->graphics_context.Device().get();
+  const auto &device = ctx->graphics_context->Device().get();
 
   device.resetFences(in_flight_fence);
-  auto res =
-      device.waitForFences(in_flight_fence, VK_TRUE, UINT64_MAX);
-  // TODO Error handling
+  // res = device.waitForFences(in_flight_fence, VK_TRUE, UINT64_MAX);
+  //   TODO Error handling
   device.resetFences(in_flight_fence);
-
-  uint32_t image_index = -1;
-  std::tie(res, image_index) = device.acquireNextImageKHR(
-      swapchain, UINT64_MAX, image_available);
 
   for (auto g : render_graph) {
-    g->render_pass->execute();
+    uint32_t image_index = -1;
+    std::tie(res, image_index) = device.acquireNextImageKHR(
+        swapchain, UINT64_MAX, image_available);
+
+    g->render_pass->execute(image_index);
 
     vk::PipelineStageFlags waitDstStageMask =
         vk::PipelineStageFlagBits::eTopOfPipe;
-    vk::SubmitInfo submit_info(
-        image_available, waitDstStageMask,
-        g->render_pass->get_command_buffers().front(),
-        render_finished);
+
+    auto cmd_bufs = g->render_pass->get_command_buffers();
+    vk::SubmitInfo submit_info(image_available, waitDstStageMask,
+                               cmd_bufs, render_finished);
     auto res =
-        ctx->graphics_context.Device().get_graphics_queue().submit(
+        ctx->graphics_context->Device().get_graphics_queue().submit(
             submit_info, in_flight_fence);
 
     vk::PresentInfoKHR present_info{render_finished, swapchain,
                                     image_index};
-    res =
-        ctx->graphics_context.Device().get_present_queue().presentKHR(
-            present_info);
+    res = ctx->graphics_context->Device()
+              .get_present_queue()
+              .presentKHR(present_info);
   }
 }
 
@@ -65,22 +65,35 @@ void Renderer::end_frame() {}
 auto Renderer::Create(const std::shared_ptr<Context> &ctx)
     -> tl::expected<std::shared_ptr<Renderer>, std::error_code> {
   ZoneScoped;
+
+  auto device = ctx->graphics_context->Device();
+
   auto renderer = std::shared_ptr<Renderer>(new Renderer(ctx));
   ctx->renderer = renderer;
 
   auto res = renderer->create_swapchain();
   if (!res.has_value()) return tl::make_unexpected(res.error());
 
-  auto shader = Shader::Create(ctx->graphics_context.Device(),
-                               TRIANGLE_VERT_SHADER.data(),
+  auto shader = Shader::Create(device, TRIANGLE_VERT_SHADER.data(),
                                TRIANGLE_FRAG_SHADER.data());
 
   renderer->build_3D_render_graph();
 
   vk::Result vres = vk::Result::eSuccess;
   std::tie(vres, renderer->in_flight_fence) =
-      ctx->graphics_context.Device().get().createFence(
-          vk::FenceCreateInfo{});
+      device.get().createFence(vk::FenceCreateInfo{});
+  if (vres != vk::Result::eSuccess)
+    return tl::make_unexpected(make_error_code(vres));
+
+  std::tie(vres, renderer->image_available) =
+      device.get().createSemaphore(vk::SemaphoreCreateInfo{});
+  if (vres != vk::Result::eSuccess)
+    return tl::make_unexpected(make_error_code(vres));
+
+  std::tie(vres, renderer->render_finished) =
+      device.get().createSemaphore(vk::SemaphoreCreateInfo{});
+  if (vres != vk::Result::eSuccess)
+    return tl::make_unexpected(make_error_code(vres));
 
   return renderer;
 }
@@ -88,7 +101,7 @@ auto Renderer::Create(const std::shared_ptr<Context> &ctx)
 auto Renderer::create_swapchain()
     -> tl::expected<void, std::error_code> {
   auto swapchain_support =
-      ctx->graphics_context.GetSwapchainSupport();
+      ctx->graphics_context->GetSwapchainSupport();
   if (!swapchain_support.has_value())
     return tl::make_unexpected(swapchain_support.error());
 
@@ -109,13 +122,13 @@ auto Renderer::create_swapchain()
   }
 
   vk::SwapchainCreateInfoKHR create_info(
-      {}, ctx->graphics_context.Surface(), image_count, format.format,
-      format.colorSpace, extent, 1,
+      {}, ctx->graphics_context->Surface(), image_count,
+      format.format, format.colorSpace, extent, 1,
       vk::ImageUsageFlagBits::eColorAttachment);
 
   auto queue_families = vulkan::Queue::FindQueueFamilyIndices(
-      ctx->graphics_context.PhysicalDevice(),
-      ctx->graphics_context.Surface());
+      ctx->graphics_context->PhysicalDevice(),
+      ctx->graphics_context->Surface());
   if (!queue_families.has_value())
     return tl::make_unexpected(queue_families.error());
 
@@ -138,13 +151,13 @@ auto Renderer::create_swapchain()
 
   vk::Result res = vk::Result::eSuccess;
   std::tie(res, swapchain) =
-      ctx->graphics_context.Device().get().createSwapchainKHR(
+      ctx->graphics_context->Device().get().createSwapchainKHR(
           create_info);
   if (res != vk::Result::eSuccess)
     return tl::make_unexpected(make_error_code(res));
 
   std::tie(res, swapchain_images) =
-      ctx->graphics_context.Device().get().getSwapchainImagesKHR(
+      ctx->graphics_context->Device().get().getSwapchainImagesKHR(
           swapchain);
   if (res != vk::Result::eSuccess)
     return tl::make_unexpected(make_error_code(res));
@@ -161,7 +174,7 @@ auto Renderer::create_swapchain()
                                   1, 0, 1));
 
     std::tie(res, swapchain_image_views[i]) =
-        ctx->graphics_context.Device().get().createImageView(
+        ctx->graphics_context->Device().get().createImageView(
             create_info);
     if (res != vk::Result::eSuccess)
       return tl::make_unexpected(make_error_code(res));
@@ -223,7 +236,7 @@ auto Renderer::choose_swapchain_extent(
 void Renderer::build_3D_render_graph() {
   GraphBuilder builder(ctx);
 
-  auto shader = Shader::Create(ctx->graphics_context.Device(),
+  auto shader = Shader::Create(ctx->graphics_context->Device(),
                                TRIANGLE_VERT_SHADER.data(),
                                TRIANGLE_FRAG_SHADER.data())
                     .value();
