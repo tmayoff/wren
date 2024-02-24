@@ -49,6 +49,10 @@ class Renderer {
   vk::Format swapchain_image_format = vk::Format::eB8G8R8Srgb;
   vk::Extent2D swapchain_extent;
 
+  vk::Semaphore image_available;
+  vk::Semaphore render_finished;
+  vk::Fence in_flight_fence;
+
   Graph render_graph;
 };
 

@@ -1,5 +1,6 @@
 #include "wren/renderer.hpp"
 
+#include <Tracy/tracy/Tracy.hpp>
 #include <cstdint>
 #include <gsl/gsl-lite.hpp>
 #include <system_error>
@@ -17,17 +18,53 @@
 namespace wren {
 
 void Renderer::draw() {
+  ZoneScoped;
   begin_frame();
 
   end_frame();
 }
 
-void Renderer::begin_frame() {}
+void Renderer::begin_frame() {
+  ZoneScoped;
+
+  const auto &device = ctx->graphics_context.Device().get();
+
+  device.resetFences(in_flight_fence);
+  auto res =
+      device.waitForFences(in_flight_fence, VK_TRUE, UINT64_MAX);
+  // TODO Error handling
+  device.resetFences(in_flight_fence);
+
+  uint32_t image_index = -1;
+  std::tie(res, image_index) = device.acquireNextImageKHR(
+      swapchain, UINT64_MAX, image_available);
+
+  for (auto g : render_graph) {
+    g->render_pass->execute();
+
+    vk::PipelineStageFlags waitDstStageMask =
+        vk::PipelineStageFlagBits::eTopOfPipe;
+    vk::SubmitInfo submit_info(
+        image_available, waitDstStageMask,
+        g->render_pass->get_command_buffers().front(),
+        render_finished);
+    auto res =
+        ctx->graphics_context.Device().get_graphics_queue().submit(
+            submit_info, in_flight_fence);
+
+    vk::PresentInfoKHR present_info{render_finished, swapchain,
+                                    image_index};
+    res =
+        ctx->graphics_context.Device().get_present_queue().presentKHR(
+            present_info);
+  }
+}
 
 void Renderer::end_frame() {}
 
 auto Renderer::Create(const std::shared_ptr<Context> &ctx)
     -> tl::expected<std::shared_ptr<Renderer>, std::error_code> {
+  ZoneScoped;
   auto renderer = std::shared_ptr<Renderer>(new Renderer(ctx));
   ctx->renderer = renderer;
 
@@ -39,6 +76,11 @@ auto Renderer::Create(const std::shared_ptr<Context> &ctx)
                                TRIANGLE_FRAG_SHADER.data());
 
   renderer->build_3D_render_graph();
+
+  vk::Result vres = vk::Result::eSuccess;
+  std::tie(vres, renderer->in_flight_fence) =
+      ctx->graphics_context.Device().get().createFence(
+          vk::FenceCreateInfo{});
 
   return renderer;
 }

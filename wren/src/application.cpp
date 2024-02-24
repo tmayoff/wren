@@ -3,6 +3,7 @@
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan_core.h>
 
+#include <Tracy/tracy/Tracy.hpp>
 #include <memory>
 #include <tl/expected.hpp>
 
@@ -16,6 +17,7 @@ namespace wren {
 auto Application::Create(const std::string &application_name)
     -> tl::expected<std::shared_ptr<Application>, std::error_code> {
   spdlog::set_level(spdlog::level::debug);
+  ZoneScoped;
 
   spdlog::debug("Initializing application");
 
@@ -68,6 +70,7 @@ void Application::run() {
   });
 
   while (running) {
+    FrameMark;
     ctx->window.DispatchEvents(ctx->event_dispatcher);
 
     ctx->renderer->draw();

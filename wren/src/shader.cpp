@@ -4,7 +4,6 @@
 #include <shaderc/status.h>
 
 #include <shaderc/shaderc.hpp>
-#include <spirv_cross/spirv_glsl.hpp>
 #include <system_error>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>

@@ -8,7 +8,7 @@
 namespace wren::vulkan {
 
 class Device {
-public:
+ public:
   static auto Create(const vk::Instance &instance,
                      const vk::PhysicalDevice &physical_device,
                      const vk::SurfaceKHR &surface)
@@ -16,7 +16,15 @@ public:
 
   [[nodiscard]] auto get() const -> vk::Device { return device; }
 
-private:
+  [[nodiscard]] auto get_graphics_queue() const {
+    return graphics_queue;
+  }
+
+  [[nodiscard]] auto get_present_queue() const {
+    return present_queue;
+  }
+
+ private:
   auto CreateDevice(const vk::Instance &instance,
                     const vk::PhysicalDevice &physical_device,
                     const vk::SurfaceKHR &surface)
@@ -27,4 +35,4 @@ private:
   vk::Queue present_queue;
 };
 
-} // namespace wren::vulkan
+}  // namespace wren::vulkan

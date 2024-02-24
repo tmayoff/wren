@@ -20,7 +20,7 @@ sdl = dependency('SDL2')
 expected = dependency('tl-expected', modules: ['tl::expected'])
 vulkan = dependency('vulkan')
 shaderc = dependency('shaderc')
-tracy = dependency('tracy')
+tracy = dependency('tracy', required: false)
 if not tracy.found()
 tracy = cpp.find_library(
     'tracy',

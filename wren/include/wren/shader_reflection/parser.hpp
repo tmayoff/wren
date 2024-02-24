@@ -1,10 +1,10 @@
 #pragma once
 
 #include <cstdint>
-#include <spirv/1.2/spirv.hpp>
-#include <vector>
-#include <string>
 #include <span>
+#include <spirv/1.2/spirv.hpp>
+#include <string>
+#include <vector>
 
 namespace wren::spirv {
 
@@ -16,19 +16,18 @@ struct EntryPoint {
 using spirv_t = std::vector<uint32_t>;
 
 class Parser {
-public:
+ public:
   Parser(spirv_t spirv);
 
-  [[nodiscard]] auto entry_points() const {
-      return entry_points_;
-    }
+  [[nodiscard]] auto entry_points() const { return entry_points_; }
 
-private:
+ private:
   void load_reflection_info();
 
   auto peek(spirv_t::iterator it) { return *(it + 1); }
 
-  static auto string_literal(const std::span<uint32_t>& string_literal) -> std::string;
+  static auto string_literal(
+      const std::span<uint32_t>& string_literal) -> std::string;
 
   spirv_t spirv;
 
@@ -39,27 +38,27 @@ private:
   std::vector<EntryPoint> entry_points_;
 };
 
-inline auto to_string(spv::ExecutionModel model){
+inline auto to_string(spv::ExecutionModel model) {
   switch (model) {
-  case spv::ExecutionModelVertex:
-    return "vertex";
-  case spv::ExecutionModelTessellationControl:
+    case spv::ExecutionModelVertex:
+      return "vertex";
+    case spv::ExecutionModelTessellationControl:
       return "tessellation control";
-  case spv::ExecutionModelTessellationEvaluation:
+    case spv::ExecutionModelTessellationEvaluation:
       return "tessellation evaluation";
-  case spv::ExecutionModelGeometry:
+    case spv::ExecutionModelGeometry:
       return "geometry";
-  case spv::ExecutionModelFragment:
-    return "fragment";
-  case spv::ExecutionModelGLCompute:
+    case spv::ExecutionModelFragment:
+      return "fragment";
+    case spv::ExecutionModelGLCompute:
       return "gl_compute";
-  case spv::ExecutionModelKernel:
+    case spv::ExecutionModelKernel:
       return "kernel";
-  case spv::ExecutionModelMax:
+    case spv::ExecutionModelMax:
       return "unknown_max";
+    default:
+      return "unknown";
   }
-
-  return "unknown";
 }
 
-} // namespace wren::spirv
+}  // namespace wren::spirv

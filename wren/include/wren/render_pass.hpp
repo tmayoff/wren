@@ -27,7 +27,13 @@ class RenderPass {
   static auto Create(const std::shared_ptr<Context>& ctx,
                      const std::string& name,
                      const PassResources& resources)
-      -> tl::expected<RenderPass, std::error_code>;
+      -> tl::expected<std::shared_ptr<RenderPass>, std::error_code>;
+
+  void execute();
+
+  [[nodiscard]] auto get_command_buffers() const {
+    return command_buffers;
+  }
 
  private:
   RenderPass(std::string name, PassResources resources)
@@ -40,7 +46,7 @@ class RenderPass {
   vk::RenderPass render_pass;
 
   vk::CommandPool command_pool;
-  std::vector<vk::CommandBuffer> command_buffer;
+  std::vector<vk::CommandBuffer> command_buffers;
   std::vector<std::vector<vk::Framebuffer>> framebuffers;
 };
 

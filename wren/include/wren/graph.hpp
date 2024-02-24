@@ -9,12 +9,17 @@
 
 namespace wren {
 
-class Node {};
+struct Node {
+  std::shared_ptr<RenderPass> render_pass;
+};
 
 using node_t = std::shared_ptr<Node>;
 using edge_t = std::pair<node_t, node_t>;
 
 struct Graph {
+  auto begin() { return nodes.begin(); }
+  auto end() { return nodes.end(); }
+
   std::vector<node_t> nodes;
   std::vector<edge_t> edges;
 };

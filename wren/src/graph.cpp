@@ -5,9 +5,8 @@ namespace wren {
 auto GraphBuilder::add_pass(const std::string &name,
                             const PassResources &resources)
     -> GraphBuilder & {
-  node_t n;
-
-  auto pass = RenderPass::Create(ctx, name, resources);
+  auto pass = RenderPass::Create(ctx, name, resources).value();
+  node_t n = std::make_shared<Node>(pass);
 
   graph.nodes.push_back(n);
 

@@ -13,8 +13,9 @@ namespace wren {
 auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
                         const std::string& name,
                         const PassResources& resources)
-    -> tl::expected<RenderPass, std::error_code> {
-  RenderPass pass(name, resources);
+    -> tl::expected<std::shared_ptr<RenderPass>, std::error_code> {
+  auto pass =
+      std::shared_ptr<RenderPass>(new RenderPass(name, resources));
 
   const auto& device = ctx->graphics_context.Device();
   const auto& swapchain_images =
@@ -52,14 +53,14 @@ auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
   vk::RenderPassCreateInfo create_info({}, attachments, subpass);
 
   auto [res, renderpass] = device.get().createRenderPass(create_info);
-  pass.render_pass = renderpass;
+  pass->render_pass = renderpass;
 
   pipeline_create_info.setRenderPass(renderpass);
   vk::Pipeline pipeline;
   std::tie(res, pipeline) =
       device.get().createGraphicsPipeline({}, pipeline_create_info);
 
-  pass.pipeline = pipeline;
+  pass->pipeline = pipeline;
 
   for (const auto& rt : resources.render_targets) {
     std::vector<vk::Framebuffer> framebuffers;
@@ -76,7 +77,7 @@ auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
       }
       framebuffers.push_back(framebuffer);
     }
-    pass.framebuffers.push_back(framebuffers);
+    pass->framebuffers.push_back(framebuffers);
   }
 
   {
@@ -94,10 +95,16 @@ auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
     std::tie(res, bufs) =
         device.get().allocateCommandBuffers(alloc_info);
 
-    pass.command_pool = pool;
-    pass.command_buffer = bufs;
+    pass->command_pool = pool;
+    pass->command_buffers = bufs;
   }
   return pass;
+}
+
+void RenderPass::execute() {
+  const auto& cmd = command_buffers.front();
+
+  cmd.reset();
 }
 
 }  // namespace wren

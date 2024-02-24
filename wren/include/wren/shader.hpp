@@ -2,7 +2,7 @@
 
 #include <shaderc/shaderc.h>
 
-#include <spirv_cross/spirv_cross.hpp>
+#include <memory>
 #include <string>
 #include <system_error>
 #include <tl/expected.hpp>
