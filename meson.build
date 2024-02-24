@@ -8,6 +8,10 @@ if get_option('buildtype') == 'debug'
     add_project_arguments('-DWREN_DEBUG', language: 'cpp')
 endif
 
+if get_option('profiling')
+    add_project_arguments('-DTRACY_ENABLE', language: 'cpp')
+endif
+
 cpp = meson.get_compiler('cpp')
 
 boost = dependency('boost')
@@ -15,9 +19,13 @@ spdlog = dependency('spdlog')
 sdl = dependency('SDL2')
 expected = dependency('tl-expected', modules: ['tl::expected'])
 vulkan = dependency('vulkan')
-gsl = dependency('gsl-lite', modules: ['gsl::gsl-lite'])
 shaderc = dependency('shaderc')
-#spirv_headers = dependency('spirv-headers')
+tracy = dependency('tracy')
+if not tracy.found()
+tracy = cpp.find_library(
+    'tracy',
+)
+endif
 
 subdir('wren')
 subdir('editor')
