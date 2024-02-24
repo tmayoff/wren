@@ -26,13 +26,15 @@ void Renderer::draw() {
 
 void Renderer::begin_frame() {
   ZoneScoped;
+
+    // TODO This needs to be cleaned up majorly
+        
   vk::Result res = vk::Result::eSuccess;
 
   const auto &device = ctx->graphics_context->Device().get();
 
-  device.resetFences(in_flight_fence);
-  // res = device.waitForFences(in_flight_fence, VK_TRUE, UINT64_MAX);
-  //   TODO Error handling
+  res = device.waitForFences(in_flight_fence, VK_TRUE, UINT64_MAX);
+  if (res != vk::Result::eSuccess) return;
   device.resetFences(in_flight_fence);
 
   for (auto g : render_graph) {
@@ -81,7 +83,8 @@ auto Renderer::Create(const std::shared_ptr<Context> &ctx)
 
   vk::Result vres = vk::Result::eSuccess;
   std::tie(vres, renderer->in_flight_fence) =
-      device.get().createFence(vk::FenceCreateInfo{});
+      device.get().createFence(
+          vk::FenceCreateInfo{vk::FenceCreateFlagBits::eSignaled});
   if (vres != vk::Result::eSuccess)
     return tl::make_unexpected(make_error_code(vres));
 

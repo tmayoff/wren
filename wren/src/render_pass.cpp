@@ -113,7 +113,7 @@ void RenderPass::execute(uint32_t image_index) {
       std::array<float, 4>{0.5f, 0.2f, 0.0, 1.0}});
 
   vk::RenderPassBeginInfo rp_begin(
-      render_pass, framebuffers.at(image_index).front(), {{}, extent},
+      render_pass, framebuffers.front().at(image_index), {{}, extent},
       clear_value);
 
   cmd.beginRenderPass(rp_begin, vk::SubpassContents::eInline);
