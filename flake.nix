@@ -13,6 +13,7 @@
         rawNativeBuildInputs = with pkgs; [
           pkg-config
           meson
+          muon
           cmake
           ninja
           vscode-extensions.llvm-org.lldb-vscode
@@ -28,9 +29,9 @@
           vulkan-headers
           vulkan-loader
           vulkan-tools
-          shaderc 
-          spirv-cross
+          shaderc
           spirv-headers
+          tracy
         ];
       in rec {
 
