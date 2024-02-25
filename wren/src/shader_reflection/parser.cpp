@@ -65,7 +65,7 @@ auto Parser::string_literal(const std::span<uint32_t> &literal_set)
     auto chars = to_bytes(arg);
     bool done = false;
     for (const auto &c : chars) {
-      if (c == '\0') done = true;
+      if (c == '\0') {done = true; break;}
       literal.push_back(static_cast<char>(c));
     }
 

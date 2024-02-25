@@ -86,8 +86,13 @@ auto GraphicsContext::CreateInstance(
 
 #ifdef WREN_DEBUG
   if (vulkan::IsLayerSupported("VK_LAYER_KHRONOS_validation")) {
-    spdlog::debug("Validation layer supported, adding to instance");
-    layers.push_back("VK_LAYER_KHRONOS_validation");
+    if (getenv("ENABLE_VULKAN_RENDERDOC_CAPTURE") == nullptr) {
+      spdlog::debug("Validation layer supported, adding to instance");
+      layers.push_back("VK_LAYER_KHRONOS_validation");
+    } else {
+      spdlog::info(
+          "Renderdoc enabled can't enable validation layers");
+    }
   }
 
   if (vulkan::IsExtensionSupport(VK_EXT_DEBUG_UTILS_EXTENSION_NAME)) {
@@ -138,7 +143,10 @@ auto GraphicsContext::SetupDevice()
   {
     spdlog::debug("Creating logical device...");
     auto res = CreateDevice();
-    if (!res.has_value()) return tl::make_unexpected(res.error());
+    if (!res.has_value()) {
+      return tl::make_unexpected(res.error());
+    }
+
     spdlog::debug("Created logical device.");
   }
 

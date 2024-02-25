@@ -41,7 +41,6 @@ class RenderPass {
 
   std::string name;
   PassResources resources;
-  vk::Pipeline pipeline;
 
   vk::RenderPass render_pass;
 

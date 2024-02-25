@@ -7,6 +7,7 @@
 #include <system_error>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
@@ -25,9 +26,6 @@ struct ShaderModule {
   ShaderModule() = default;
   ShaderModule(spirv_t spirv, const vk::ShaderModule &module);
 
-  [[nodiscard]] auto get_shader_stage_info() const
-      -> vk::PipelineShaderStageCreateInfo;
-
   [[nodiscard]] auto get_vertex_input() const
       -> vk::PipelineVertexInputStateCreateInfo;
 };
@@ -45,6 +43,8 @@ class Shader {
                              const std::string &shader_source)
       -> tl::expected<ShaderModule, std::error_code>;
 
+  [[nodiscard]] auto get_pipeline() const { return pipeline; }
+
   void fragment_shader(const ShaderModule &fragment) {
     fragment_shader_module = fragment;
   }
@@ -53,9 +53,15 @@ class Shader {
     vertex_shader_module = vertex;
   }
 
-  auto reflect_graphics_pipeline() -> vk::GraphicsPipelineCreateInfo;
+  auto create_graphics_pipeline(const vk::Device &device,
+                                const vk::RenderPass &render_pass,
+                                const vk::Extent2D &size)
+      -> tl::expected<void, std::error_code>;
 
  private:
+  vk::PipelineLayout pipeline_layout;
+  vk::Pipeline pipeline;
+
   ShaderModule vertex_shader_module;
   ShaderModule fragment_shader_module;
 };

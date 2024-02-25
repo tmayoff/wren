@@ -17,6 +17,8 @@
           cmake
           ninja
           vscode-extensions.llvm-org.lldb-vscode
+          tracy
+          renderdoc
         ];
 
         rawBuildInputs = with pkgs; [
@@ -30,12 +32,11 @@
           vulkan-loader
           vulkan-tools
           shaderc
-          spirv-headers
-          tracy
+          spirv-headers  
         ];
       in rec {
 
-        vulkan_layer_path = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d";
+        vulkan_layer_path = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d:${pkgs.renderdoc}/share/vulkan/implicit_layer.d";
  
         packages = rec {
           wren_editor = pkgs.stdenv.mkDerivation {
@@ -58,6 +59,7 @@
         devShell = pkgs.mkShell.override { stdenv = pkgs.clangStdenv; } {
             NIX_CFLAGS_COMPILE = "-U_FORTIFY_SOURCE";
             VK_LAYER_PATH = vulkan_layer_path;
+            #ENABLE_VULKAN_RENDERDOC_CAPTURE=1;
            
             nativeBuildInputs = with pkgs; [
               clang-tools

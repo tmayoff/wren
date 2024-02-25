@@ -22,15 +22,7 @@ auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
       ctx->renderer->get_swapchain_images_views();
 
   const auto& shader = resources.shader;
-  auto pipeline_create_info = shader->reflect_graphics_pipeline();
-
   const auto& rt = resources.render_targets.front();
-  vk::Viewport viewport(0, 0, static_cast<float>(rt.size.width),
-                        static_cast<float>(rt.size.height));
-  vk::Rect2D scissor({}, rt.size);
-  vk::PipelineViewportStateCreateInfo viewport_state({}, viewport,
-                                                     scissor);
-  pipeline_create_info.setPViewportState(&viewport_state);
 
   std::vector<vk::AttachmentDescription> attachments;
   attachments.reserve(resources.render_targets.size());
@@ -55,12 +47,17 @@ auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
   auto [res, renderpass] = device.get().createRenderPass(create_info);
   pass->render_pass = renderpass;
 
-  pipeline_create_info.setRenderPass(renderpass);
-  vk::Pipeline pipeline;
-  std::tie(res, pipeline) =
-      device.get().createGraphicsPipeline({}, pipeline_create_info);
+  auto size = resources.render_targets.front().size;
+  auto pipeline_res = shader->create_graphics_pipeline(
+      device.get(), renderpass, size);
+  if (!pipeline_res.has_value())
+    return tl::make_unexpected(pipeline_res.error());
 
-  pass->pipeline = pipeline;
+  vk::Viewport viewport(0, 0, static_cast<float>(rt.size.width),
+                        static_cast<float>(rt.size.height));
+  vk::Rect2D scissor({}, rt.size);
+  vk::PipelineViewportStateCreateInfo viewport_state({}, viewport,
+                                                     scissor);
 
   for (const auto& rt : resources.render_targets) {
     std::vector<vk::Framebuffer> framebuffers;
@@ -109,8 +106,8 @@ void RenderPass::execute(uint32_t image_index) {
 
   auto extent = resources.render_targets.front().size;
 
-  vk::ClearValue clear_value(vk::ClearColorValue{
-      std::array<float, 4>{0.5f, 0.2f, 0.0, 1.0}});
+  vk::ClearValue clear_value(
+      vk::ClearColorValue{std::array<float, 4>{0.0, 0.0, 0.0, 1.0}});
 
   vk::RenderPassBeginInfo rp_begin(
       render_pass, framebuffers.front().at(image_index), {{}, extent},
@@ -118,9 +115,19 @@ void RenderPass::execute(uint32_t image_index) {
 
   cmd.beginRenderPass(rp_begin, vk::SubpassContents::eInline);
 
+  cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
+                   resources.shader->get_pipeline());
+
+  cmd.setViewport(0,
+                  vk::Viewport{0, 0, static_cast<float>(extent.width),
+                               static_cast<float>(extent.height)});
+  cmd.setScissor(0, vk::Rect2D{{0, 0}, extent});
+
+  cmd.draw(3, 1, 1, 0);
+
   cmd.endRenderPass();
 
-  cmd.end();
+  res = cmd.end();
 }
 
 }  // namespace wren

@@ -26,7 +26,8 @@ auto Window::Create(const std::string &application_name)
 
   SDL_Window *window = SDL_CreateWindow(
       application_name.c_str(), SDL_WINDOWPOS_UNDEFINED,
-      SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_VULKAN);
+      SDL_WINDOWPOS_UNDEFINED, 640, 480,
+      SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
   if (window == nullptr) {
     return tl::make_unexpected(
         make_error_code(WindowErrors::SDL_INIT));
