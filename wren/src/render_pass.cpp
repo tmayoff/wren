@@ -107,7 +107,7 @@ void RenderPass::execute(uint32_t image_index) {
   auto extent = resources.render_targets.front().size;
 
   vk::ClearValue clear_value(
-      vk::ClearColorValue{std::array<float, 4>{0.0, 0.0, 0.0, 1.0}});
+      vk::ClearColorValue{std::array<float, 4>{0.2, 0.2, 0.2, 1.0}});
 
   vk::RenderPassBeginInfo rp_begin(
       render_pass, framebuffers.front().at(image_index), {{}, extent},

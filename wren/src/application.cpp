@@ -65,10 +65,16 @@ Application::Application(const std::shared_ptr<Context> &ctx,
     : ctx(ctx), renderer(renderer), running(true) {}
 
 void Application::run() {
-  this->ctx->event_dispatcher.on<Event::WindowClose>([this]() {
-    spdlog::info("Window closed");
+  this->ctx->event_dispatcher.on<Event::WindowClose>([this](auto &w) {
+    spdlog::debug("{}", w.debug_name);
     this->running = false;
   });
+
+  this->ctx->event_dispatcher.on<Event::WindowResized>(
+      [](const Event::WindowResized &size) {
+        spdlog::debug("{} ({}, {})", size.debug_name, size.width,
+                      size.height);
+      });
 
   while (running) {
     FrameMark;

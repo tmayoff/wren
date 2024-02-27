@@ -76,6 +76,16 @@ void Window::DispatchEvents(const Event::Dispatcher &dispatcher) {
       case SDL_QUIT: {
         dispatcher.dispatch(Event::WindowClose{});
         break;
+
+        case SDL_WINDOWEVENT:
+          switch (event.window.event) {
+            case SDL_WINDOWEVENT_RESIZED:
+              dispatcher.dispatch(Event::WindowResized{
+                  {static_cast<float>(event.window.data1),
+                   static_cast<float>(event.window.data2)}});
+              break;
+          }
+          break;
       }
     }
   }

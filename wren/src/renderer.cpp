@@ -27,8 +27,8 @@ void Renderer::draw() {
 void Renderer::begin_frame() {
   ZoneScoped;
 
-    // TODO This needs to be cleaned up majorly
-        
+  // TODO This needs to be cleaned up majorly
+
   vk::Result res = vk::Result::eSuccess;
 
   const auto &device = ctx->graphics_context->Device().get();
