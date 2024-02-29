@@ -22,13 +22,15 @@ class Renderer {
 
   auto get_swapchain_images_views() { return swapchain_image_views; }
 
+  void on_window_resize(const std::pair<float, float> &size);
+
  private:
   explicit Renderer(const std::shared_ptr<Context> &ctx) : ctx(ctx) {}
 
   void begin_frame();
   void end_frame();
 
-  auto create_swapchain() -> tl::expected<void, std::error_code>;
+  auto recreate_swapchain() -> tl::expected<void, std::error_code>;
 
   auto choose_swapchain_format(
       const std::vector<vk::SurfaceFormatKHR> &formats)
@@ -46,6 +48,9 @@ class Renderer {
   vk::SwapchainKHR swapchain;
   std::vector<vk::Image> swapchain_images;
   std::vector<vk::ImageView> swapchain_image_views;
+
+  std::vector<std::shared_ptr<RenderTarget>> targets;
+
   vk::Format swapchain_image_format = vk::Format::eB8G8R8Srgb;
   vk::Extent2D swapchain_extent;
 

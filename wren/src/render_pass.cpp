@@ -12,7 +12,8 @@ namespace wren {
 
 auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
                         const std::string& name,
-                        const PassResources& resources)
+                        const PassResources& resources,
+                        const execute_fn_t& fn)
     -> tl::expected<std::shared_ptr<RenderPass>, std::error_code> {
   auto pass =
       std::shared_ptr<RenderPass>(new RenderPass(name, resources));
@@ -59,24 +60,6 @@ auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
   vk::PipelineViewportStateCreateInfo viewport_state({}, viewport,
                                                      scissor);
 
-  for (const auto& rt : resources.render_targets) {
-    std::vector<vk::Framebuffer> framebuffers;
-    for (const auto& image : swapchain_images) {
-      auto [res, framebuffer] = device.get().createFramebuffer(
-          vk::FramebufferCreateInfo{{},
-                                    renderpass,
-                                    image,
-                                    rt.size.width,
-                                    rt.size.height,
-                                    1});
-      if (res != vk::Result::eSuccess) {
-        return tl::make_unexpected(make_error_code(res));
-      }
-      framebuffers.push_back(framebuffer);
-    }
-    pass->framebuffers.push_back(framebuffers);
-  }
-
   {
     std::vector<vk::CommandBuffer> cmds;
     auto [res, pool] =
@@ -98,8 +81,11 @@ auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
   return pass;
 }
 
+void RenderPass::on_resource_resized(
+    const std::pair<float, float>& size) {}
+
 void RenderPass::execute(uint32_t image_index) {
-  const auto& cmd = command_buffers.front();
+  auto& cmd = command_buffers.front();
 
   auto res = cmd.begin(vk::CommandBufferBeginInfo{});
   if (res != vk::Result::eSuccess) return;
@@ -109,9 +95,8 @@ void RenderPass::execute(uint32_t image_index) {
   vk::ClearValue clear_value(
       vk::ClearColorValue{std::array<float, 4>{0.2, 0.2, 0.2, 1.0}});
 
-  vk::RenderPassBeginInfo rp_begin(
-      render_pass, framebuffers.front().at(image_index), {{}, extent},
-      clear_value);
+  vk::RenderPassBeginInfo rp_begin(render_pass, {}, {{}, extent},
+                                   clear_value);
 
   cmd.beginRenderPass(rp_begin, vk::SubpassContents::eInline);
 
@@ -123,7 +108,7 @@ void RenderPass::execute(uint32_t image_index) {
                                static_cast<float>(extent.height)});
   cmd.setScissor(0, vk::Rect2D{{0, 0}, extent});
 
-  cmd.draw(3, 1, 1, 0);
+  if (execute_fn) execute_fn(cmd);
 
   cmd.endRenderPass();
 

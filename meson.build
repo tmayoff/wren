@@ -23,9 +23,9 @@ vulkan = dependency('vulkan')
 shaderc = dependency('shaderc')
 tracy = dependency('tracy', required: false)
 if not tracy.found()
-tracy = cpp.find_library(
-    'tracy',
-)
+    tracy = cpp.find_library(
+        'tracy',
+    )
 endif
 
 subdir('wren')

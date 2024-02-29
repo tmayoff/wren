@@ -10,6 +10,7 @@
 
 #include "wren/context.hpp"
 #include "wren/graph.hpp"
+#include "wren/render_pass.hpp"
 #include "wren/shader.hpp"
 #include "wren/shaders/triangle.hpp"
 #include "wren/utils/queue.hpp"
@@ -50,9 +51,8 @@ void Renderer::begin_frame() {
     auto cmd_bufs = g->render_pass->get_command_buffers();
     vk::SubmitInfo submit_info(image_available, waitDstStageMask,
                                cmd_bufs, render_finished);
-    auto res =
-        ctx->graphics_context->Device().get_graphics_queue().submit(
-            submit_info, in_flight_fence);
+    res = ctx->graphics_context->Device().get_graphics_queue().submit(
+        submit_info, in_flight_fence);
 
     vk::PresentInfoKHR present_info{render_finished, swapchain,
                                     image_index};
@@ -64,6 +64,17 @@ void Renderer::begin_frame() {
 
 void Renderer::end_frame() {}
 
+void Renderer::on_window_resize(const std::pair<float, float> &size) {
+  // TODO recreate swapchains
+
+  recreate_swapchain();
+
+  // Update render passes
+  for (auto &nodes : render_graph) {
+    nodes->render_pass->on_resource_resized(size);
+  }
+}
+
 auto Renderer::Create(const std::shared_ptr<Context> &ctx)
     -> tl::expected<std::shared_ptr<Renderer>, std::error_code> {
   ZoneScoped;
@@ -73,7 +84,7 @@ auto Renderer::Create(const std::shared_ptr<Context> &ctx)
   auto renderer = std::shared_ptr<Renderer>(new Renderer(ctx));
   ctx->renderer = renderer;
 
-  auto res = renderer->create_swapchain();
+  auto res = renderer->recreate_swapchain();
   if (!res.has_value()) return tl::make_unexpected(res.error());
 
   auto shader = Shader::Create(device, TRIANGLE_VERT_SHADER.data(),
@@ -101,8 +112,28 @@ auto Renderer::Create(const std::shared_ptr<Context> &ctx)
   return renderer;
 }
 
-auto Renderer::create_swapchain()
+auto Renderer::recreate_swapchain()
     -> tl::expected<void, std::error_code> {
+  vk::Result res = vk::Result::eSuccess;
+
+  const auto &device = ctx->graphics_context->Device();
+
+  res = ctx->graphics_context->Device().get().waitIdle();
+
+  // ============ Destroy previous resources
+  for (const auto &node : render_graph) {
+    const auto &fbs = node->render_pass->get_framebuffers();
+    for (const auto &fb : fbs) device.get().destroyFramebuffer(fb);
+  }
+
+  for (const auto &rt : targets) {
+    device.get().destroyImageView(rt->image_view);
+  }
+
+  if (swapchain != nullptr)
+    device.get().destroySwapchainKHR(swapchain);
+
+  //=========== Create Swapchain
   auto swapchain_support =
       ctx->graphics_context->GetSwapchainSupport();
   if (!swapchain_support.has_value())
@@ -152,7 +183,6 @@ auto Renderer::create_swapchain()
   create_info.setPresentMode(present_mode);
   create_info.setClipped(true);
 
-  vk::Result res = vk::Result::eSuccess;
   std::tie(res, swapchain) =
       ctx->graphics_context->Device().get().createSwapchainKHR(
           create_info);
@@ -169,16 +199,22 @@ auto Renderer::create_swapchain()
   swapchain_extent = extent;
 
   swapchain_image_views.resize(swapchain_images.size());
-  for (size_t i = 0; i < swapchain_images.size(); i++) {
+  for (const auto &swapchain_image : swapchain_images) {
     vk::ImageViewCreateInfo create_info(
-        {}, swapchain_images[i], vk::ImageViewType::e2D,
+        {}, swapchain_image, vk::ImageViewType::e2D,
         swapchain_image_format, {},
         vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0,
                                   1, 0, 1));
 
-    std::tie(res, swapchain_image_views[i]) =
+    vk::ImageView image_view;
+    std::tie(res, image_view) =
         ctx->graphics_context->Device().get().createImageView(
             create_info);
+
+    std::make_shared<RenderTarget>(
+        swapchain_extent, swapchain_image_format,
+        vk::SampleCountFlagBits::e1, image_view);
+
     if (res != vk::Result::eSuccess)
       return tl::make_unexpected(make_error_code(res));
   }
@@ -243,11 +279,13 @@ void Renderer::build_3D_render_graph() {
                                TRIANGLE_VERT_SHADER.data(),
                                TRIANGLE_FRAG_SHADER.data())
                     .value();
+
   builder.add_pass(
       "triangle",
       {shader,
        {RenderTarget{swapchain_extent, swapchain_image_format,
-                     vk::SampleCountFlagBits::e1}}});
+                     vk::SampleCountFlagBits::e1}}},
+      [](vk::CommandBuffer &cmd) { cmd.draw(3, 1, 1, 0); });
 
   render_graph = builder.compile();
 }

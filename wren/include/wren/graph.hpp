@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <vector>
 #include <vulkan/vulkan.hpp>
 
@@ -32,11 +33,14 @@ class GraphBuilder {
   auto compile() -> Graph;
 
   auto add_pass(const std::string &name,
-                const PassResources &resources) -> GraphBuilder &;
+                const PassResources &resources,
+                const RenderPass::execute_fn_t &fn) -> GraphBuilder &;
 
  private:
-  Graph graph;
   std::shared_ptr<Context> ctx;
+  std::vector<std::tuple<std::string, PassResources,
+                         RenderPass::execute_fn_t>>
+      passes;
 };
 
 }  // namespace wren

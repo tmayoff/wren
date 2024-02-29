@@ -1,6 +1,6 @@
 ## plan
 
-
+- Setup shared render targets with the ImageView's associated with them these are passed to the rendergraph, when a target needs updating (swapchain resized) the render targets can update their image views
 
 ## 3d render pipeline
 
