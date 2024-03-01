@@ -8,6 +8,7 @@
 #include <vulkan/vulkan_structs.hpp>
 
 #include "wren/graph.hpp"
+#include "wren/render_target.hpp"
 
 namespace wren {
 
@@ -49,7 +50,7 @@ class Renderer {
   std::vector<vk::Image> swapchain_images;
   std::vector<vk::ImageView> swapchain_image_views;
 
-  std::vector<std::shared_ptr<RenderTarget>> targets;
+  std::shared_ptr<RenderTarget> target;
 
   vk::Format swapchain_image_format = vk::Format::eB8G8R8Srgb;
   vk::Extent2D swapchain_extent;

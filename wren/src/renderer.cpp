@@ -11,6 +11,7 @@
 #include "wren/context.hpp"
 #include "wren/graph.hpp"
 #include "wren/render_pass.hpp"
+#include "wren/render_target.hpp"
 #include "wren/shader.hpp"
 #include "wren/shaders/triangle.hpp"
 #include "wren/utils/queue.hpp"
@@ -67,7 +68,7 @@ void Renderer::end_frame() {}
 void Renderer::on_window_resize(const std::pair<float, float> &size) {
   // TODO recreate swapchains
 
-  recreate_swapchain();
+  // recreate_swapchain();
 
   // Update render passes
   for (auto &nodes : render_graph) {
@@ -126,9 +127,9 @@ auto Renderer::recreate_swapchain()
     for (const auto &fb : fbs) device.get().destroyFramebuffer(fb);
   }
 
-  for (const auto &rt : targets) {
-    device.get().destroyImageView(rt->image_view);
-  }
+  if (target != nullptr)
+    for (const auto &iv : target->image_views)
+      device.get().destroyImageView(iv);
 
   if (swapchain != nullptr)
     device.get().destroySwapchainKHR(swapchain);
@@ -198,7 +199,7 @@ auto Renderer::recreate_swapchain()
   swapchain_image_format = format.format;
   swapchain_extent = extent;
 
-  swapchain_image_views.resize(swapchain_images.size());
+  swapchain_image_views.reserve(swapchain_images.size());
   for (const auto &swapchain_image : swapchain_images) {
     vk::ImageViewCreateInfo create_info(
         {}, swapchain_image, vk::ImageViewType::e2D,
@@ -211,13 +212,15 @@ auto Renderer::recreate_swapchain()
         ctx->graphics_context->Device().get().createImageView(
             create_info);
 
-    std::make_shared<RenderTarget>(
-        swapchain_extent, swapchain_image_format,
-        vk::SampleCountFlagBits::e1, image_view);
+    swapchain_image_views.push_back(image_view);
 
     if (res != vk::Result::eSuccess)
       return tl::make_unexpected(make_error_code(res));
   }
+
+  target = std::make_shared<RenderTarget>(
+      swapchain_extent, swapchain_image_format,
+      vk::SampleCountFlagBits::e1, swapchain_image_views);
 
   return {};
 }
@@ -281,10 +284,7 @@ void Renderer::build_3D_render_graph() {
                     .value();
 
   builder.add_pass(
-      "triangle",
-      {shader,
-       {RenderTarget{swapchain_extent, swapchain_image_format,
-                     vk::SampleCountFlagBits::e1}}},
+      "triangle", {shader, target},
       [](vk::CommandBuffer &cmd) { cmd.draw(3, 1, 1, 0); });
 
   render_graph = builder.compile();

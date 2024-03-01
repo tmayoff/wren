@@ -14,7 +14,7 @@ struct Context;
 
 struct PassResources {
   std::shared_ptr<Shader> shader;
-  std::vector<RenderTarget> render_targets;
+  std::shared_ptr<RenderTarget> render_target;
 };
 
 class RenderPass {
@@ -51,8 +51,7 @@ class RenderPass {
   vk::CommandPool command_pool;
   std::vector<vk::CommandBuffer> command_buffers;
 
-  // Associative arrays
-  std::vector<std::shared_ptr<RenderTarget>> targets;
+  //std::shared_ptr<RenderTarget> targets;
   std::vector<vk::Framebuffer> framebuffers;
 };
 

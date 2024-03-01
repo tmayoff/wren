@@ -12,7 +12,7 @@ class RenderTarget {
   vk::Format format;
   vk::SampleCountFlagBits sample_count;
 
-  vk::ImageView image_view;
+  std::vector<vk::ImageView> image_views;
 
   auto is_colour() { return true; }
 };

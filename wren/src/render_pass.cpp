@@ -23,20 +23,16 @@ auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
       ctx->renderer->get_swapchain_images_views();
 
   const auto& shader = resources.shader;
-  const auto& rt = resources.render_targets.front();
 
   std::vector<vk::AttachmentDescription> attachments;
-  attachments.reserve(resources.render_targets.size());
 
-  for (const auto& rt : resources.render_targets) {
-    vk::AttachmentDescription attachment(
-        {}, rt.format, rt.sample_count, vk::AttachmentLoadOp::eClear,
-        vk::AttachmentStoreOp::eStore,
-        vk::AttachmentLoadOp::eDontCare,
-        vk::AttachmentStoreOp::eDontCare, vk::ImageLayout::eUndefined,
-        vk::ImageLayout::ePresentSrcKHR);
-    attachments.push_back(attachment);
-  }
+  const auto& rt = resources.render_target;
+  vk::AttachmentDescription attachment(
+      {}, rt->format, rt->sample_count, vk::AttachmentLoadOp::eClear,
+      vk::AttachmentStoreOp::eStore, vk::AttachmentLoadOp::eDontCare,
+      vk::AttachmentStoreOp::eDontCare, vk::ImageLayout::eUndefined,
+      vk::ImageLayout::ePresentSrcKHR);
+  attachments.push_back(attachment);
 
   vk::AttachmentReference attachment_ref(
       0, vk::ImageLayout::eColorAttachmentOptimal);
@@ -48,17 +44,29 @@ auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
   auto [res, renderpass] = device.get().createRenderPass(create_info);
   pass->render_pass = renderpass;
 
-  auto size = resources.render_targets.front().size;
+  auto size = resources.render_target->size;
   auto pipeline_res = shader->create_graphics_pipeline(
       device.get(), renderpass, size);
   if (!pipeline_res.has_value())
     return tl::make_unexpected(pipeline_res.error());
 
-  vk::Viewport viewport(0, 0, static_cast<float>(rt.size.width),
-                        static_cast<float>(rt.size.height));
-  vk::Rect2D scissor({}, rt.size);
+  vk::Viewport viewport(0, 0, static_cast<float>(rt->size.width),
+                        static_cast<float>(rt->size.height));
+  vk::Rect2D scissor({}, rt->size);
   vk::PipelineViewportStateCreateInfo viewport_state({}, viewport,
                                                      scissor);
+
+  for (const auto& image_view : resources.render_target->image_views) {
+    vk::Framebuffer fb;
+    std::tie(res, fb) = device.get().createFramebuffer(
+        vk::FramebufferCreateInfo{{},
+                                  pass->render_pass,
+                                  image_view,
+                                  rt->size.width,
+                                  rt->size.height,
+                                  1});
+    pass->framebuffers.push_back(fb);
+  }
 
   {
     std::vector<vk::CommandBuffer> cmds;
@@ -90,13 +98,14 @@ void RenderPass::execute(uint32_t image_index) {
   auto res = cmd.begin(vk::CommandBufferBeginInfo{});
   if (res != vk::Result::eSuccess) return;
 
-  auto extent = resources.render_targets.front().size;
+  auto extent = resources.render_target->size;
 
   vk::ClearValue clear_value(
       vk::ClearColorValue{std::array<float, 4>{0.2, 0.2, 0.2, 1.0}});
 
-  vk::RenderPassBeginInfo rp_begin(render_pass, {}, {{}, extent},
-                                   clear_value);
+  vk::RenderPassBeginInfo rp_begin(render_pass,
+                                   framebuffers.at(image_index),
+                                   {{}, extent}, clear_value);
 
   cmd.beginRenderPass(rp_begin, vk::SubpassContents::eInline);
 
