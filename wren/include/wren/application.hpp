@@ -1,15 +1,17 @@
 #pragma once
 
+#include <spdlog/spdlog.h>
+
+#include <memory>
+#include <tl/expected.hpp>
+
 #include "context.hpp"
 #include "wren/renderer.hpp"
-#include <memory>
-#include <spdlog/spdlog.h>
-#include <tl/expected.hpp>
 
 namespace wren {
 
 class Application {
-public:
+ public:
   enum class errors {};
 
   static auto Create(const std::string &application_name)
@@ -17,7 +19,7 @@ public:
 
   void run();
 
-private:
+ private:
   explicit Application(const std::shared_ptr<Context> &ctx,
                        const std::shared_ptr<Renderer> &renderer);
 
@@ -27,4 +29,4 @@ private:
   bool running;
 };
 
-} // namespace wren
+}  // namespace wren

@@ -15,8 +15,8 @@ auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
                         const PassResources& resources,
                         const execute_fn_t& fn)
     -> tl::expected<std::shared_ptr<RenderPass>, std::error_code> {
-  auto pass =
-      std::shared_ptr<RenderPass>(new RenderPass(name, resources));
+  auto pass = std::shared_ptr<RenderPass>(
+      new RenderPass(name, resources, fn));
 
   const auto& device = ctx->graphics_context->Device();
   const auto& swapchain_images =
@@ -110,7 +110,7 @@ void RenderPass::execute(uint32_t image_index) {
   auto extent = resources.render_target->size;
 
   vk::ClearValue clear_value(
-      vk::ClearColorValue{std::array<float, 4>{0.2, 0.2, 0.2, 1.0}});
+      vk::ClearColorValue{std::array<float, 4>{0.0, 0.0, 0.0, 1.0}});
 
   vk::RenderPassBeginInfo rp_begin(render_pass,
                                    framebuffers.at(image_index),
@@ -131,6 +131,10 @@ void RenderPass::execute(uint32_t image_index) {
   cmd.endRenderPass();
 
   res = cmd.end();
+  if (res != vk::Result::eSuccess) {
+    spdlog::error("Failed to record command buffer {}",
+                  make_error_code(res).message());
+  }
 }
 
 }  // namespace wren

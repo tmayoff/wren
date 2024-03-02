@@ -40,8 +40,11 @@ class RenderPass {
   void recreate_framebuffers(const vk::Device& device);
 
  private:
-  RenderPass(std::string name, PassResources resources)
-      : name(std::move(name)), resources(std::move(resources)) {}
+  RenderPass(std::string name, PassResources resources,
+             execute_fn_t fn)
+      : name(std::move(name)),
+        resources(std::move(resources)),
+        execute_fn(std::move(fn)) {}
 
   std::string name;
   PassResources resources;

@@ -40,8 +40,8 @@ auto GraphicsContext::Create(
 #ifdef WREN_DEBUG
   {
     spdlog::debug("Creating debug messenger...");
-    auto res = graphics_context->CreateDebugMessenger();
-    if (!res.has_value()) return tl::make_unexpected(res.error());
+    // auto res = graphics_context->CreateDebugMessenger();
+    // if (!res.has_value()) return tl::make_unexpected(res.error());
     spdlog::debug("Created debug messenger.");
   }
 #endif
@@ -57,7 +57,7 @@ auto GraphicsContext::CreateInstance(
     const std::vector<std::string_view> &requested_layers)
     -> tl::expected<void, std::error_code> {
   const auto appInfo = vk::ApplicationInfo(
-      application_name.c_str(), 1, "wren", 1, VK_API_VERSION_1_3);
+      application_name.c_str(), 1, "wren", 1, VK_API_VERSION_1_2);
 
   spdlog::debug("Requesting extensions:");
   std::vector<const char *> extensions = {};
@@ -108,9 +108,10 @@ auto GraphicsContext::CreateInstance(
       vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
 
   vk::DebugUtilsMessageTypeFlagsEXT message_type_flags(
-      vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
-      vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
-      vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance);
+      // vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+      vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation
+      //|  vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
+  );
 
   vk::DebugUtilsMessengerCreateInfoEXT debugMessengerCreateInfo(
       {}, severity_flags, message_type_flags, &vulkan::DebugCallback);
@@ -118,7 +119,7 @@ auto GraphicsContext::CreateInstance(
 
   vk::InstanceCreateInfo createInfo({}, &appInfo, layers, extensions);
 #ifdef WREN_DEBUG
-  // createInfo.setPNext(&debugMessengerCreateInfo);
+  createInfo.setPNext(&debugMessengerCreateInfo);
 #endif
 
   auto [res, instance] = vk::createInstance(createInfo);

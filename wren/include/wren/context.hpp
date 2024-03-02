@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 
 #include "event.hpp"
 #include "graphics_context.hpp"

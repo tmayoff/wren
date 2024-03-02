@@ -1,6 +1,11 @@
 #include "wren/renderer.hpp"
 
+#if __has_include(<Tracy/tracy/Tracy.hpp>)
 #include <Tracy/tracy/Tracy.hpp>
+#else
+#include <tracy/Tracy.hpp>
+#endif
+
 #include <cstdint>
 #include <gsl/gsl-lite.hpp>
 #include <system_error>
@@ -59,9 +64,6 @@ void Renderer::begin_frame() {
     ZoneScopedN("render_pass->execute()");
     g->render_pass->execute(image_index);
     cmd_bufs = g->render_pass->get_command_buffers();
-    // cmd_bufs.insert(cmd_bufs.end(),
-    //                 g->render_pass->get_command_buffers().begin(),
-    //                 g->render_pass->get_command_buffers().end());
   }
 
   vk::PipelineStageFlags waitDstStageMask =
@@ -169,8 +171,7 @@ auto Renderer::recreate_swapchain()
     swapchain_image_views.clear();
   }
 
-  if (swapchain != nullptr)
-    device.get().destroySwapchainKHR(swapchain);
+  device.get().destroySwapchainKHR(swapchain);
 
   //=========== Create Swapchain
   auto swapchain_support =
@@ -182,7 +183,7 @@ auto Renderer::recreate_swapchain()
       choose_swapchain_format(swapchain_support->surface_formats);
   auto present_mode = choose_swapchain_presentation_mode(
       swapchain_support->present_modes);
-  auto extent =
+  swapchain_extent =
       choose_swapchain_extent(swapchain_support->surface_capabilites);
 
   auto image_count =
@@ -196,7 +197,7 @@ auto Renderer::recreate_swapchain()
 
   vk::SwapchainCreateInfoKHR create_info(
       {}, ctx->graphics_context->Surface(), image_count,
-      format.format, format.colorSpace, extent, 1,
+      format.format, format.colorSpace, swapchain_extent, 1,
       vk::ImageUsageFlagBits::eColorAttachment);
 
   auto queue_families = vulkan::Queue::FindQueueFamilyIndices(
@@ -235,7 +236,6 @@ auto Renderer::recreate_swapchain()
     return tl::make_unexpected(make_error_code(res));
 
   swapchain_image_format = format.format;
-  swapchain_extent = extent;
 
   swapchain_image_views.reserve(swapchain_images.size());
   for (const auto &swapchain_image : swapchain_images) {

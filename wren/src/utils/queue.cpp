@@ -26,7 +26,7 @@ auto Queue::FindQueueFamilyIndices(const vk::PhysicalDevice &physical_device,
       if (res.result != vk::Result::eSuccess)
         return tl::make_unexpected(make_error_code(res.result));
 
-      if (res.value == vk::True) {
+      if (res.value) {
         present_family = i;
       }
     }

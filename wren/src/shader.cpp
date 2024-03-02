@@ -115,19 +115,32 @@ auto Shader::create_graphics_pipeline(
   vk::PipelineInputAssemblyStateCreateInfo input_assembly(
       {}, vk::PrimitiveTopology::eTriangleList, false);
 
+  vk::Viewport viewport{0,
+                        0,
+                        static_cast<float>(size.width),
+                        static_cast<float>(size.height),
+                        0,
+                        1};
+  vk::Rect2D scissor{{0, 0}, size};
+  vk::PipelineViewportStateCreateInfo viewport_state{
+      {}, viewport, scissor};
+
   vk::PipelineRasterizationStateCreateInfo rasterization(
       {}, false, false, vk::PolygonMode::eFill,
-      vk::CullModeFlagBits::eBack, vk::FrontFace::eClockwise, {}, {},
-      {}, {}, 1.0f);
-  vk::PipelineMultisampleStateCreateInfo multisample;
+      vk::CullModeFlagBits::eBack, vk::FrontFace::eClockwise, false,
+      {}, {}, {}, 1.0f);
+
+  vk::PipelineMultisampleStateCreateInfo multisample{
+      {}, vk::SampleCountFlagBits::e1, false};
 
   vk::PipelineColorBlendAttachmentState colour_blend_attachment{
-      true,
+      false,
       vk::BlendFactor::eSrcAlpha,
       vk::BlendFactor::eOneMinusSrcAlpha,
       vk::BlendOp::eAdd,
       vk::BlendFactor::eOne,
-      vk::BlendFactor::eOne};
+      vk::BlendFactor::eZero,
+      vk::BlendOp::eAdd};
   colour_blend_attachment.setColorWriteMask(
       vk::ColorComponentFlagBits::eR |
       vk::ColorComponentFlagBits::eG |
@@ -136,12 +149,6 @@ auto Shader::create_graphics_pipeline(
   vk::PipelineColorBlendStateCreateInfo colour_blend(
       {}, false, vk::LogicOp::eCopy, colour_blend_attachment,
       {0.0, 0.0, 0.0, 0.0});
-
-  vk::Viewport viewport{0, 0, static_cast<float>(size.width),
-                        static_cast<float>(size.height)};
-  vk::Rect2D scissor{{0, 0}, size};
-  vk::PipelineViewportStateCreateInfo viewport_state{
-      {}, viewport, scissor};
 
   auto v_stage_create_info = vk::PipelineShaderStageCreateInfo(
       {}, vk::ShaderStageFlagBits::eVertex,

@@ -3,7 +3,11 @@
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan_core.h>
 
-#include <Tracy/tracy/Tracy.hpp>
+#if __has_include(<Tracy/tracy/Tracy.hpp>)
+  #include <Tracy/tracy/Tracy.hpp>
+#else
+  #include <tracy/Tracy.hpp>
+#endif
 #include <memory>
 #include <tl/expected.hpp>
 

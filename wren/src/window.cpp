@@ -4,7 +4,13 @@
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_vulkan.h>
 
-#include <Tracy/tracy/Tracy.hpp>
+
+#if __has_include(<Tracy/tracy/Tracy.hpp>)
+  #include <Tracy/tracy/Tracy.hpp>
+#else
+  #include <tracy/Tracy.hpp>
+#endif
+
 #include <functional>
 #include <system_error>
 

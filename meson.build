@@ -1,4 +1,4 @@
-project('wren', 'cpp', version: '0.0.1', default_options: ['cpp_std=c++23'])
+project('wren', 'cpp', version: '0.0.1', default_options: ['cpp_std=c++20'])
 
 add_project_arguments('-U_FORTIFY_SOURCE', language: 'cpp')
 add_project_arguments('-DVULKAN_HPP_NO_EXCEPTIONS', language: 'cpp')
@@ -21,11 +21,10 @@ sdl = dependency('SDL2')
 expected = dependency('tl-expected', modules: ['tl::expected'])
 vulkan = dependency('vulkan')
 shaderc = dependency('shaderc')
-tracy = dependency('tracy', required: false)
+
+tracy = cpp.find_library('tracy', required: false)
 if not tracy.found()
-    tracy = cpp.find_library(
-        'tracy',
-    )
+    tracy = dependency('tracy', required: true) 
 endif
 
 subdir('wren')
