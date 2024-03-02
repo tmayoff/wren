@@ -7,6 +7,7 @@
 #include <tl/expected.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
+#include <vulkan/vulkan_to_string.hpp>
 
 #include "wren/context.hpp"
 #include "wren/graph.hpp"
@@ -34,46 +35,75 @@ void Renderer::begin_frame() {
   vk::Result res = vk::Result::eSuccess;
 
   const auto &device = ctx->graphics_context->Device().get();
+  {
+    ZoneScopedN("device.waitForFences()");  // NOLINT
+    res = device.waitForFences(in_flight_fence, VK_TRUE, UINT64_MAX);
+    if (res != vk::Result::eSuccess) return;
+    device.resetFences(in_flight_fence);
+  }
 
-  res = device.waitForFences(in_flight_fence, VK_TRUE, UINT64_MAX);
-  if (res != vk::Result::eSuccess) return;
-  device.resetFences(in_flight_fence);
+  uint32_t image_index = -1;
 
-  for (auto g : render_graph) {
-    uint32_t image_index = -1;
+  {
+    ZoneScopedN("device.acquireNextImageKHR()");
     std::tie(res, image_index) = device.acquireNextImageKHR(
         swapchain, UINT64_MAX, image_available);
+    if (res == vk::Result::eErrorOutOfDateKHR) {
+      recreate_swapchain();
+      return;
+    }
+  }
 
+  std::vector<vk::CommandBuffer> cmd_bufs;
+  for (auto g : render_graph) {
+    ZoneScopedN("render_pass->execute()");
     g->render_pass->execute(image_index);
+    cmd_bufs = g->render_pass->get_command_buffers();
+    // cmd_bufs.insert(cmd_bufs.end(),
+    //                 g->render_pass->get_command_buffers().begin(),
+    //                 g->render_pass->get_command_buffers().end());
+  }
 
-    vk::PipelineStageFlags waitDstStageMask =
-        vk::PipelineStageFlagBits::eTopOfPipe;
+  vk::PipelineStageFlags waitDstStageMask =
+      vk::PipelineStageFlagBits::eTopOfPipe;
 
-    auto cmd_bufs = g->render_pass->get_command_buffers();
-    vk::SubmitInfo submit_info(image_available, waitDstStageMask,
-                               cmd_bufs, render_finished);
-    res = ctx->graphics_context->Device().get_graphics_queue().submit(
-        submit_info, in_flight_fence);
+  vk::SubmitInfo submit_info(image_available, waitDstStageMask,
+                             cmd_bufs, render_finished);
+  res = ctx->graphics_context->Device().get_graphics_queue().submit(
+      submit_info, in_flight_fence);
+  if (res != vk::Result::eSuccess) {
+    spdlog::warn("{}", vk::to_string(res));
+  }
 
-    vk::PresentInfoKHR present_info{render_finished, swapchain,
-                                    image_index};
-    res = ctx->graphics_context->Device()
-              .get_present_queue()
-              .presentKHR(present_info);
+  vk::PresentInfoKHR present_info{render_finished, swapchain,
+                                  image_index};
+  res =
+      ctx->graphics_context->Device().get_present_queue().presentKHR(
+          present_info);
+  if (res == vk::Result::eErrorOutOfDateKHR ||
+      res == vk::Result::eSuboptimalKHR) {
+    recreate_swapchain();
+    return;
+  }
+
+  if (res != vk::Result::eSuccess) {
+    spdlog::warn("{}", vk::to_string(res));
   }
 }
 
 void Renderer::end_frame() {}
 
 void Renderer::on_window_resize(const std::pair<float, float> &size) {
+  ZoneScoped;  // NOLINT
+
   // TODO recreate swapchains
 
   // recreate_swapchain();
 
   // Update render passes
-  for (auto &nodes : render_graph) {
-    nodes->render_pass->on_resource_resized(size);
-  }
+  // for (auto &nodes : render_graph) {
+  //  nodes->render_pass->on_resource_resized(size);
+  //}
 }
 
 auto Renderer::Create(const std::shared_ptr<Context> &ctx)
@@ -115,11 +145,16 @@ auto Renderer::Create(const std::shared_ptr<Context> &ctx)
 
 auto Renderer::recreate_swapchain()
     -> tl::expected<void, std::error_code> {
+  ZoneScoped;  // NOLINT
   vk::Result res = vk::Result::eSuccess;
 
   const auto &device = ctx->graphics_context->Device();
 
-  res = ctx->graphics_context->Device().get().waitIdle();
+  {
+    ZoneScopedN(
+        "ctx->graphics_context->Device().get().waitIdle()");  // NOLINT
+    res = ctx->graphics_context->Device().get().waitIdle();
+  }
 
   // ============ Destroy previous resources
   for (const auto &node : render_graph) {
@@ -127,9 +162,12 @@ auto Renderer::recreate_swapchain()
     for (const auto &fb : fbs) device.get().destroyFramebuffer(fb);
   }
 
-  if (target != nullptr)
+  if (target != nullptr) {
     for (const auto &iv : target->image_views)
       device.get().destroyImageView(iv);
+    target->image_views.clear();
+    swapchain_image_views.clear();
+  }
 
   if (swapchain != nullptr)
     device.get().destroySwapchainKHR(swapchain);
@@ -218,9 +256,19 @@ auto Renderer::recreate_swapchain()
       return tl::make_unexpected(make_error_code(res));
   }
 
-  target = std::make_shared<RenderTarget>(
-      swapchain_extent, swapchain_image_format,
-      vk::SampleCountFlagBits::e1, swapchain_image_views);
+  if (target == nullptr) {
+    target = std::make_shared<RenderTarget>(
+        swapchain_extent, swapchain_image_format,
+        vk::SampleCountFlagBits::e1, swapchain_image_views);
+  } else {
+    target->size = swapchain_extent;
+    target->format = swapchain_image_format;
+    target->image_views = swapchain_image_views;
+  }
+
+  for (const auto &g : render_graph)
+    g->render_pass->recreate_framebuffers(
+        ctx->graphics_context->Device().get());
 
   return {};
 }

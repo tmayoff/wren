@@ -55,18 +55,7 @@ auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
   vk::Rect2D scissor({}, rt->size);
   vk::PipelineViewportStateCreateInfo viewport_state({}, viewport,
                                                      scissor);
-
-  for (const auto& image_view : resources.render_target->image_views) {
-    vk::Framebuffer fb;
-    std::tie(res, fb) = device.get().createFramebuffer(
-        vk::FramebufferCreateInfo{{},
-                                  pass->render_pass,
-                                  image_view,
-                                  rt->size.width,
-                                  rt->size.height,
-                                  1});
-    pass->framebuffers.push_back(fb);
-  }
+  pass->recreate_framebuffers(device.get());
 
   {
     std::vector<vk::CommandBuffer> cmds;
@@ -91,6 +80,26 @@ auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
 
 void RenderPass::on_resource_resized(
     const std::pair<float, float>& size) {}
+
+void RenderPass::recreate_framebuffers(const vk::Device& device) {
+  vk::Result res = vk::Result::eSuccess;
+
+  framebuffers.clear();
+
+  const auto& rt = resources.render_target;
+  for (const auto& image_view :
+       resources.render_target->image_views) {
+    vk::Framebuffer fb;
+    std::tie(res, fb) = device.createFramebuffer(
+        vk::FramebufferCreateInfo{{},
+                                  render_pass,
+                                  image_view,
+                                  rt->size.width,
+                                  rt->size.height,
+                                  1});
+    framebuffers.push_back(fb);
+  }
+}
 
 void RenderPass::execute(uint32_t image_index) {
   auto& cmd = command_buffers.front();

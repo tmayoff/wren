@@ -37,6 +37,8 @@ class RenderPass {
 
   [[nodiscard]] auto get_framebuffers() const { return framebuffers; }
 
+  void recreate_framebuffers(const vk::Device& device);
+
  private:
   RenderPass(std::string name, PassResources resources)
       : name(std::move(name)), resources(std::move(resources)) {}
@@ -51,7 +53,7 @@ class RenderPass {
   vk::CommandPool command_pool;
   std::vector<vk::CommandBuffer> command_buffers;
 
-  //std::shared_ptr<RenderTarget> targets;
+  // std::shared_ptr<RenderTarget> targets;
   std::vector<vk::Framebuffer> framebuffers;
 };
 
