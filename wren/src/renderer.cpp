@@ -333,7 +333,7 @@ void Renderer::build_3D_render_graph() {
 
   builder.add_pass(
       "triangle", {shader, target},
-      [](vk::CommandBuffer &cmd) { cmd.draw(3, 1, 1, 0); });
+      [](vk::CommandBuffer &cmd) { cmd.draw(3, 1, 0, 0); });
 
   render_graph = builder.compile();
 }
