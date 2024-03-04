@@ -67,7 +67,7 @@ void Renderer::begin_frame() {
   }
 
   vk::PipelineStageFlags waitDstStageMask =
-      vk::PipelineStageFlagBits::eTopOfPipe;
+      vk::PipelineStageFlagBits::eColorAttachmentOutput;
 
   vk::SubmitInfo submit_info(image_available, waitDstStageMask,
                              cmd_bufs, render_finished);

@@ -39,7 +39,13 @@ auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
   vk::SubpassDescription subpass({}, vk::PipelineBindPoint::eGraphics,
                                  {}, attachment_ref);
 
-  vk::RenderPassCreateInfo create_info({}, attachments, subpass);
+  vk::SubpassDependency dependency(
+      VK_SUBPASS_EXTERNAL, 0,
+      vk::PipelineStageFlagBits::eColorAttachmentOutput,
+      vk::PipelineStageFlagBits::eColorAttachmentOutput, {},
+      vk::AccessFlagBits::eColorAttachmentWrite);
+  vk::RenderPassCreateInfo create_info({}, attachments, subpass,
+                                       dependency);
 
   auto [res, renderpass] = device.get().createRenderPass(create_info);
   pass->render_pass = renderpass;
