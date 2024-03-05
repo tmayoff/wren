@@ -22,7 +22,7 @@ class Parser {
 
   [[nodiscard]] auto entry_points() const { return entry_points_; }
 
-    [[nodiscard]] auto op_names() const {return op_names_;}
+  [[nodiscard]] auto op_names() const { return op_names_; }
 
  private:
   void load_reflection_info();
