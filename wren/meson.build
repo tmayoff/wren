@@ -1,6 +1,16 @@
 sources = []
 
-deps = [boost, expected, spdlog, sdl, vulkan, shaderc, tracy]
+deps = [
+    boost,
+    expected,
+    spdlog,
+    sdl,
+    wrenm_dep,
+    wren_reflect_dep,
+    vulkan,
+    shaderc,
+    tracy,
+]
 
 subdir('src')
 

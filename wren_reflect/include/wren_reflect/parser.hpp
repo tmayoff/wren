@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace wren::spirv {
+namespace wren::reflect {
 
 struct EntryPoint {
   spv::ExecutionModel exeuction_model;

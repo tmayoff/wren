@@ -8,11 +8,10 @@
 #include <system_error>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
+#include <wren_reflect/parser.hpp>
 
 #include "tl/expected.hpp"
 #include "vulkan/vulkan_structs.hpp"
-#include "wren/shader_reflection/parser.hpp"
-#include "wren/utils/spirv.hpp"
 #include "wren/utils/vulkan_errors.hpp"
 #include "wren/window.hpp"
 
@@ -22,14 +21,18 @@ ShaderModule::ShaderModule(spirv_t spirv,
                            const vk::ShaderModule &module)
     : spirv(std::move(spirv)),
       module(module),
-      parser(std::make_shared<spirv::Parser>(this->spirv)) {}
+      parser(std::make_shared<reflect::Parser>(this->spirv)) {}
+
+auto ShaderModule::get_vertex_input_bindings() const
+    -> std::vector<vk::VertexInputBindingDescription> {
+  return {};
+}
 
 auto ShaderModule::get_vertex_input() const
     -> vk::PipelineVertexInputStateCreateInfo {
-  // const auto resources = glsl->get_shader_resources();
-
   // TODO Vertex binding descriptors
-  std::vector<vk::VertexInputBindingDescription> binding_descriptions;
+  std::vector<vk::VertexInputBindingDescription>
+      binding_descriptions = get_vertex_input_bindings();
 
   // TODO Vertex attribute descriptors
   std::vector<vk::VertexInputAttributeDescription>

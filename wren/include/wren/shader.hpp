@@ -10,21 +10,22 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
+#include <wren_reflect/parser.hpp>
 
-#include "wren/shader_reflection/parser.hpp"
 #include "wren/utils/device.hpp"
 
 namespace wren {
 
-using spirv_t = std::vector<uint32_t>;
-
 struct ShaderModule {
-  spirv_t spirv;
+  reflect::spirv_t spirv;
   vk::ShaderModule module;
-  std::shared_ptr<spirv::Parser> parser;
+  std::shared_ptr<reflect::Parser> parser;
 
   ShaderModule() = default;
-  ShaderModule(spirv_t spirv, const vk::ShaderModule &module);
+  ShaderModule(reflect::spirv_t spirv, const vk::ShaderModule &module);
+
+  [[nodiscard]] auto get_vertex_input_bindings() const
+      -> std::vector<vk::VertexInputBindingDescription>;
 
   [[nodiscard]] auto get_vertex_input() const
       -> vk::PipelineVertexInputStateCreateInfo;

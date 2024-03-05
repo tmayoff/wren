@@ -25,6 +25,7 @@
         ];
 
         rawBuildInputs = with pkgs; [
+          catch2
           SDL2
           spdlog
           tl-expected

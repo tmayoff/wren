@@ -1,8 +1,6 @@
 sources += files(
-    'shader_reflection/parser.cpp',
     'utils/device.cpp',
     'utils/queue.cpp',
-    'utils/spirv.cpp',
     'utils/vulkan.cpp',
     'utils/vulkan_errors.cpp',
     'application.cpp',

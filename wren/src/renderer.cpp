@@ -1,5 +1,8 @@
 #include "wren/renderer.hpp"
 
+#include "wren/mesh.hpp"
+#include "wren/shaders/mesh.hpp"
+
 #if __has_include(<Tracy/tracy/Tracy.hpp>)
 #include <Tracy/tracy/Tracy.hpp>
 #else
@@ -95,19 +98,6 @@ void Renderer::begin_frame() {
 
 void Renderer::end_frame() {}
 
-void Renderer::on_window_resize(const std::pair<float, float> &size) {
-  ZoneScoped;  // NOLINT
-
-  // TODO recreate swapchains
-
-  // recreate_swapchain();
-
-  // Update render passes
-  // for (auto &nodes : render_graph) {
-  //  nodes->render_pass->on_resource_resized(size);
-  //}
-}
-
 auto Renderer::Create(const std::shared_ptr<Context> &ctx)
     -> tl::expected<std::shared_ptr<Renderer>, std::error_code> {
   ZoneScoped;
@@ -120,8 +110,9 @@ auto Renderer::Create(const std::shared_ptr<Context> &ctx)
   auto res = renderer->recreate_swapchain();
   if (!res.has_value()) return tl::make_unexpected(res.error());
 
-  auto shader = Shader::Create(device, TRIANGLE_VERT_SHADER.data(),
-                               TRIANGLE_FRAG_SHADER.data());
+  auto shader =
+      Shader::Create(device, shaders::MESH_VERT_SHADER.data(),
+                     shaders::MESH_FRAG_SHADER.data());
 
   renderer->build_3D_render_graph();
 
@@ -330,6 +321,12 @@ void Renderer::build_3D_render_graph() {
                                TRIANGLE_VERT_SHADER.data(),
                                TRIANGLE_FRAG_SHADER.data())
                     .value();
+
+  const std::vector<Vertex> vertices = {
+      {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+      {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+      {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+  };
 
   builder.add_pass(
       "triangle", {shader, target},

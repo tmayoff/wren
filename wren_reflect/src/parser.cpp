@@ -1,10 +1,9 @@
-#include "wren/shader_reflection/parser.hpp"
+#include "wren_reflect/parser.hpp"
 
-#include <spdlog/spdlog.h>
-
+#include <cstring>
 #include <spirv/1.2/spirv.hpp>
 
-namespace wren::spirv {
+namespace wren::reflect {
 
 template <typename T>
 auto to_bytes(T value) -> std::vector<uint8_t> {
@@ -65,7 +64,10 @@ auto Parser::string_literal(const std::span<uint32_t> &literal_set)
     auto chars = to_bytes(arg);
     bool done = false;
     for (const auto &c : chars) {
-      if (c == '\0') {done = true; break;}
+      if (c == '\0') {
+        done = true;
+        break;
+      }
       literal.push_back(static_cast<char>(c));
     }
 
@@ -75,4 +77,4 @@ auto Parser::string_literal(const std::span<uint32_t> &literal_set)
   return literal;
 }
 
-}  // namespace wren::spirv
+}  // namespace wren::reflect

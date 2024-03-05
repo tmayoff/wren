@@ -1,33 +1,37 @@
 #pragma once
 
-#include "wren/utils/vulkan_errors.hpp"
 #include <spirv/1.2/spirv.hpp>
 #include <system_error>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_enums.hpp>
 
-namespace wren::spirv {
+namespace wren::reflect {
 
-inline auto get_vk_shader_stage(const spv::ExecutionModel &execution_model)
+  
+
+using spirv_t = std::vector<uint32_t>;
+
+inline auto get_vk_shader_stage(
+    const spv::ExecutionModel &execution_model)
     -> tl::expected<vk::ShaderStageFlagBits, std::error_code> {
   switch (execution_model) {
-  case spv::ExecutionModelVertex:
+    case spv::ExecutionModelVertex:
       return vk::ShaderStageFlagBits::eVertex;
-  case spv::ExecutionModelTessellationControl:
+    case spv::ExecutionModelTessellationControl:
       return vk::ShaderStageFlagBits::eTessellationControl;
-  case spv::ExecutionModelTessellationEvaluation:
+    case spv::ExecutionModelTessellationEvaluation:
       return vk::ShaderStageFlagBits::eTessellationEvaluation;
-  case spv::ExecutionModelGeometry:
+    case spv::ExecutionModelGeometry:
       return vk::ShaderStageFlagBits::eGeometry;
-  case spv::ExecutionModelFragment:
+    case spv::ExecutionModelFragment:
       return vk::ShaderStageFlagBits::eFragment;
-  case spv::ExecutionModelGLCompute:
+    case spv::ExecutionModelGLCompute:
       return vk::ShaderStageFlagBits::eCompute;
-  default:
+    default:
       return tl::make_unexpected(
           std::make_error_code(std::errc::invalid_argument));
   }
 }
 
-} // namespace wren::spirv
+}  // namespace wren::reflect

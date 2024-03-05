@@ -23,8 +23,6 @@ class Renderer {
 
   auto get_swapchain_images_views() { return swapchain_image_views; }
 
-  void on_window_resize(const std::pair<float, float> &size);
-
  private:
   explicit Renderer(const std::shared_ptr<Context> &ctx) : ctx(ctx) {}
 
