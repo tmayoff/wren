@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <map>
 #include <span>
 #include <spirv/1.2/spirv.hpp>
 #include <string>
@@ -21,6 +22,8 @@ class Parser {
 
   [[nodiscard]] auto entry_points() const { return entry_points_; }
 
+    [[nodiscard]] auto op_names() const {return op_names_;}
+
  private:
   void load_reflection_info();
 
@@ -36,6 +39,8 @@ class Parser {
   uint32_t bound = 0;
 
   std::vector<EntryPoint> entry_points_;
+  std::map<uint32_t, uint32_t> inputs;
+  std::map<uint32_t, std::string> op_names_;
 };
 
 inline auto to_string(spv::ExecutionModel model) {
@@ -61,4 +66,4 @@ inline auto to_string(spv::ExecutionModel model) {
   }
 }
 
-}  // namespace wren::spirv
+}  // namespace wren::reflect

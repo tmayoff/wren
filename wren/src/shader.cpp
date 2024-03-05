@@ -17,7 +17,7 @@
 
 namespace wren {
 
-ShaderModule::ShaderModule(spirv_t spirv,
+ShaderModule::ShaderModule(reflect::spirv_t spirv,
                            const vk::ShaderModule &module)
     : spirv(std::move(spirv)),
       module(module),
@@ -25,6 +25,7 @@ ShaderModule::ShaderModule(spirv_t spirv,
 
 auto ShaderModule::get_vertex_input_bindings() const
     -> std::vector<vk::VertexInputBindingDescription> {
+  vk::VertexInputBindingDescription binding(0, 32);
   return {};
 }
 

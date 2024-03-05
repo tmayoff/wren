@@ -8,7 +8,7 @@
 #include <spirv/1.2/spirv.hpp>
 #include <wren_reflect/spirv.hpp>
 
-std::string_view triangle_vert_shader = R"(
+const std::string_view triangle_vert_shader = R"(
 #version 450
 
 layout(location = 0) out vec3 fragColor;
@@ -52,4 +52,38 @@ TEST_CASE("Entry Points") {
 
   REQUIRE(entry_point.name == "main");
   REQUIRE(entry_point.exeuction_model == spv::ExecutionModelVertex);
+}
+
+TEST_CASE("Vertex Inputs") {
+  const std::string_view vertex_inputs = R"(
+#version 450
+
+layout(location = 0) in vec2 inPosition;
+layout(location = 1) in vec3 inColor;
+
+layout(location = 0) out vec3 fragColor;
+
+void main() {
+    gl_Position = vec4(inPosition, 0.0, 1.0);
+    fragColor = inColor;
+}  
+)";
+
+  shaderc::Compiler compiler;
+  shaderc::CompileOptions options;
+
+  const auto compile_result = compiler.CompileGlslToSpv(
+      vertex_inputs.data(),
+      shaderc_shader_kind::shaderc_glsl_vertex_shader, "tests.glsl");
+  REQUIRE(compile_result.GetCompilationStatus() ==
+          shaderc_compilation_status_success);
+
+  auto parser =
+      std::make_shared<wren::reflect::Parser>(wren::reflect::spirv_t{
+          compile_result.begin(), compile_result.end()});
+
+  REQUIRE(std::find_if(parser->op_names().begin(),
+                       parser->op_names().end(), [](const auto pair) {
+                         return pair.second == "inPosition";
+                       }) != parser->op_names().end());
 }

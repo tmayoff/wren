@@ -110,10 +110,6 @@ auto Renderer::Create(const std::shared_ptr<Context> &ctx)
   auto res = renderer->recreate_swapchain();
   if (!res.has_value()) return tl::make_unexpected(res.error());
 
-  auto shader =
-      Shader::Create(device, shaders::MESH_VERT_SHADER.data(),
-                     shaders::MESH_FRAG_SHADER.data());
-
   renderer->build_3D_render_graph();
 
   vk::Result vres = vk::Result::eSuccess;
@@ -318,8 +314,8 @@ void Renderer::build_3D_render_graph() {
   GraphBuilder builder(ctx);
 
   auto shader = Shader::Create(ctx->graphics_context->Device(),
-                               TRIANGLE_VERT_SHADER.data(),
-                               TRIANGLE_FRAG_SHADER.data())
+                               shaders::MESH_VERT_SHADER.data(),
+                               shaders::MESH_FRAG_SHADER.data())
                     .value();
 
   const std::vector<Vertex> vertices = {
@@ -328,9 +324,10 @@ void Renderer::build_3D_render_graph() {
       {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
   };
 
-  builder.add_pass(
-      "triangle", {shader, target},
-      [](vk::CommandBuffer &cmd) { cmd.draw(3, 1, 0, 0); });
+  builder.add_pass("triangle", {shader, target},
+                   [](vk::CommandBuffer &cmd) {
+                     // cmd.draw(3, 1, 0, 0);
+                   });
 
   render_graph = builder.compile();
 }

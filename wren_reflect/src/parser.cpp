@@ -46,6 +46,13 @@ void Parser::load_reflection_info() {
         break;
       }
 
+      case spv::Op::OpName: {
+        const auto target_id = *(arg_it++);
+        const auto op_name =
+            string_literal({arg_it, arguments.end()});
+        op_names_.insert({target_id, op_name});
+      }
+
       default:
         break;
     }
