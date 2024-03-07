@@ -2,12 +2,21 @@
 
 #include <cstdint>
 #include <map>
+#include <optional>
 #include <span>
 #include <spirv/1.2/spirv.hpp>
 #include <string>
 #include <vector>
 
 namespace wren::reflect {
+
+struct SpvType {
+  uint32_t id;
+  spv::Op type;
+  uint32_t parent_type;
+
+  std::optional<spv::StorageClass> storage_class;
+};
 
 struct EntryPoint {
   spv::ExecutionModel exeuction_model;
@@ -21,8 +30,8 @@ class Parser {
   Parser(spirv_t spirv);
 
   [[nodiscard]] auto entry_points() const { return entry_points_; }
-
   [[nodiscard]] auto op_names() const { return op_names_; }
+  [[nodiscard]] auto types() const { return types_; }
 
  private:
   void load_reflection_info();
@@ -41,6 +50,7 @@ class Parser {
   std::vector<EntryPoint> entry_points_;
   std::map<uint32_t, uint32_t> inputs;
   std::map<uint32_t, std::string> op_names_;
+  std::vector<SpvType> types_;
 };
 
 inline auto to_string(spv::ExecutionModel model) {

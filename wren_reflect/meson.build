@@ -1,7 +1,6 @@
 wren_reflect = static_library(
     'wren_reflect',
-    'src/spirv.cpp',
-    'src/parser.cpp',
+    'src/spirv_reflect.cpp',
     include_directories: 'include',
 )
 wren_reflect_dep = declare_dependency(

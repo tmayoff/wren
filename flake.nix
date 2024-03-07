@@ -36,11 +36,30 @@
           vulkan-loader
           vulkan-tools
           shaderc
-          spirv-headers  
+          spirv-headers
         ];
       in rec {
         vulkan_layer_path = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d:${pkgs.renderdoc}/share/vulkan/implicit_layer.d";
  
+        spirv-reflect = pkgs.stdenv.mkDerivation {
+          name = "spirv-reflect";
+          src = pkgs.fetchFromGitHub {
+            owner = "KhronosGroup";
+            repo = "SPIRV-Reflect";
+            rev = "vulkan-sdk-1.3.275.0";
+            hash = "sha256-WnbNEyoutiWs+4Cu9Nv9KfNNmT4gKe/IzyiL/bLb3rg=";
+          };
+    
+          cmakeFlags = [
+            "-DSPIRV_REFLECT_STATIC_LIB=On"
+          ];
+
+          nativeBuildInputs = [
+            pkgs.cmake
+            pkgs.ninja
+          ];
+        };
+
         packages = rec {
           wren_editor = pkgs.stdenv.mkDerivation {
             name = "wren_editor";
@@ -76,6 +95,7 @@
             ] ++ rawNativeBuildInputs;
 
             buildInputs = with pkgs; [
+              spirv-reflect
             ] ++ rawBuildInputs;
           };
 

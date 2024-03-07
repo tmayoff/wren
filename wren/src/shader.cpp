@@ -3,6 +3,7 @@
 #include <shaderc/shaderc.h>
 #include <shaderc/status.h>
 #include <vulkan/vulkan_core.h>
+#include <wren_reflect/spirv_reflect.h>
 
 #include <shaderc/shaderc.hpp>
 #include <system_error>
@@ -21,23 +22,53 @@ ShaderModule::ShaderModule(reflect::spirv_t spirv,
                            const vk::ShaderModule &module)
     : spirv(std::move(spirv)),
       module(module),
-      parser(std::make_shared<reflect::Parser>(this->spirv)) {}
+      reflection(
+          std::make_shared<spv_reflect::ShaderModule>(this->spirv)) {}
 
 auto ShaderModule::get_vertex_input_bindings() const
     -> std::vector<vk::VertexInputBindingDescription> {
-  vk::VertexInputBindingDescription binding(0, 32);
-  return {};
+  // TODO Fix this
+
+  uint32_t count = 0;
+  reflection->EnumerateInputVariables(&count, nullptr);
+  std::vector<SpvReflectInterfaceVariable *> input_variables(count);
+  reflection->EnumerateInputVariables(&count, input_variables.data());
+
+  uint32_t offset = 0;
+  for (const auto &input : input_variables) {
+    const auto width = input->numeric.scalar.width;
+    const auto count = input->numeric.vector.component_count;
+    offset += width * count;
+  }
+
+  return {{0, offset}};
+}
+
+auto ShaderModule::get_vertex_input_attributes() const
+    -> std::vector<vk::VertexInputAttributeDescription> {
+  // TODO Fix this
+  uint32_t count = 0;
+  reflection->EnumerateInputVariables(&count, nullptr);
+  std::vector<SpvReflectInterfaceVariable *> input_variables(count);
+  reflection->EnumerateInputVariables(&count, input_variables.data());
+
+  std::vector<vk::VertexInputAttributeDescription> attrs;
+  for (const auto &input : input_variables) {
+    attrs.emplace_back(input->location, 0,
+                       static_cast<vk::Format>(input->format),
+                       input->word_offset.location);
+  }
+
+  return attrs;
 }
 
 auto ShaderModule::get_vertex_input() const
     -> vk::PipelineVertexInputStateCreateInfo {
-  // TODO Vertex binding descriptors
   std::vector<vk::VertexInputBindingDescription>
       binding_descriptions = get_vertex_input_bindings();
 
-  // TODO Vertex attribute descriptors
   std::vector<vk::VertexInputAttributeDescription>
-      attribute_descriptions;
+      attribute_descriptions = get_vertex_input_attributes();
 
   return {{}, binding_descriptions, attribute_descriptions};
 }

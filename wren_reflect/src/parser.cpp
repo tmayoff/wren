@@ -33,7 +33,7 @@ void Parser::load_reflection_info() {
     const std::span<uint32_t> arguments(it + 1, it + length);
     auto arg_it = arguments.begin();
 
-    switch (op) {
+    switch (static_cast<spv::Op>(op)) {
       case spv::Op::OpEntryPoint: {
         const auto execution_model =
             static_cast<spv::ExecutionModel>(*(arg_it++));
@@ -51,9 +51,27 @@ void Parser::load_reflection_info() {
         const auto op_name =
             string_literal({arg_it, arguments.end()});
         op_names_.insert({target_id, op_name});
+        break;
       }
 
       default:
+        const auto id = *arg_it;
+        arg_it++;
+        const auto type = static_cast<spv::Op>(*(arg_it));
+        SpvType t{id, type};
+
+        if (arg_it != arguments.end()) {
+          t.parent_type = *arg_it;
+          arg_it++;
+        }
+
+        if (arg_it != arguments.end()) {
+          if (type == spv::Op::OpVariable) {
+            t.storage_class = static_cast<spv::StorageClass>(*arg_it);
+          }
+        }
+
+        types_.push_back(t);
         break;
     }
 

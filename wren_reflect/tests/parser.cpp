@@ -2,6 +2,7 @@
 
 #include <shaderc/shaderc.h>
 #include <shaderc/status.h>
+#include <spdlog/spdlog.h>
 
 #include <catch2/catch_test_macros.hpp>
 #include <shaderc/shaderc.hpp>
@@ -86,4 +87,21 @@ void main() {
                        parser->op_names().end(), [](const auto pair) {
                          return pair.second == "inPosition";
                        }) != parser->op_names().end());
+
+  for (const auto& n : parser->op_names()) {
+    spdlog::info("Named types: {} {}", n.first, n.second);
+  }
+
+  REQUIRE(!parser->types().empty());
+
+  for (const auto& type : parser->types()) {
+    spdlog::info("ID: {} type: {} parent: {}", type.id,
+                 spv::to_string(type.type), type.parent_type);
+    if (type.storage_class.has_value()) {
+      spdlog::info("\tstorage class: {}",
+                   spv::to_string(type.storage_class.value()));
+    }
+  }
+
+  REQUIRE(false);
 }

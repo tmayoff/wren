@@ -1,6 +1,7 @@
 #pragma once
 
 #include <shaderc/shaderc.h>
+#include <wren_reflect/spirv_reflect.h>
 
 #include <memory>
 #include <string>
@@ -19,13 +20,17 @@ namespace wren {
 struct ShaderModule {
   reflect::spirv_t spirv;
   vk::ShaderModule module;
-  std::shared_ptr<reflect::Parser> parser;
+  std::shared_ptr<spv_reflect::ShaderModule> reflection;
 
   ShaderModule() = default;
-  ShaderModule(reflect::spirv_t spirv, const vk::ShaderModule &module);
+  ShaderModule(reflect::spirv_t spirv,
+               const vk::ShaderModule &module);
 
   [[nodiscard]] auto get_vertex_input_bindings() const
       -> std::vector<vk::VertexInputBindingDescription>;
+
+  [[nodiscard]] auto get_vertex_input_attributes() const
+      -> std::vector<vk::VertexInputAttributeDescription>;
 
   [[nodiscard]] auto get_vertex_input() const
       -> vk::PipelineVertexInputStateCreateInfo;
