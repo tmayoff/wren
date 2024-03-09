@@ -22,7 +22,6 @@ sdl = dependency('SDL2')
 expected = dependency('tl-expected', modules: ['tl::expected'])
 vulkan = dependency('vulkan')
 shaderc = dependency('shaderc')
-spirv_reflect = cpp.find_library('spirv-reflect-static')
 
 tracy = cpp.find_library('tracy', required: false)
 if not tracy.found()

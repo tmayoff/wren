@@ -31,9 +31,6 @@ struct ShaderModule {
 
   [[nodiscard]] auto get_vertex_input_attributes() const
       -> std::vector<vk::VertexInputAttributeDescription>;
-
-  [[nodiscard]] auto get_vertex_input() const
-      -> vk::PipelineVertexInputStateCreateInfo;
 };
 
 class Shader {

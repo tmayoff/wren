@@ -5,8 +5,8 @@
 namespace wren {
 
 struct Vertex {
-  wrenm::Vector2d pos;
-  wrenm::Vector3d colour;
+  wrenm::vec2 pos;
+  wrenm::vec3 colour;
 };
 
 }  // namespace wren

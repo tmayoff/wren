@@ -2,12 +2,12 @@
 
 namespace wrenm {
 
-struct Vector2d {
+struct vec2 {
   float x;
   float y;
 };
 
-struct Vector3d {
+struct vec3 {
   float x;
   float y;
   float z;

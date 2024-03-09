@@ -10,6 +10,7 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <wren_reflect/parser.hpp>
+#include <wrenm/vector.hpp>
 
 #include "tl/expected.hpp"
 #include "vulkan/vulkan_structs.hpp"
@@ -27,8 +28,6 @@ ShaderModule::ShaderModule(reflect::spirv_t spirv,
 
 auto ShaderModule::get_vertex_input_bindings() const
     -> std::vector<vk::VertexInputBindingDescription> {
-  // TODO Fix this
-
   uint32_t count = 0;
   reflection->EnumerateInputVariables(&count, nullptr);
   std::vector<SpvReflectInterfaceVariable *> input_variables(count);
@@ -36,7 +35,7 @@ auto ShaderModule::get_vertex_input_bindings() const
 
   uint32_t offset = 0;
   for (const auto &input : input_variables) {
-    const auto width = input->numeric.scalar.width;
+    const auto width = input->numeric.scalar.width / 8;
     const auto count = input->numeric.vector.component_count;
     offset += width * count;
   }
@@ -46,31 +45,22 @@ auto ShaderModule::get_vertex_input_bindings() const
 
 auto ShaderModule::get_vertex_input_attributes() const
     -> std::vector<vk::VertexInputAttributeDescription> {
-  // TODO Fix this
   uint32_t count = 0;
   reflection->EnumerateInputVariables(&count, nullptr);
   std::vector<SpvReflectInterfaceVariable *> input_variables(count);
   reflection->EnumerateInputVariables(&count, input_variables.data());
 
+  uint32_t offset = 0;
   std::vector<vk::VertexInputAttributeDescription> attrs;
   for (const auto &input : input_variables) {
     attrs.emplace_back(input->location, 0,
                        static_cast<vk::Format>(input->format),
-                       input->word_offset.location);
+                       offset);
+    offset += (input->numeric.scalar.width / 8) *
+              input->numeric.vector.component_count;
   }
 
   return attrs;
-}
-
-auto ShaderModule::get_vertex_input() const
-    -> vk::PipelineVertexInputStateCreateInfo {
-  std::vector<vk::VertexInputBindingDescription>
-      binding_descriptions = get_vertex_input_bindings();
-
-  std::vector<vk::VertexInputAttributeDescription>
-      attribute_descriptions = get_vertex_input_attributes();
-
-  return {{}, binding_descriptions, attribute_descriptions};
 }
 
 auto Shader::Create(const vulkan::Device &device,
@@ -144,8 +134,13 @@ auto Shader::create_graphics_pipeline(
   vk::PipelineDynamicStateCreateInfo dynamic_state({},
                                                    dynamic_states);
 
-  vk::PipelineVertexInputStateCreateInfo vertex_input_info =
-      vertex_shader_module.get_vertex_input();
+  const auto input_bindings =
+      vertex_shader_module.get_vertex_input_bindings();
+  const auto input_attributes =
+      vertex_shader_module.get_vertex_input_attributes();
+
+  vk::PipelineVertexInputStateCreateInfo vertex_input_info{
+      {}, input_bindings, input_attributes};
 
   vk::PipelineInputAssemblyStateCreateInfo input_assembly(
       {}, vk::PrimitiveTopology::eTriangleList, false);

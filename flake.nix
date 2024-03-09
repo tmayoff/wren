@@ -37,6 +37,7 @@
           vulkan-tools
           shaderc
           spirv-headers
+          glm
         ];
       in rec {
         vulkan_layer_path = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d:${pkgs.renderdoc}/share/vulkan/implicit_layer.d";
@@ -94,8 +95,7 @@
               python311Packages.mkdocs-mermaid2-plugin
             ] ++ rawNativeBuildInputs;
 
-            buildInputs = with pkgs; [
-              spirv-reflect
+            buildInputs = [
             ] ++ rawBuildInputs;
           };
 
