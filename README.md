@@ -1,4 +1,9 @@
-# My experimental vulkan-based game engine, as much as possible written myself
+# wren
 
-- [ ] Custom math library
-- [ ] Render graph based vulkan library
+Custom vulkan renderer, with eventually no major dependencies
+
+[![builds.sr.ht status](https://builds.sr.ht/~tmayoff/wren.svg)](https://builds.sr.ht/~tmayoff/wren?)
+
+**Dependencies to remove**
+- SPIRV-Reflect
+- Boost.Describe
