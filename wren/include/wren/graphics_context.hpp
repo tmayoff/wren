@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vk_mem_alloc.h>
+
 #include <system_error>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
@@ -66,6 +68,8 @@ class GraphicsContext {
       const std::vector<std::string_view> &requested_layers = {})
       -> tl::expected<void, std::error_code>;
 
+  auto CreateAllocator() -> tl::expected<void, std::error_code>;
+
   auto CreateDevice() -> tl::expected<void, std::error_code>;
   auto PickPhysicalDevice() -> tl::expected<void, std::error_code>;
   auto IsDeviceSuitable(const vk::PhysicalDevice &device) -> bool;
@@ -76,6 +80,8 @@ class GraphicsContext {
   vulkan::Device device;
 
   vk::SurfaceKHR surface;
+
+  VmaAllocator allocator{};
 
 #ifdef WREN_DEBUG
   auto CreateDebugMessenger() -> tl::expected<void, std::error_code>;

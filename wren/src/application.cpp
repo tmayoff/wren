@@ -3,10 +3,12 @@
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan_core.h>
 
+#include "wren/utils/errors.hpp"
+
 #if __has_include(<Tracy/tracy/Tracy.hpp>)
-  #include <Tracy/tracy/Tracy.hpp>
+#include <Tracy/tracy/Tracy.hpp>
 #else
-  #include <tracy/Tracy.hpp>
+#include <tracy/Tracy.hpp>
 #endif
 #include <memory>
 #include <tl/expected.hpp>
@@ -30,38 +32,24 @@ auto Application::Create(const std::string &application_name)
     return tl::make_unexpected(window.error());
   }
 
-  auto extensions = window->GetRequiredVulkanExtension();
-  if (!extensions.has_value())
-    return tl::make_unexpected(extensions.error());
+  ERR_PROP(auto extensions, window->GetRequiredVulkanExtension());
 
-  auto graphics_context_res =
-      GraphicsContext::Create(application_name, *extensions);
-  if (!graphics_context_res.has_value())
-    return tl::make_unexpected(graphics_context_res.error());
-  auto graphics_context = graphics_context_res.value();
-
+  ERR_PROP(auto graphics_context,
+           GraphicsContext::Create(application_name, extensions));
   spdlog::trace("Created graphics context");
 
-  {
-    auto res = window->CreateSurface(graphics_context->Instance());
-    if (!res.has_value()) return tl::make_unexpected(res.error());
-    graphics_context->Surface(res.value());
-  }
+  ERR_PROP(auto surface,
+           window->CreateSurface(graphics_context->Instance()));
+  graphics_context->Surface(surface);
 
-  {
-    auto res = graphics_context->SetupDevice();
-    if (!res.has_value()) return tl::make_unexpected(res.error());
-  }
+  ERR_PROP_VOID(graphics_context->SetupDevice());
 
   auto ctx = std::make_shared<Context>(*window, Event::Dispatcher(),
                                        graphics_context);
 
-  auto renderer = Renderer::Create(ctx);
-  if (!renderer.has_value())
-    return tl::make_unexpected(renderer.error());
+  ERR_PROP(auto renderer, Renderer::Create(ctx));
 
-  return std::shared_ptr<Application>(
-      new Application(ctx, renderer.value()));
+  return std::shared_ptr<Application>(new Application(ctx, renderer));
 }
 
 Application::Application(const std::shared_ptr<Context> &ctx,

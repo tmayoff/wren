@@ -6,6 +6,7 @@ sources += files(
     'application.cpp',
     'graph.cpp',
     'graphics_context.cpp',
+    'memory.cpp',
     'render_pass.cpp',
     'renderer.cpp',
     'shader.cpp',

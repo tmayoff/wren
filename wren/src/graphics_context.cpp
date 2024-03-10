@@ -12,6 +12,7 @@
 #include <vulkan/vulkan_structs.hpp>
 
 #include "spdlog/spdlog.h"
+#include "wren/utils/errors.hpp"
 #include "wren/utils/queue.hpp"
 #include "wren/utils/vulkan.hpp"
 #include "wren/utils/vulkan_errors.hpp"
@@ -29,11 +30,8 @@ auto GraphicsContext::Create(
 
   {
     spdlog::debug("Creating instance...");
-    auto res = graphics_context->CreateInstance(
-        application_name, requested_extensions, requested_layers);
-    if (!res.has_value()) {
-      return tl::make_unexpected(res.error());
-    }
+    ERR_PROP_VOID(graphics_context->CreateInstance(
+        application_name, requested_extensions, requested_layers));
     spdlog::debug("Created instance.");
   }
 
@@ -122,12 +120,7 @@ auto GraphicsContext::CreateInstance(
   createInfo.setPNext(&debugMessengerCreateInfo);
 #endif
 
-  auto [res, instance] = vk::createInstance(createInfo);
-  if (res != vk::Result::eSuccess) {
-    return tl::make_unexpected(make_error_code(res));
-  }
-
-  this->instance = instance;
+  VK_TIE_ERR_PROP(this->instance, vk::createInstance(createInfo));
 
   return {};
 }
@@ -136,18 +129,13 @@ auto GraphicsContext::SetupDevice()
     -> tl::expected<void, std::error_code> {
   {
     spdlog::debug("Picking physical device...");
-    auto res = PickPhysicalDevice();
-    if (!res.has_value()) return tl::make_unexpected(res.error());
+    ERR_PROP_VOID(PickPhysicalDevice());
     spdlog::debug("Picked physical device.");
   }
 
   {
     spdlog::debug("Creating logical device...");
-    auto res = CreateDevice();
-    if (!res.has_value()) {
-      return tl::make_unexpected(res.error());
-    }
-
+    ERR_PROP_VOID(CreateDevice());
     spdlog::debug("Created logical device.");
   }
 
@@ -200,11 +188,8 @@ auto GraphicsContext::IsDeviceSuitable(
 
 auto GraphicsContext::CreateDevice()
     -> tl::expected<void, std::error_code> {
-  auto res =
-      vulkan::Device::Create(instance, physical_device, surface);
-  if (!res.has_value()) return tl::make_unexpected(res.error());
-  device = res.value();
-
+  ERR_PROP(device, vulkan::Device::Create(instance, physical_device,
+                                          surface));
   return {};
 }
 
@@ -225,13 +210,9 @@ auto GraphicsContext::CreateDebugMessenger()
   vk::DebugUtilsMessengerCreateInfoEXT createInfo(
       {}, severity_flags, message_type_flags, &vulkan::DebugCallback);
 
-  auto [res, debug_messenger] =
-      instance.createDebugUtilsMessengerEXT(createInfo, nullptr);
-  if (res != vk::Result::eSuccess) {
-    return tl::unexpected(make_error_code(res));
-  }
-
-  this->debug_messenger = debug_messenger;
+  VK_TIE_ERR_PROP(
+      this->debug_messenger,
+      instance.createDebugUtilsMessengerEXT(createInfo, nullptr));
 
   return {};
 }

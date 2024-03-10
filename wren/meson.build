@@ -7,6 +7,7 @@ deps = [
     sdl,
     wrenm_dep,
     wren_reflect_dep,
+    vma,
     vulkan,
     shaderc,
     tracy,
