@@ -15,7 +15,6 @@ find_package(SDL2 REQUIRED)
 find_package(Vulkan REQUIRED)
 find_package(tl-expected REQUIRED)
 pkg_check_modules(shaderc REQUIRED shaderc)
-#find_package(shaderc_combined REQUIRED)
 
 include_directories(${SDL2_INCLUDE_DIRS} ${SPDLOG_INCLUDE_DIRS})
 
