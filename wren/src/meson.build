@@ -4,6 +4,7 @@ sources += files(
     'utils/vulkan.cpp',
     'utils/vulkan_errors.cpp',
     'application.cpp',
+    'buffer.cpp',
     'graph.cpp',
     'graphics_context.cpp',
     'memory.cpp',

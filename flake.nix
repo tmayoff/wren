@@ -33,13 +33,13 @@
 
         rawNativeBuildInputs = with pkgs; [
           pkg-config
-          meson
-          muon
           cmake
+          cmake-language-server
           ninja
           vscode-extensions.llvm-org.lldb-vscode
           tracy
           renderdoc
+          doxygen
         ];
 
         rawBuildInputs = with pkgs; [
@@ -107,7 +107,6 @@
             [
               clang-tools
               gdb
-              muon
               just
 
               mkdocs

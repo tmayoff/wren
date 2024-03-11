@@ -47,6 +47,8 @@ class GraphicsContext {
     return device;
   }
 
+  [[nodiscard]] auto allocator() const { return allocator_; }
+
   auto SetupDevice() -> tl::expected<void, std::error_code>;
 
   auto GetSwapchainSupport() {
@@ -81,7 +83,7 @@ class GraphicsContext {
 
   vk::SurfaceKHR surface;
 
-  VmaAllocator allocator{};
+  VmaAllocator allocator_{};
 
 #ifdef WREN_DEBUG
   auto CreateDebugMessenger() -> tl::expected<void, std::error_code>;
