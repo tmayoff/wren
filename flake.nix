@@ -34,11 +34,8 @@
         rawNativeBuildInputs = with pkgs; [
           pkg-config
           cmake
-          cmake-language-server
           ninja
-          vscode-extensions.llvm-org.lldb-vscode
           tracy
-          renderdoc
           doxygen
         ];
 
@@ -112,6 +109,10 @@
               mkdocs
               python311Packages.mkdocs-material
               python311Packages.mkdocs-mermaid2-plugin
+
+              vscode-extensions.llvm-org.lldb-vscode
+              cmake-language-server
+              renderdoc
             ]
             ++ rawNativeBuildInputs;
 

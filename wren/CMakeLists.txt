@@ -1,6 +1,7 @@
 add_library(
   wren
   src/application.cpp
+  src/buffer.cpp
   src/event.cpp
   src/graph.cpp
   src/graphics_context.cpp
