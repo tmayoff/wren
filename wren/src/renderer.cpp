@@ -313,6 +313,8 @@ auto Renderer::choose_swapchain_extent(
 void Renderer::build_3D_render_graph() {
   GraphBuilder builder(ctx);
 
+  Mesh m(this->ctx->graphics_context->allocator());
+
   auto shader = Shader::Create(ctx->graphics_context->Device(),
                                shaders::MESH_VERT_SHADER.data(),
                                shaders::MESH_FRAG_SHADER.data())

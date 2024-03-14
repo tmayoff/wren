@@ -1,7 +1,6 @@
 add_library(
   wren
   src/application.cpp
-  src/buffer.cpp
   src/event.cpp
   src/graph.cpp
   src/graphics_context.cpp
@@ -15,6 +14,12 @@ add_library(
   src/utils/vulkan.cpp
   src/utils/vulkan_errors.cpp
   src/window.cpp)
+
+target_sources(wren
+  PUBLIC
+  FILE_SET CXX_MODULES FILES
+  src/buffer.cppm
+)
 
 target_compile_definitions(wren PUBLIC VULKAN_HPP_NO_EXCEPTIONS)
 target_include_directories(wren PUBLIC include)
