@@ -22,38 +22,27 @@ std::vector<Vertex> const TRIANGLE_VERTICES = {
     {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
     {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
 
+std::vector<Vertex> const QUAD_VERTICES = {
+    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+    {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}};
+
+std::vector<uint16_t> const QUAD_INDICES = {0, 1, 2, 2, 3, 0};
+
 class Mesh {
  public:
   Mesh() = default;
 
-  Mesh(vulkan::Device const& device, VmaAllocator allocator)
-      : vertices(TRIANGLE_VERTICES) {
-    std::span data{vertices.begin(), vertices.end()};
-
-    auto staging_buffer =
-        Buffer::Create(allocator, data.size_bytes(),
-                       VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
-                           VK_BUFFER_USAGE_TRANSFER_SRC_BIT |
-                           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                       VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT);
-
-    staging_buffer->set_data_raw<Vertex>(allocator, data);
-
-    vertex_buffer_ =
-        Buffer::Create(allocator, data.size_bytes(),
-                       VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
-                           VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-    Buffer::copy_buffer(device, device.command_pool(), staging_buffer,
-                        vertex_buffer_, data.size_bytes());
-  }
+  Mesh(vulkan::Device const& device, VmaAllocator allocator);
 
   void draw(vk::CommandBuffer const& cmd);
   void bind(vk::CommandBuffer const& cmd);
 
  private:
   std::vector<Vertex> vertices;
+  std::vector<uint16_t> indices;
+  std::shared_ptr<Buffer> index_buffer;
   std::shared_ptr<Buffer> vertex_buffer_;
 };
 
