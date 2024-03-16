@@ -17,7 +17,7 @@ struct Context;
 
 class Renderer {
  public:
-  static auto Create(const std::shared_ptr<Context> &ctx)
+  static auto Create(std::shared_ptr<Context> const &ctx)
       -> tl::expected<std::shared_ptr<Renderer>, std::error_code>;
 
   void draw();
@@ -25,7 +25,7 @@ class Renderer {
   auto get_swapchain_images_views() { return swapchain_image_views; }
 
  private:
-  explicit Renderer(const std::shared_ptr<Context> &ctx);
+  explicit Renderer(std::shared_ptr<Context> const &ctx);
 
   void begin_frame();
   void end_frame();
@@ -33,13 +33,13 @@ class Renderer {
   auto recreate_swapchain() -> tl::expected<void, std::error_code>;
 
   auto choose_swapchain_format(
-      const std::vector<vk::SurfaceFormatKHR> &formats)
+      std::vector<vk::SurfaceFormatKHR> const &formats)
       -> vk::SurfaceFormatKHR;
   auto choose_swapchain_presentation_mode(
-      const std::vector<vk::PresentModeKHR> &formats)
+      std::vector<vk::PresentModeKHR> const &formats)
       -> vk::PresentModeKHR;
   auto choose_swapchain_extent(
-      const vk::SurfaceCapabilitiesKHR &surface_capabilities)
+      vk::SurfaceCapabilitiesKHR const &surface_capabilities)
       -> vk::Extent2D;
 
   void build_3D_render_graph();
@@ -57,6 +57,8 @@ class Renderer {
   vk::Semaphore image_available;
   vk::Semaphore render_finished;
   vk::Fence in_flight_fence;
+
+  vk::CommandPool command_pool;
 
   Graph render_graph;
 

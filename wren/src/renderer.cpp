@@ -1,5 +1,7 @@
 #include "wren/renderer.hpp"
 
+#include <vulkan/vulkan_handles.hpp>
+
 #include "wren/mesh.hpp"
 #include "wren/shaders/mesh.hpp"
 
@@ -37,7 +39,7 @@ void Renderer::begin_frame() {
 
   vk::Result res = vk::Result::eSuccess;
 
-  const auto &device = ctx->graphics_context->Device().get();
+  auto const &device = ctx->graphics_context->Device().get();
   {
     ZoneScopedN("device.waitForFences()");  // NOLINT
     res = device.waitForFences(in_flight_fence, VK_TRUE, UINT64_MAX);
@@ -93,10 +95,12 @@ void Renderer::begin_frame() {
 
 void Renderer::end_frame() {}
 
-Renderer::Renderer(const std::shared_ptr<Context> &ctx)
-    : ctx(ctx), m(ctx->graphics_context->allocator()) {}
+Renderer::Renderer(std::shared_ptr<Context> const &ctx)
+    : ctx(ctx),
+      m(ctx->graphics_context->Device(),
+        ctx->graphics_context->allocator()) {}
 
-auto Renderer::Create(const std::shared_ptr<Context> &ctx)
+auto Renderer::Create(std::shared_ptr<Context> const &ctx)
     -> tl::expected<std::shared_ptr<Renderer>, std::error_code> {
   ZoneScoped;
 
@@ -135,7 +139,7 @@ auto Renderer::recreate_swapchain()
   ZoneScoped;  // NOLINT
   vk::Result res = vk::Result::eSuccess;
 
-  const auto &device = ctx->graphics_context->Device();
+  auto const &device = ctx->graphics_context->Device();
 
   {
     ZoneScopedN(
@@ -144,13 +148,13 @@ auto Renderer::recreate_swapchain()
   }
 
   // ============ Destroy previous resources
-  for (const auto &node : render_graph) {
-    const auto &fbs = node->render_pass->get_framebuffers();
-    for (const auto &fb : fbs) device.get().destroyFramebuffer(fb);
+  for (auto const &node : render_graph) {
+    auto const &fbs = node->render_pass->get_framebuffers();
+    for (auto const &fb : fbs) device.get().destroyFramebuffer(fb);
   }
 
   if (target != nullptr) {
-    for (const auto &iv : target->image_views)
+    for (auto const &iv : target->image_views)
       device.get().destroyImageView(iv);
     target->image_views.clear();
     swapchain_image_views.clear();
@@ -223,7 +227,7 @@ auto Renderer::recreate_swapchain()
   swapchain_image_format = format.format;
 
   swapchain_image_views.reserve(swapchain_images.size());
-  for (const auto &swapchain_image : swapchain_images) {
+  for (auto const &swapchain_image : swapchain_images) {
     vk::ImageViewCreateInfo create_info(
         {}, swapchain_image, vk::ImageViewType::e2D,
         swapchain_image_format, {},
@@ -251,7 +255,7 @@ auto Renderer::recreate_swapchain()
     target->image_views = swapchain_image_views;
   }
 
-  for (const auto &g : render_graph)
+  for (auto const &g : render_graph)
     g->render_pass->recreate_framebuffers(
         ctx->graphics_context->Device().get());
 
@@ -259,12 +263,12 @@ auto Renderer::recreate_swapchain()
 }
 
 auto Renderer::choose_swapchain_format(
-    const std::vector<vk::SurfaceFormatKHR> &formats)
+    std::vector<vk::SurfaceFormatKHR> const &formats)
     -> vk::SurfaceFormatKHR {
-  const auto PREFERED_FORMAT = vk::Format::eB8G8R8Srgb;
-  const auto PREFERED_COLOR_SPACE = vk::ColorSpaceKHR::eSrgbNonlinear;
+  auto const PREFERED_FORMAT = vk::Format::eB8G8R8Srgb;
+  auto const PREFERED_COLOR_SPACE = vk::ColorSpaceKHR::eSrgbNonlinear;
 
-  for (const auto &format : formats) {
+  for (auto const &format : formats) {
     if (format.format == PREFERED_FORMAT &&
         format.colorSpace == PREFERED_COLOR_SPACE)
       return format;
@@ -274,11 +278,11 @@ auto Renderer::choose_swapchain_format(
 }
 
 auto Renderer::choose_swapchain_presentation_mode(
-    const std::vector<vk::PresentModeKHR> &modes)
+    std::vector<vk::PresentModeKHR> const &modes)
     -> vk::PresentModeKHR {
-  const auto PREFERED_PRESENT_MDOE = vk::PresentModeKHR::eMailbox;
+  auto const PREFERED_PRESENT_MDOE = vk::PresentModeKHR::eMailbox;
 
-  for (const auto &mode : modes) {
+  for (auto const &mode : modes) {
     if (mode == PREFERED_PRESENT_MDOE) return mode;
   }
 
@@ -286,7 +290,7 @@ auto Renderer::choose_swapchain_presentation_mode(
 }
 
 auto Renderer::choose_swapchain_extent(
-    const vk::SurfaceCapabilitiesKHR &surface_capabilities)
+    vk::SurfaceCapabilitiesKHR const &surface_capabilities)
     -> vk::Extent2D {
   if (surface_capabilities.currentExtent.width !=
       std::numeric_limits<uint32_t>::max()) {
@@ -316,7 +320,7 @@ void Renderer::build_3D_render_graph() {
                                shaders::MESH_FRAG_SHADER.data())
                     .value();
 
-  const std::vector<Vertex> vertices = {
+  std::vector<Vertex> const vertices = {
       {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
       {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
       {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},

@@ -12,9 +12,9 @@
 
 namespace wren::vulkan {
 
-auto Device::Create(const vk::Instance &instance,
-                    const vk::PhysicalDevice &physical_device,
-                    const vk::SurfaceKHR &surface)
+auto Device::Create(vk::Instance const &instance,
+                    vk::PhysicalDevice const &physical_device,
+                    vk::SurfaceKHR const &surface)
     -> tl::expected<Device, std::error_code> {
   Device device;
 
@@ -24,11 +24,11 @@ auto Device::Create(const vk::Instance &instance,
   return device;
 }
 
-auto Device::CreateDevice(const vk::Instance &instance,
-                          const vk::PhysicalDevice &physical_device,
-                          const vk::SurfaceKHR &surface)
+auto Device::CreateDevice(vk::Instance const &instance,
+                          vk::PhysicalDevice const &physical_device,
+                          vk::SurfaceKHR const &surface)
     -> tl::expected<void, std::error_code> {
-  const auto indices =
+  auto const indices =
       Queue::FindQueueFamilyIndices(physical_device, surface);
 
   float queue_prio = 0.0f;
@@ -47,6 +47,13 @@ auto Device::CreateDevice(const vk::Instance &instance,
 
   graphics_queue = device.getQueue(indices->graphics_index, 0);
   present_queue = device.getQueue(indices->present_index, 0);
+
+  {
+    vk::CommandPoolCreateInfo const create_info(
+        {}, indices->graphics_index);
+    VK_TIE_ERR_PROP(command_pool_,
+                    device.createCommandPool(create_info));
+  }
 
   return {};
 }

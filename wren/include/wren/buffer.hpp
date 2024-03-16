@@ -8,6 +8,7 @@
 #include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
 
+#include "utils/device.hpp"
 #include "utils/vulkan_errors.hpp"
 
 namespace wren {
@@ -16,9 +17,26 @@ class GraphicsContext;
 
 class Buffer {
  public:
-  static auto Create(VmaAllocator const& allocator, size_t size,
-                     VkBufferUsageFlags usage)
+  static auto Create(
+      VmaAllocator const& allocator, size_t size,
+      VkBufferUsageFlags usage,
+      std::optional<VmaAllocationCreateFlags> const& flags = {})
       -> std::shared_ptr<Buffer>;
+
+  static auto copy_buffer(vulkan::Device const& device,
+                          vk::CommandPool const& command_pool,
+                          std::shared_ptr<Buffer> const& src,
+                          std::shared_ptr<Buffer> const& dst,
+                          size_t size)
+      -> tl::expected<void, std::error_code>;
+
+  Buffer(VmaAllocator const& allocator) : allocator(allocator) {}
+  ~Buffer();
+
+  Buffer(Buffer const&) = delete;
+  Buffer(Buffer&&) = delete;
+  auto operator=(Buffer const&) = delete;
+  auto operator=(Buffer&&) = delete;
 
   template <typename T>
   auto set_data_raw(VmaAllocator allocator, std::span<T const> data)
@@ -28,6 +46,7 @@ class Buffer {
 
  private:
   vk::Buffer buffer{};
+  VmaAllocator allocator;
   VmaAllocation allocation{};
 };
 
@@ -35,17 +54,8 @@ template <typename T>
 auto Buffer::set_data_raw(VmaAllocator allocator,
                           std::span<T const> data)
     -> tl::expected<void, std::error_code> {
-  void* mapped = nullptr;
-
-  vmaInvalidateAllocation(allocator, allocation, 0,
-                          data.size_bytes());
-
-  VK_ERR_PROP_VOID(static_cast<vk::Result>(
-      vmaMapMemory(allocator, allocation, &mapped)));
-  std::memcpy(mapped, data.data(), data.size_bytes());
-  vmaUnmapMemory(allocator, allocation);
-
-  vmaFlushAllocation(allocator, allocation, 0, data.size_bytes());
+  VK_ERR_PROP_VOID(static_cast<vk::Result>(vmaCopyMemoryToAllocation(
+      allocator, data.data(), allocation, {0}, {data.size_bytes()})));
   return {};
 }
 
