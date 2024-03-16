@@ -7,6 +7,7 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
+#include "mesh.hpp"
 #include "wren/graph.hpp"
 #include "wren/render_target.hpp"
 
@@ -24,7 +25,7 @@ class Renderer {
   auto get_swapchain_images_views() { return swapchain_image_views; }
 
  private:
-  explicit Renderer(const std::shared_ptr<Context> &ctx) : ctx(ctx) {}
+  explicit Renderer(const std::shared_ptr<Context> &ctx);
 
   void begin_frame();
   void end_frame();
@@ -58,6 +59,8 @@ class Renderer {
   vk::Fence in_flight_fence;
 
   Graph render_graph;
+
+  Mesh m;
 };
 
 }  // namespace wren

@@ -98,7 +98,6 @@
         devShell = pkgs.mkShell.override {stdenv = pkgs.clangStdenv;} {
           NIX_CFLAGS_COMPILE = "-U_FORTIFY_SOURCE";
           VK_LAYER_PATH = vulkan_layer_path;
-          #ENABLE_VULKAN_RENDERDOC_CAPTURE=1;
 
           nativeBuildInputs = with pkgs;
             [

@@ -5,7 +5,7 @@
 #include <vulkan/vulkan.hpp>
 #include <wrenm/vector.hpp>
 
-import Buffer;
+#include "buffer.hpp"
 
 namespace wren {
 
@@ -16,6 +16,8 @@ struct Vertex {
 
 class Mesh {
  public:
+  Mesh() = default;
+
   Mesh(VmaAllocator allocator) {
     const std::vector<Vertex> vertices = {
         {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
@@ -23,7 +25,7 @@ class Mesh {
         {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
 
     const size_t size = sizeof(Vertex) * vertices.size();
-    void* buf = nullptr;
+    void* buf = std::malloc(size);
     std::memcpy(buf, vertices.data(), size);
 
     vertex_buffer_ = Buffer::Create(
@@ -31,6 +33,8 @@ class Mesh {
 
     vertex_buffer_->set_data_raw(allocator, size, buf);
   }
+
+  void bind(const vk::CommandBuffer& cmd);
 
  private:
   std::vector<Vertex> vertices;

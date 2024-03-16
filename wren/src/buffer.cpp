@@ -1,4 +1,4 @@
-module;
+#include "buffer.hpp"
 
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan_core.h>
@@ -7,24 +7,7 @@ module;
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_enums.hpp>
 
-export module Buffer;
-
 namespace wren {
-
-class GraphicsContext;
-
-export class Buffer {
- public:
-  static auto Create(const VmaAllocator& allocator, size_t size,
-                     vk::BufferUsageFlags usage)
-      -> std::shared_ptr<Buffer>;
-
-  void set_data_raw(VmaAllocator allocator, size_t size, void* data);
-
- private:
-  VkBuffer buffer{};
-  VmaAllocation allocation{};
-};
 
 auto Buffer::Create(const VmaAllocator& allocator, size_t size,
                     vk::BufferUsageFlags usage)

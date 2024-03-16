@@ -1,9 +1,10 @@
 #include "wren/graphics_context.hpp"
 
 #include <spdlog/fmt/ranges.h>
+#include <spdlog/spdlog.h>
+#include <vk_mem_alloc.h>
 #include <vulkan/vulkan_core.h>
 
-#include <algorithm>
 #include <system_error>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
@@ -11,7 +12,6 @@
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
-#include "spdlog/spdlog.h"
 #include "wren/utils/errors.hpp"
 #include "wren/utils/queue.hpp"
 #include "wren/utils/vulkan.hpp"
@@ -138,6 +138,18 @@ auto GraphicsContext::SetupDevice()
     ERR_PROP_VOID(CreateDevice());
     spdlog::debug("Created logical device.");
   }
+
+  VmaVulkanFunctions vma_functions{};
+  vma_functions.vkGetInstanceProcAddr = &vkGetInstanceProcAddr;
+  vma_functions.vkGetDeviceProcAddr = &vkGetDeviceProcAddr;
+
+  VmaAllocatorCreateInfo create_info{};
+  create_info.vulkanApiVersion = VK_API_VERSION_1_2;
+  create_info.physicalDevice = physical_device;
+  create_info.device = device.get();
+  create_info.instance = instance;
+  create_info.pVulkanFunctions = &vma_functions;
+  vmaCreateAllocator(&create_info, &allocator_);
 
   return {};
 }

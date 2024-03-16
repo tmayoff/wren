@@ -20,11 +20,6 @@
 #include "wren/context.hpp"
 #include "wren/graph.hpp"
 #include "wren/render_pass.hpp"
-#include "wren/render_target.hpp"
-#include "wren/shader.hpp"
-#include "wren/shaders/triangle.hpp"
-#include "wren/utils/queue.hpp"
-#include "wren/utils/vulkan.hpp"
 
 namespace wren {
 
@@ -97,6 +92,8 @@ void Renderer::begin_frame() {
 }
 
 void Renderer::end_frame() {}
+
+Renderer::Renderer(const std::shared_ptr<Context> &ctx) : ctx(ctx) {}
 
 auto Renderer::Create(const std::shared_ptr<Context> &ctx)
     -> tl::expected<std::shared_ptr<Renderer>, std::error_code> {
@@ -312,8 +309,6 @@ auto Renderer::choose_swapchain_extent(
 
 void Renderer::build_3D_render_graph() {
   GraphBuilder builder(ctx);
-
-  Mesh m(this->ctx->graphics_context->allocator());
 
   auto shader = Shader::Create(ctx->graphics_context->Device(),
                                shaders::MESH_VERT_SHADER.data(),
