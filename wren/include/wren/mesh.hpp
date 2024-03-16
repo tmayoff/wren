@@ -1,7 +1,9 @@
 #pragma once
 
 #include <vk_mem_alloc.h>
+#include <vulkan/vulkan_core.h>
 
+#include <span>
 #include <vulkan/vulkan.hpp>
 #include <wrenm/vector.hpp>
 
@@ -19,22 +21,21 @@ class Mesh {
   Mesh() = default;
 
   Mesh(VmaAllocator allocator) {
-    const std::vector<Vertex> vertices = {
-        {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-        {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-        {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
+    vertices = {{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+                {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+                {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
 
-    const size_t size = sizeof(Vertex) * vertices.size();
-    void* buf = std::malloc(size);
-    std::memcpy(buf, vertices.data(), size);
+    std::span data{vertices.begin(), vertices.end()};
 
-    vertex_buffer_ = Buffer::Create(
-        allocator, size, vk::BufferUsageFlagBits::eVertexBuffer);
+    vertex_buffer_ =
+        Buffer::Create(allocator, data.size_bytes(),
+                       VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
-    vertex_buffer_->set_data_raw(allocator, size, buf);
+    vertex_buffer_->set_data_raw<Vertex>(allocator, data);
   }
 
-  void bind(const vk::CommandBuffer& cmd);
+  void draw(vk::CommandBuffer const& cmd);
+  void bind(vk::CommandBuffer const& cmd);
 
  private:
   std::vector<Vertex> vertices;

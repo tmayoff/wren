@@ -5,7 +5,6 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_to_string.hpp>
 
-#include "enums.hpp"
 #include "errors.hpp"
 
 template <>
@@ -18,6 +17,13 @@ ERROR_ENUM(wren, VulkanErrors, NoDevicesFound,
 // NOLINTNEXTLINE
 #define VK_ERR_PROP(out, err)                         \
   auto [LINEIZE(res, __LINE__), out] = err;           \
+  if (LINEIZE(res, __LINE__) != vk::Result::eSuccess) \
+    return tl::make_unexpected(                       \
+        make_error_code(LINEIZE(res, __LINE__)));
+
+// NOLINTNEXTLINE
+#define VK_ERR_PROP_VOID(err)                         \
+  vk::Result LINEIZE(res, __LINE__) = err;            \
   if (LINEIZE(res, __LINE__) != vk::Result::eSuccess) \
     return tl::make_unexpected(                       \
         make_error_code(LINEIZE(res, __LINE__)));

@@ -4,10 +4,12 @@
 
 namespace wren {
 
-void Mesh::bind(const vk::CommandBuffer& cmd) {
-  std::array<vk::Buffer, 1> bufs = {vertex_buffer_->get()};
-  std::array<vk::DeviceSize, 1> offsets = {0};
-  cmd.bindVertexBuffers(0, bufs, offsets);
+void Mesh::draw(vk::CommandBuffer const& cmd) {
+  cmd.draw(vertices.size(), 1, 0, 0);
+}
+
+void Mesh::bind(vk::CommandBuffer const& cmd) {
+  cmd.bindVertexBuffers(0, vertex_buffer_->get(), vk::DeviceSize{0});
 }
 
 }  // namespace wren

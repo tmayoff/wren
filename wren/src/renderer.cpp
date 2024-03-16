@@ -93,7 +93,8 @@ void Renderer::begin_frame() {
 
 void Renderer::end_frame() {}
 
-Renderer::Renderer(const std::shared_ptr<Context> &ctx) : ctx(ctx) {}
+Renderer::Renderer(const std::shared_ptr<Context> &ctx)
+    : ctx(ctx), m(ctx->graphics_context->allocator()) {}
 
 auto Renderer::Create(const std::shared_ptr<Context> &ctx)
     -> tl::expected<std::shared_ptr<Renderer>, std::error_code> {
@@ -322,8 +323,9 @@ void Renderer::build_3D_render_graph() {
   };
 
   builder.add_pass("triangle", {shader, target},
-                   [](vk::CommandBuffer &cmd) {
-                     // cmd.draw(3, 1, 0, 0);
+                   [this](vk::CommandBuffer &cmd) {
+                     m.bind(cmd);
+                     m.draw(cmd);
                    });
 
   render_graph = builder.compile();

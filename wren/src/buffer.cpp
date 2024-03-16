@@ -9,8 +9,8 @@
 
 namespace wren {
 
-auto Buffer::Create(const VmaAllocator& allocator, size_t size,
-                    vk::BufferUsageFlags usage)
+auto Buffer::Create(VmaAllocator const& allocator, size_t size,
+                    VkBufferUsageFlags usage)
     -> std::shared_ptr<Buffer> {
   auto b = std::make_shared<Buffer>();
 
@@ -21,15 +21,15 @@ auto Buffer::Create(const VmaAllocator& allocator, size_t size,
 
   VmaAllocationCreateInfo alloc_info{};
   alloc_info.usage = VMA_MEMORY_USAGE_AUTO;
+  alloc_info.flags =
+      VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 
-  vmaCreateBuffer(allocator, &create_info, &alloc_info, &b->buffer,
+  VkBuffer buf{};
+  vmaCreateBuffer(allocator, &create_info, &alloc_info, &buf,
                   &b->allocation, nullptr);
-  return b;
-}
+  b->buffer = buf;
 
-void Buffer::set_data_raw(VmaAllocator allocator, size_t size,
-                          void* data) {
-  vmaCopyAllocationToMemory(allocator, allocation, 0, data, size);
+  return b;
 }
 
 }  // namespace wren
