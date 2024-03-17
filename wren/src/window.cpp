@@ -4,24 +4,17 @@
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_vulkan.h>
 
-
-#if __has_include(<Tracy/tracy/Tracy.hpp>)
-  #include <Tracy/tracy/Tracy.hpp>
-#else
-  #include <tracy/Tracy.hpp>
-#endif
-
-#include <functional>
 #include <system_error>
 
 #include "tl/expected.hpp"
+#include "utils/tracy.hpp"  // IWYU pragma: export
 #include "vulkan/vulkan_core.h"
 #include "vulkan/vulkan_handles.hpp"
 #include "wren/event.hpp"
 
 namespace wren {
 
-auto Window::Create(const std::string &application_name)
+auto Window::Create(std::string const &application_name)
     -> tl::expected<Window, std::error_code> {
   ZoneScoped;
   spdlog::debug("Initializing window");
@@ -44,7 +37,7 @@ auto Window::Create(const std::string &application_name)
 
 void Window::Shutdown() { SDL_Quit(); }
 
-auto Window::CreateSurface(const vk::Instance &instance)
+auto Window::CreateSurface(vk::Instance const &instance)
     -> tl::expected<vk::SurfaceKHR, std::error_code> {
   VkSurfaceKHR surface{};
   SDL_Vulkan_CreateSurface(window, instance, &surface);
@@ -62,7 +55,7 @@ auto Window::GetRequiredVulkanExtension() const
         make_error_code(WindowErrors::SDL_VULKAN_EXTENSION));
   }
 
-  std::vector<const char *> extensions(count);
+  std::vector<char const *> extensions(count);
   res = SDL_Vulkan_GetInstanceExtensions(window, &count,
                                          extensions.data());
   if (!res) {
@@ -74,7 +67,7 @@ auto Window::GetRequiredVulkanExtension() const
                                        extensions.end()};
 }
 
-void Window::DispatchEvents(const Event::Dispatcher &dispatcher) {
+void Window::DispatchEvents(Event::Dispatcher const &dispatcher) {
   ZoneScoped;
   SDL_Event event;
   while (SDL_PollEvent(&event)) {

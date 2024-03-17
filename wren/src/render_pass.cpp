@@ -10,23 +10,23 @@
 
 namespace wren {
 
-auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
-                        const std::string& name,
-                        const PassResources& resources,
-                        const execute_fn_t& fn)
+auto RenderPass::Create(std::shared_ptr<Context> const& ctx,
+                        std::string const& name,
+                        PassResources const& resources,
+                        execute_fn_t const& fn)
     -> tl::expected<std::shared_ptr<RenderPass>, std::error_code> {
   auto pass = std::shared_ptr<RenderPass>(
       new RenderPass(name, resources, fn));
 
-  const auto& device = ctx->graphics_context->Device();
-  const auto& swapchain_images =
+  auto const& device = ctx->graphics_context->Device();
+  auto const& swapchain_images =
       ctx->renderer->get_swapchain_images_views();
 
-  const auto& shader = resources.shader;
+  auto const& shader = resources.shader;
 
   std::vector<vk::AttachmentDescription> attachments;
 
-  const auto& rt = resources.render_target;
+  auto const& rt = resources.render_target;
   vk::AttachmentDescription attachment(
       {}, rt->format, rt->sample_count, vk::AttachmentLoadOp::eClear,
       vk::AttachmentStoreOp::eStore, vk::AttachmentLoadOp::eDontCare,
@@ -85,15 +85,15 @@ auto RenderPass::Create(const std::shared_ptr<Context>& ctx,
 }
 
 void RenderPass::on_resource_resized(
-    const std::pair<float, float>& size) {}
+    std::pair<float, float> const& size) {}
 
-void RenderPass::recreate_framebuffers(const vk::Device& device) {
+void RenderPass::recreate_framebuffers(vk::Device const& device) {
   vk::Result res = vk::Result::eSuccess;
 
   framebuffers.clear();
 
-  const auto& rt = resources.render_target;
-  for (const auto& image_view :
+  auto const& rt = resources.render_target;
+  for (auto const& image_view :
        resources.render_target->image_views) {
     vk::Framebuffer fb;
     std::tie(res, fb) = device.createFramebuffer(

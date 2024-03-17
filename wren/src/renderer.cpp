@@ -1,27 +1,19 @@
 #include "wren/renderer.hpp"
 
-#include <vulkan/vulkan_handles.hpp>
-
-#include "wren/mesh.hpp"
-#include "wren/shaders/mesh.hpp"
-
-#if __has_include(<Tracy/tracy/Tracy.hpp>)
-#include <Tracy/tracy/Tracy.hpp>
-#else
-#include <tracy/Tracy.hpp>
-#endif
-
 #include <cstdint>
-#include <gsl/gsl-lite.hpp>
 #include <system_error>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
 #include <vulkan/vulkan_to_string.hpp>
 
+#include "utils/tracy.hpp"  // IWYU pragma: export
 #include "wren/context.hpp"
 #include "wren/graph.hpp"
+#include "wren/mesh.hpp"
 #include "wren/render_pass.hpp"
+#include "wren/shaders/mesh.hpp"
 
 namespace wren {
 

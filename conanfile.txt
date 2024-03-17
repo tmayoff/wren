@@ -1,0 +1,13 @@
+[requires]
+tracy/0.10
+catch2/3.5.3
+
+[tool_requires]
+cmake/3.28.1
+
+[generators]
+CMakeDeps
+CMakeToolchain
+
+[layout]
+cmake_layout

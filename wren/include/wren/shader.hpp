@@ -24,7 +24,7 @@ struct ShaderModule {
 
   ShaderModule() = default;
   ShaderModule(reflect::spirv_t spirv,
-               const vk::ShaderModule &module);
+               vk::ShaderModule const &module);
 
   [[nodiscard]] auto get_vertex_input_bindings() const
       -> std::vector<vk::VertexInputBindingDescription>;
@@ -35,33 +35,34 @@ struct ShaderModule {
 
 class Shader {
  public:
-  static auto Create(const vulkan::Device &device,
-                     const std::string &vertex_shader,
-                     const std::string &fragment_shader)
+  static auto Create(vulkan::Device const &device,
+                     std::string const &vertex_shader,
+                     std::string const &fragment_shader)
       -> tl::expected<std::shared_ptr<Shader>, std::error_code>;
 
-  static auto compile_shader(const vk::Device &device,
-                             const shaderc_shader_kind &shader_kind,
-                             const std::string &filename,
-                             const std::string &shader_source)
+  static auto compile_shader(vk::Device const &device,
+                             shaderc_shader_kind const &shader_kind,
+                             std::string const &filename,
+                             std::string const &shader_source)
       -> tl::expected<ShaderModule, std::error_code>;
 
   [[nodiscard]] auto get_pipeline() const { return pipeline; }
 
-  void fragment_shader(const ShaderModule &fragment) {
+  void fragment_shader(ShaderModule const &fragment) {
     fragment_shader_module = fragment;
   }
 
-  void vertex_shader(const ShaderModule &vertex) {
+  void vertex_shader(ShaderModule const &vertex) {
     vertex_shader_module = vertex;
   }
 
-  auto create_graphics_pipeline(const vk::Device &device,
-                                const vk::RenderPass &render_pass,
-                                const vk::Extent2D &size)
+  auto create_graphics_pipeline(vk::Device const &device,
+                                vk::RenderPass const &render_pass,
+                                vk::Extent2D const &size)
       -> tl::expected<void, std::error_code>;
 
  private:
+  vk::DescriptorSetLayout descriptor_layout;
   vk::PipelineLayout pipeline_layout;
   vk::Pipeline pipeline;
 

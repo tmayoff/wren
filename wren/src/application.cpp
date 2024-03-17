@@ -3,24 +3,19 @@
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan_core.h>
 
-#include "wren/utils/errors.hpp"
-
-#if __has_include(<Tracy/tracy/Tracy.hpp>)
-#include <Tracy/tracy/Tracy.hpp>
-#else
-#include <tracy/Tracy.hpp>
-#endif
 #include <memory>
 #include <tl/expected.hpp>
 
+#include "utils/tracy.hpp"  // IWYU pragma: export
 #include "wren/context.hpp"
 #include "wren/event.hpp"
 #include "wren/graphics_context.hpp"
 #include "wren/renderer.hpp"
+#include "wren/utils/errors.hpp"
 
 namespace wren {
 
-auto Application::Create(const std::string &application_name)
+auto Application::Create(std::string const &application_name)
     -> tl::expected<std::shared_ptr<Application>, std::error_code> {
   spdlog::set_level(spdlog::level::debug);
   ZoneScoped;
@@ -52,8 +47,8 @@ auto Application::Create(const std::string &application_name)
   return std::shared_ptr<Application>(new Application(ctx, renderer));
 }
 
-Application::Application(const std::shared_ptr<Context> &ctx,
-                         const std::shared_ptr<Renderer> &renderer)
+Application::Application(std::shared_ptr<Context> const &ctx,
+                         std::shared_ptr<Renderer> const &renderer)
     : ctx(ctx), renderer(renderer), running(true) {}
 
 void Application::run() {
@@ -63,7 +58,7 @@ void Application::run() {
   });
 
   this->ctx->event_dispatcher.on<Event::WindowResized>(
-      [](const Event::WindowResized &size) {
+      [](Event::WindowResized const &size) {
         spdlog::debug("{} ({}, {})", size.debug_name, size.width,
                       size.height);
       });

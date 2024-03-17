@@ -30,4 +30,5 @@ target_link_libraries(
          vulkan
          ${shaderc_LIBRARIES}
          spdlog::spdlog
-         tl::expected)
+         tl::expected
+         Tracy::TracyClient)

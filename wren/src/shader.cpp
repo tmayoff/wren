@@ -20,7 +20,7 @@
 namespace wren {
 
 ShaderModule::ShaderModule(reflect::spirv_t spirv,
-                           const vk::ShaderModule &module)
+                           vk::ShaderModule const &module)
     : spirv(std::move(spirv)),
       module(module),
       reflection(
@@ -34,9 +34,9 @@ auto ShaderModule::get_vertex_input_bindings() const
   reflection->EnumerateInputVariables(&count, input_variables.data());
 
   uint32_t offset = 0;
-  for (const auto &input : input_variables) {
-    const auto width = input->numeric.scalar.width / 8;
-    const auto count = input->numeric.vector.component_count;
+  for (auto const &input : input_variables) {
+    auto const width = input->numeric.scalar.width / 8;
+    auto const count = input->numeric.vector.component_count;
     offset += width * count;
   }
 
@@ -52,7 +52,7 @@ auto ShaderModule::get_vertex_input_attributes() const
 
   uint32_t offset = 0;
   std::vector<vk::VertexInputAttributeDescription> attrs;
-  for (const auto &input : input_variables) {
+  for (auto const &input : input_variables) {
     attrs.emplace_back(input->location, 0,
                        static_cast<vk::Format>(input->format),
                        offset);
@@ -63,9 +63,9 @@ auto ShaderModule::get_vertex_input_attributes() const
   return attrs;
 }
 
-auto Shader::Create(const vulkan::Device &device,
-                    const std::string &vertex_shader,
-                    const std::string &fragment_shader)
+auto Shader::Create(vulkan::Device const &device,
+                    std::string const &vertex_shader,
+                    std::string const &fragment_shader)
     -> tl::expected<std::shared_ptr<Shader>, std::error_code> {
   auto shader = std::make_shared<Shader>();
 
@@ -89,15 +89,15 @@ auto Shader::Create(const vulkan::Device &device,
   return shader;
 }
 
-auto Shader::compile_shader(const vk::Device &device,
-                            const shaderc_shader_kind &shader_kind,
-                            const std::string &filename,
-                            const std::string &shader_source)
+auto Shader::compile_shader(vk::Device const &device,
+                            shaderc_shader_kind const &shader_kind,
+                            std::string const &filename,
+                            std::string const &shader_source)
     -> tl::expected<ShaderModule, std::error_code> {
   shaderc::Compiler compiler;
   shaderc::CompileOptions options;
 
-  const auto compilation_result = compiler.CompileGlslToSpv(
+  auto const compilation_result = compiler.CompileGlslToSpv(
       shader_source, shader_kind, filename.c_str());
 
   if (compilation_result.GetCompilationStatus() !=
@@ -119,11 +119,19 @@ auto Shader::compile_shader(const vk::Device &device,
 }
 
 auto Shader::create_graphics_pipeline(
-    const vk::Device &device, const vk::RenderPass &render_pass,
-    const vk::Extent2D &size) -> tl::expected<void, std::error_code> {
+    vk::Device const &device, vk::RenderPass const &render_pass,
+    vk::Extent2D const &size) -> tl::expected<void, std::error_code> {
   vk::Result res = vk::Result::eSuccess;
 
-  vk::PipelineLayoutCreateInfo layout_create;
+  vk::DescriptorSetLayoutBinding ubo_layout_bindings(
+      0, vk::DescriptorType::eUniformBuffer, 1,
+      vk::ShaderStageFlagBits::eVertex);
+  vk::DescriptorSetLayoutCreateInfo dl_create_info(
+      {}, ubo_layout_bindings);
+  VK_TIE_ERR_PROP(descriptor_layout,
+                  device.createDescriptorSetLayout(dl_create_info));
+
+  vk::PipelineLayoutCreateInfo layout_create({}, descriptor_layout);
   std::tie(res, pipeline_layout) =
       device.createPipelineLayout(layout_create);
   if (res != vk::Result::eSuccess)
@@ -133,10 +141,9 @@ auto Shader::create_graphics_pipeline(
                                vk::DynamicState::eScissor};
   vk::PipelineDynamicStateCreateInfo dynamic_state({},
                                                    dynamic_states);
-
-  const auto input_bindings =
+  auto const input_bindings =
       vertex_shader_module.get_vertex_input_bindings();
-  const auto input_attributes =
+  auto const input_attributes =
       vertex_shader_module.get_vertex_input_attributes();
 
   vk::PipelineVertexInputStateCreateInfo vertex_input_info{

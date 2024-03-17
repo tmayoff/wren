@@ -1,5 +1,3 @@
-
-#include <gsl/gsl-lite.hpp>
 #include <wrenm/utils.hpp>
 #include <wrenm/vector.hpp>
 
