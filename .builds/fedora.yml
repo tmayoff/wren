@@ -3,6 +3,8 @@ image: fedora/39
 sources:
     - https://git.sr.ht/~tmayoff/wren
 tasks:
+    - deps: |
+      dnf install just cmake ninja-build
     - build: |
         cd wren
         mkdir build
