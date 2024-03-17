@@ -1,7 +1,6 @@
 #pragma once
 
-#ifdef TRACY_TRACY_HPP
-#warning "HELP ME"
+#if __has_include(<Tracy/tracy/Tracy.hpp>)
 #include <Tracy/tracy/Tracy.hpp>
 #else
 #include <tracy/Tracy.hpp>

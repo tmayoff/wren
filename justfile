@@ -1,7 +1,7 @@
 default: build
 
 configure:
-    cmake -S. -B build -G Ninja -DCMAKE_BUILD_TYPE=DEBUG
+    cmake -S. -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 
 build:
     cmake --build build

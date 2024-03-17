@@ -31,4 +31,4 @@ target_link_libraries(
          ${shaderc_LIBRARIES}
          spdlog::spdlog
          tl::expected
-         Tracy::TracyClient)
+         ${TRACY_DEP})
