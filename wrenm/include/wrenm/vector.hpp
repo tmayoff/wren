@@ -1,10 +1,24 @@
 #pragma once
 
+#include <cmath>
+
 namespace wrenm {
 
 struct vec2f {
   vec2f() : x(0), y(0) {}
   vec2f(float x, float y) : x(x), y(y) {}
+
+  auto operator*(float scalar) const {
+    return vec2f{x * scalar, y * scalar};
+  }
+
+  auto operator*(vec2f const& other) const {
+    return x * other.x + y * other.y;
+  }
+
+  auto operator/(float scalar) const {
+    return vec2f{x / scalar, y / scalar};
+  }
 
   auto operator+(vec2f const& rhs) const {
     return vec2f{x + rhs.x, y + rhs.y};
@@ -19,6 +33,9 @@ struct vec2f {
   }
 
   auto operator!=(vec2f const& rhs) const { return !(*this == rhs); }
+
+  auto length() { return std::sqrt(x * x + y * y); }
+  auto sqr_length() { return x * x + y * y; }
 
   float x;
   float y;
