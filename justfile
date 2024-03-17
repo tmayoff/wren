@@ -24,4 +24,4 @@ clean:
 everything: deps configure build
 
 deps:
-    conan install . --build=missing -s build_type=Debug -s compiler.version=13.1
+    conan install . --build=missing -s build_type=Debug
