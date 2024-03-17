@@ -9,8 +9,8 @@ tasks:
             spirv-headers-devel VulkanMemoryAllocator-devel vulkan-headers vulkan-loader-devel \
             spdlog-devel SDL2-devel expected-devel
     - build: |
-        export CXX=clang++
-        export CC=clang
+        export CXX=clang++-17
+        export CC=clang-17
         conan profile detect --force
         cd wren
         just everything
