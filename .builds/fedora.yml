@@ -8,7 +8,7 @@ tasks:
             boost-devel catch2-devel libshaderc-devel \
             spirv-headers-devel VulkanMemoryAllocator-devel vulkan-headers vulkan-loader-devel \
             spdlog-devel SDL2-devel expected-devel
-    - build:
+    - build: |
         export CXX=clang++
         export CC=clang
         cd wren
