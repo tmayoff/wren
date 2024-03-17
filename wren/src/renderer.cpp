@@ -320,12 +320,6 @@ void Renderer::build_3D_render_graph() {
                                shaders::MESH_FRAG_SHADER.data())
                     .value();
 
-  std::vector<Vertex> const vertices = {
-      {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-      {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-      {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-  };
-
   builder.add_pass("triangle", {shader, target},
                    [this](vk::CommandBuffer &cmd) {
                      m.bind(cmd);

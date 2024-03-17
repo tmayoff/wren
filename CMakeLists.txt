@@ -10,10 +10,12 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 
-add_compile_options(
-     "$<$<CONFIG:DEBUG>:-DWREN_DEBUG>"
-)
+add_compile_options("$<$<CONFIG:DEBUG>:-DWREN_DEBUG>")
 
+include(CTest)
+enable_testing()
+
+find_package(Catch2 3 REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(Vulkan REQUIRED)

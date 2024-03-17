@@ -3,31 +3,37 @@
 #include <string_view>
 namespace wren::shaders {
 
-const std::string_view MESH_VERT_SHADER = R"(
+std::string_view const MESH_VERT_SHADER = R"(
 #version 450
 
-layout(location = 0) in vec2 inPosition;
-layout(location = 1) in vec3 inColor;
+layout(location = 0) in vec2 in_position;
+layout(location = 1) in vec3 in_color;
 
-layout(location = 0) out vec3 fragColor;
+layout(binding = 0) uniform UBO {
+    mat4 model;
+    mat4 view;
+    mat4 proj;            
+} ubo;
+
+layout(location = 0) out vec3 out_color;
 
 void main() {
-    gl_Position = vec4(inPosition, 0.0, 1.0);
-    fragColor = inColor;
+    gl_Position = ubo.proj * ubo.view * ubo.model * vec4(in_position, 0.0, 1.0);
+    out_color = in_color;
 }  
 )";
 
-const std::string_view MESH_FRAG_SHADER = R"(
+std::string_view const MESH_FRAG_SHADER = R"(
 #version 450
 
-layout(location = 0) in vec3 fragColor;
+layout(location = 0) in vec3 in_color;
 
-layout(location = 0) out vec4 outColor;
+layout(location = 0) out vec4 out_color;
 
 void main() {
-    outColor = vec4(fragColor, 1.0);
+    out_color = vec4(in_color, 1.0);
 }
      
 )";
-  
-}
+
+}  // namespace wren::shaders

@@ -3,7 +3,6 @@
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan_core.h>
 
-#include <span>
 #include <vulkan/vulkan.hpp>
 #include <wrenm/vector.hpp>
 
@@ -13,8 +12,8 @@
 namespace wren {
 
 struct Vertex {
-  wrenm::vec2 pos;
-  wrenm::vec3 colour;
+  wrenm::vec2f pos;
+  wrenm::vec3f colour;
 };
 
 std::vector<Vertex> const TRIANGLE_VERTICES = {
@@ -43,7 +42,7 @@ class Mesh {
   std::vector<Vertex> vertices;
   std::vector<uint16_t> indices;
   std::shared_ptr<Buffer> index_buffer;
-  std::shared_ptr<Buffer> vertex_buffer_;
+  std::shared_ptr<Buffer> vertex_buffer;
 };
 
 }  // namespace wren
