@@ -4,6 +4,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include <memory>
+#include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
@@ -34,6 +35,13 @@ auto Buffer::Create(
   b->buffer = buf;
 
   return b;
+}
+
+auto Buffer::set_data_raw(void const* data, std::size_t size)
+    -> tl::expected<void, std::error_code> {
+  VK_ERR_PROP_VOID(static_cast<vk::Result>(vmaCopyMemoryToAllocation(
+      allocator, data, allocation, 0, size)));
+  return {};
 }
 
 auto Buffer::copy_buffer(vulkan::Device const& device,

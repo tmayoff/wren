@@ -4,12 +4,19 @@
 #include <vulkan/vulkan_core.h>
 
 #include <vulkan/vulkan.hpp>
+#include <wrenm/matrix.hpp>
 #include <wrenm/vector.hpp>
 
 #include "buffer.hpp"
 #include "utils/device.hpp"
 
 namespace wren {
+
+struct UBO {
+  wrenm::mat4f model;
+  wrenm::mat4f view;
+  wrenm::mat4f proj;
+};
 
 struct Vertex {
   wrenm::vec2f pos;
@@ -43,6 +50,7 @@ class Mesh {
   std::vector<uint16_t> indices;
   std::shared_ptr<Buffer> index_buffer;
   std::shared_ptr<Buffer> vertex_buffer;
+  std::shared_ptr<Buffer> uniform_buffer;
 };
 
 }  // namespace wren

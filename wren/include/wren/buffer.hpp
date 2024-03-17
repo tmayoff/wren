@@ -39,8 +39,11 @@ class Buffer {
   auto operator=(Buffer&&) = delete;
 
   template <typename T>
-  auto set_data_raw(VmaAllocator allocator, std::span<T const> data)
+  auto set_data_raw(std::span<T const> data)
       -> tl::expected<void, std::error_code>;
+
+  auto set_data_raw(void const* data, std::size_t size)
+      -> tl ::expected<void, std::error_code>;
 
   [[nodiscard]] auto get() const { return buffer; }
 
@@ -51,8 +54,7 @@ class Buffer {
 };
 
 template <typename T>
-auto Buffer::set_data_raw(VmaAllocator allocator,
-                          std::span<T const> data)
+auto Buffer::set_data_raw(std::span<T const> data)
     -> tl::expected<void, std::error_code> {
   VK_ERR_PROP_VOID(static_cast<vk::Result>(vmaCopyMemoryToAllocation(
       allocator, data.data(), allocation, {0}, {data.size_bytes()})));

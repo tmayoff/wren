@@ -1,2 +1,4 @@
 - https://www.haroldserrano.com/blog/developing-a-math-engine-in-c-implementing-vectors
 - https://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/
+- https://pencilprogrammer.com/cpp-programs/multiply-matrices/
+- https://www.khanacademy.org/math/precalculus/x9e81a4f98389efdf:matrices/x9e81a4f98389efdf:mat-intro/a/intro-to-matrices

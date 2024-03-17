@@ -16,7 +16,7 @@ Mesh::Mesh(vulkan::Device const& device, VmaAllocator allocator)
                            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                        VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT);
 
-    staging_buffer->set_data_raw<Vertex>(allocator, data);
+    staging_buffer->set_data_raw<Vertex>(data);
 
     vertex_buffer =
         Buffer::Create(allocator, data.size_bytes(),
@@ -39,7 +39,7 @@ Mesh::Mesh(vulkan::Device const& device, VmaAllocator allocator)
                            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                        VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT);
 
-    staging_buffer->set_data_raw<uint16_t>(allocator, data);
+    staging_buffer->set_data_raw<uint16_t>(data);
 
     index_buffer =
         Buffer::Create(allocator, data.size_bytes(),
@@ -49,6 +49,29 @@ Mesh::Mesh(vulkan::Device const& device, VmaAllocator allocator)
 
     Buffer::copy_buffer(device, device.command_pool(), staging_buffer,
                         index_buffer, data.size_bytes());
+  }
+
+  {
+    const UBO ubo{};
+    std::size_t const size = sizeof(ubo);
+
+    auto staging_buffer =
+        Buffer::Create(allocator, size,
+                       VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT |
+                           VK_BUFFER_USAGE_TRANSFER_SRC_BIT |
+                           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                       VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT);
+
+    staging_buffer->set_data_raw(&ubo, size);
+
+    uniform_buffer =
+        Buffer::Create(allocator, size,
+                       VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT |
+                           VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+    Buffer::copy_buffer(device, device.command_pool(), staging_buffer,
+                        index_buffer, size);
   }
 }
 
