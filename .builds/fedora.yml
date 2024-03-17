@@ -3,11 +3,14 @@ image: fedora/40
 sources:
     - https://git.sr.ht/~tmayoff/wren
 tasks:
-    - deps: |
+    - system_deps: |
         sudo dnf install -y just cmake ninja-build clang \
             boost-devel catch2-devel libshaderc-devel \
             spirv-headers-devel VulkanMemoryAllocator-devel vulkan-headers vulkan-loader-devel \
             spdlog-devel SDL2-devel expected-devel
+    - desp: |
+        cd wren 
+        just deps
     - build: |
         cd wren
         mkdir build
