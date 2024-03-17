@@ -21,15 +21,15 @@ class RenderPass {
  public:
   using execute_fn_t = std::function<void(vk::CommandBuffer&)>;
 
-  static auto Create(const std::shared_ptr<Context>& ctx,
-                     const std::string& name,
-                     const PassResources& resources,
-                     const execute_fn_t& fn)
+  static auto Create(std::shared_ptr<Context> const& ctx,
+                     std::string const& name,
+                     PassResources const& resources,
+                     execute_fn_t const& fn)
       -> tl::expected<std::shared_ptr<RenderPass>, std::error_code>;
 
   void execute(uint32_t image_index);
 
-  void on_resource_resized(const std::pair<float, float>& size);
+  void on_resource_resized(std::pair<float, float> const& size);
 
   [[nodiscard]] auto get_command_buffers() const {
     return command_buffers;
@@ -37,7 +37,7 @@ class RenderPass {
 
   [[nodiscard]] auto get_framebuffers() const { return framebuffers; }
 
-  void recreate_framebuffers(const vk::Device& device);
+  void recreate_framebuffers(vk::Device const& device);
 
  private:
   RenderPass(std::string name, PassResources resources,
@@ -55,6 +55,9 @@ class RenderPass {
 
   vk::CommandPool command_pool;
   std::vector<vk::CommandBuffer> command_buffers;
+
+  vk::DescriptorPool descriptor_pool;
+  std::vector<vk::DescriptorSet> descriptor_set;
 
   // std::shared_ptr<RenderTarget> targets;
   std::vector<vk::Framebuffer> framebuffers;

@@ -47,6 +47,12 @@ class Shader {
       -> tl::expected<ShaderModule, std::error_code>;
 
   [[nodiscard]] auto get_pipeline() const { return pipeline; }
+  [[nodiscard]] auto pipeline_layout() const {
+    return pipeline_layout_;
+  }
+  [[nodiscard]] auto descriptor_layout() const {
+    return descriptor_layout_;
+  }
 
   void fragment_shader(ShaderModule const &fragment) {
     fragment_shader_module = fragment;
@@ -62,8 +68,8 @@ class Shader {
       -> tl::expected<void, std::error_code>;
 
  private:
-  vk::DescriptorSetLayout descriptor_layout;
-  vk::PipelineLayout pipeline_layout;
+  vk::DescriptorSetLayout descriptor_layout_;
+  vk::PipelineLayout pipeline_layout_;
   vk::Pipeline pipeline;
 
   ShaderModule vertex_shader_module;

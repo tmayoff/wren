@@ -8,6 +8,7 @@
 #include <vulkan/vulkan_structs.hpp>
 #include <vulkan/vulkan_to_string.hpp>
 
+#include "utils/errors.hpp"
 #include "utils/tracy.hpp"  // IWYU pragma: export
 #include "wren/context.hpp"
 #include "wren/graph.hpp"
@@ -104,7 +105,7 @@ auto Renderer::Create(std::shared_ptr<Context> const &ctx)
   auto res = renderer->recreate_swapchain();
   if (!res.has_value()) return tl::make_unexpected(res.error());
 
-  renderer->build_3D_render_graph();
+  ERR_PROP_VOID(renderer->build_3D_render_graph());
 
   vk::Result vres = vk::Result::eSuccess;
   std::tie(vres, renderer->in_flight_fence) =
@@ -304,7 +305,8 @@ auto Renderer::choose_swapchain_extent(
   }
 }
 
-void Renderer::build_3D_render_graph() {
+auto Renderer::build_3D_render_graph()
+    -> tl::expected<void, std::error_code> {
   GraphBuilder builder(ctx);
 
   auto shader = Shader::Create(ctx->graphics_context->Device(),
@@ -318,7 +320,9 @@ void Renderer::build_3D_render_graph() {
                      m.draw(cmd);
                    });
 
-  render_graph = builder.compile();
+  ERR_PROP(render_graph, builder.compile());
+
+  return {};
 }
 
 }  // namespace wren

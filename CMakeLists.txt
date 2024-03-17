@@ -11,6 +11,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 
 add_compile_options("$<$<CONFIG:DEBUG>:-DWREN_DEBUG>")
+add_compile_options("-DVULKAN_HPP_NO_EXCEPTIONS")
+add_compile_options("-DVULKAN_HPP_ASSERT_ON_RESULT(x)")
 
 include(CTest)
 include(FetchContent)

@@ -1,20 +1,23 @@
 #include "wren/graph.hpp"
 
+#include <tl/expected.hpp>
+#include <utils/errors.hpp>
+
 namespace wren {
 
-auto GraphBuilder::add_pass(const std::string &name,
-                            const PassResources &resources,
-                            const RenderPass::execute_fn_t &fn)
+auto GraphBuilder::add_pass(std::string const &name,
+                            PassResources const &resources,
+                            RenderPass::execute_fn_t const &fn)
     -> GraphBuilder & {
   passes.emplace_back(name, resources, fn);
   return *this;
 }
 
-auto GraphBuilder::compile() -> Graph {
+auto GraphBuilder::compile() -> tl::expected<Graph, std::error_code> {
   Graph graph;
 
-  for (const auto &[name, resources, fn] : passes) {
-    auto pass = RenderPass::Create(ctx, name, resources, fn).value();
+  for (auto const &[name, resources, fn] : passes) {
+    ERR_PROP(auto pass, RenderPass::Create(ctx, name, resources, fn));
     node_t n = std::make_shared<Node>(pass);
 
     graph.nodes.push_back(n);

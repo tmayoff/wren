@@ -128,11 +128,11 @@ auto Shader::create_graphics_pipeline(
       vk::ShaderStageFlagBits::eVertex);
   vk::DescriptorSetLayoutCreateInfo dl_create_info(
       {}, ubo_layout_bindings);
-  VK_TIE_ERR_PROP(descriptor_layout,
+  VK_TIE_ERR_PROP(descriptor_layout_,
                   device.createDescriptorSetLayout(dl_create_info));
 
-  vk::PipelineLayoutCreateInfo layout_create({}, descriptor_layout);
-  std::tie(res, pipeline_layout) =
+  vk::PipelineLayoutCreateInfo layout_create({}, descriptor_layout_);
+  std::tie(res, pipeline_layout_) =
       device.createPipelineLayout(layout_create);
   if (res != vk::Result::eSuccess)
     return tl::make_unexpected(make_error_code(res));
@@ -199,7 +199,7 @@ auto Shader::create_graphics_pipeline(
   auto create_info = vk::GraphicsPipelineCreateInfo(
       {}, shader_stages, &vertex_input_info, &input_assembly, {},
       &viewport_state, &rasterization, &multisample, {},
-      &colour_blend, &dynamic_state, pipeline_layout, render_pass);
+      &colour_blend, &dynamic_state, pipeline_layout_, render_pass);
 
   std::tie(res, pipeline) =
       device.createGraphicsPipeline({}, create_info);

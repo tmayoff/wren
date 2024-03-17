@@ -81,6 +81,20 @@ auto RenderPass::Create(std::shared_ptr<Context> const& ctx,
     pass->command_pool = pool;
     pass->command_buffers = bufs;
   }
+
+  {
+    vk::DescriptorPoolSize pool_sizes{{}, 1};
+    vk::DescriptorPoolCreateInfo create_info({}, 1, 1, &pool_sizes);
+    VK_TIE_ERR_PROP(pass->descriptor_pool,
+                    device.get().createDescriptorPool(create_info));
+
+    auto const layout = resources.shader->descriptor_layout();
+    vk::DescriptorSetAllocateInfo alloc_info{pass->descriptor_pool,
+                                             layout};
+    VK_TIE_ERR_PROP(pass->descriptor_set,
+                    device.get().allocateDescriptorSets(alloc_info));
+  }
+
   return pass;
 }
 
@@ -132,6 +146,9 @@ void RenderPass::execute(uint32_t image_index) {
                                static_cast<float>(extent.height)});
   cmd.setScissor(0, vk::Rect2D{{0, 0}, extent});
 
+  cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                         resources.shader->pipeline_layout(), 0, 1,
+                         &descriptor_set.front(), 0, nullptr);
   if (execute_fn) execute_fn(cmd);
 
   cmd.endRenderPass();

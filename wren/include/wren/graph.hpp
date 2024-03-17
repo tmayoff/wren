@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <tl/expected.hpp>
 #include <vector>
 #include <vulkan/vulkan.hpp>
 
@@ -27,14 +28,14 @@ struct Graph {
 
 class GraphBuilder {
  public:
-  explicit GraphBuilder(const std::shared_ptr<Context> &ctx)
+  explicit GraphBuilder(std::shared_ptr<Context> const &ctx)
       : ctx(ctx) {}
 
-  auto compile() -> Graph;
+  auto compile() -> tl::expected<Graph, std::error_code>;
 
-  auto add_pass(const std::string &name,
-                const PassResources &resources,
-                const RenderPass::execute_fn_t &fn) -> GraphBuilder &;
+  auto add_pass(std::string const &name,
+                PassResources const &resources,
+                RenderPass::execute_fn_t const &fn) -> GraphBuilder &;
 
  private:
   std::shared_ptr<Context> ctx;

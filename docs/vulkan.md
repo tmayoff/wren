@@ -1,5 +1,6 @@
 
-
+# Descriptor Sets
+- https://vkguide.dev/docs/chapter-4/descriptors/
 
 # References
 - [engine design](https://www.reddit.com/r/vulkan/comments/yaedse/seeking_for_architecture_advices_on_my_vulkan/)
