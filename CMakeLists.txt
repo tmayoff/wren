@@ -15,7 +15,7 @@ add_compile_options("$<$<CONFIG:DEBUG>:-DWREN_DEBUG>")
 include(CTest)
 enable_testing()
 
-find_package(Catch2 3 REQUIRED)
+find_package(Catch2 REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(Vulkan REQUIRED)
