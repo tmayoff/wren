@@ -4,7 +4,7 @@ sources:
     - https://git.sr.ht/~tmayoff/wren
 tasks:
     - deps: |
-        sudo dnf install just cmake ninja-build
+        sudo dnf install -y just cmake ninja-build
     - build: |
         cd wren
         mkdir build
