@@ -1,0 +1,11 @@
+image: fedora/39
+
+sources:
+    - https://git.sr.ht/~tmayoff/wren
+tasks:
+    - build: |
+        cd wren
+        mkdir build
+        cd build
+        just configure
+        just build
