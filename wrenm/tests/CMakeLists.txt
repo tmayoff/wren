@@ -1,4 +1,3 @@
-
 list(APPEND WRENM_TESTS 
   vector
 )

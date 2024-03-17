@@ -1,7 +1,7 @@
 default: build
 
 configure:
-    cmake -S. -B build -G Ninja -DCMAKE_BUILD_TYPE=DEBUG --preset conan-release
+    cmake -S. -B build -G Ninja -DCMAKE_BUILD_TYPE=DEBUG --preset conan-debug
 
 build:
     cmake --build build
@@ -21,5 +21,7 @@ gdb:
 clean:
     rm -rf build
 
+everything: deps configure build
+
 deps:
-    conan install . --build=missing
+    conan install . --build=missing -s build_type=Debug -s compiler.version=13.1
