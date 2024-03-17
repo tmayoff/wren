@@ -1,16 +1,17 @@
-image: fedora/40
-
-sources:
-    - https://git.sr.ht/~tmayoff/wren
-tasks:
-    - system_deps: |
-        sudo dnf install -y just conan cmake ninja-build clang17 \
-            boost-devel catch2-devel libshaderc-devel \
-            spirv-headers-devel VulkanMemoryAllocator-devel vulkan-headers vulkan-loader-devel \
-            spdlog-devel SDL2-devel expected-devel
-    - build: |
-        export CXX=clang++-17
-        export CC=clang-17
-        conan profile detect --force
-        cd wren
-        just everything
+#image: fedora/40
+#
+#sources:
+#    - https://git.sr.ht/~tmayoff/wren
+#tasks:
+#    - system_deps: |
+#        sudo dnf install -y just conan cmake ninja-build clang17 \
+#            boost-devel catch2-devel libshaderc-devel \
+#            spirv-headers-devel VulkanMemoryAllocator-devel vulkan-headers vulkan-loader-devel \
+#            spdlog-devel SDL2-devel expected-devel
+#    - build: |
+#        export CXX=clang++-17
+#        export CC=clang-17
+#        conan profile detect --force
+#        cd wren
+#        just everything
+#

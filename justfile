@@ -1,7 +1,7 @@
 default: build
 
 configure:
-    cmake -S. -B build -G Ninja -DCMAKE_BUILD_TYPE=DEBUG --preset conan-debug
+    cmake -S. -B build -G Ninja -DCMAKE_BUILD_TYPE=DEBUG
 
 build:
     cmake --build build
