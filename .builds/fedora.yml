@@ -4,7 +4,8 @@ sources:
     - https://git.sr.ht/~tmayoff/wren
 tasks:
     - deps: |
-        sudo dnf install -y just cmake ninja-build clang
+        sudo dnf install -y just cmake ninja-build clang \
+            catch2-devel libshaderc-devel vulkan-headers
     - build: |
         cd wren
         mkdir build
