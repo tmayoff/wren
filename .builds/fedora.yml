@@ -5,8 +5,9 @@ sources:
 tasks:
     - deps: |
         sudo dnf install -y just cmake ninja-build clang \
-            catch2-devel libshaderc-devel vulkan-headers vulkan-loader spdlog-devel \
-            SDL2-devel expected-devel
+            catch2-devel libshaderc-devel \ 
+            vulkan-headers vulkan-loader mesa-vulkan-drivers \ 
+            spdlog-devel SDL2-devel expected-devel
     - build: |
         cd wren
         mkdir build
