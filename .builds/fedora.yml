@@ -9,7 +9,8 @@ tasks:
             spirv-headers-devel VulkanMemoryAllocator-devel vulkan-headers vulkan-loader-devel \
             spdlog-devel SDL2-devel expected-devel
     - desp: |
-        cd wren 
+        cd wren
+        conan profile detect
         just deps
     - build: |
         cd wren
