@@ -11,5 +11,6 @@ tasks:
     - build: |
         export CXX=clang++
         export CC=clang
+        conan profile detect --force
         cd wren
         just everything
