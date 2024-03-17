@@ -11,6 +11,5 @@ tasks:
     - build:
         export CXX=clang++
         export CC=clang
-        conan
         cd wren
         just everything
