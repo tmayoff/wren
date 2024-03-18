@@ -34,7 +34,8 @@ auto Device::CreateDevice(vk::Instance const &instance,
   float queue_prio = 0.0f;
   vk::DeviceQueueCreateInfo queue_create_info(
       {}, indices->graphics_index, 1, &queue_prio);
-  std::array extensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+  std::array extensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+                           VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME};
 
   {
     vk::DeviceCreateInfo createInfo({}, queue_create_info, {},

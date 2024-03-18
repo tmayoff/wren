@@ -5,6 +5,8 @@
 namespace wrenm {
 
 struct mat4f {
+  using mat_t = std::array<std::array<float, 4>, 4>;
+
   static auto IDENTITY() {
     return mat4f{{{
         {1, 0, 0, 0},
@@ -13,6 +15,9 @@ struct mat4f {
         {0, 0, 0, 1},
     }}};
   }
+
+  mat4f() { data = IDENTITY().data; }
+  mat4f(mat_t const& data) : data(data) {}
 
   auto operator==(mat4f const& rhs) const { return data == rhs.data; }
   auto operator!=(mat4f const& rhs) const { return !(*this == rhs); }
@@ -33,7 +38,7 @@ struct mat4f {
     return m;
   }
 
-  std::array<std::array<float, 4>, 4> data{};
+  mat_t data{};
 };
 
 }  // namespace wrenm

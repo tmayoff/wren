@@ -1,6 +1,8 @@
 #include "mesh.hpp"
 
+#include <chrono>
 #include <vulkan/vulkan.hpp>
+#include <wrenm/geometry.hpp>
 
 namespace wren {
 
@@ -59,6 +61,7 @@ Mesh::Mesh(vulkan::Device const& device, VmaAllocator allocator)
         allocator, size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
         VmaAllocationCreateFlagBits::
             VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+    uniform_buffer->set_data_raw(&ubo, size);
   }
 }
 
@@ -67,6 +70,20 @@ void Mesh::draw(vk::CommandBuffer const& cmd) {
 }
 
 void Mesh::bind(vk::CommandBuffer const& cmd) {
+  static auto start_time = std::chrono::high_resolution_clock::now();
+  auto current_time = std::chrono::high_resolution_clock::now();
+  float time =
+      std::chrono::duration<float, std::chrono::seconds::period>(
+          current_time - start_time)
+          .count();
+
+  UBO ubo{};
+  ubo.model =
+      wrenm::rotate(wrenm::mat4f{}, time * wrenm::radians(90.0f),
+                    wrenm::vec3f(0.0f, 0.0f, 1.0f));
+
+  uniform_buffer->set_data_raw(&ubo, sizeof(ubo));
+
   vk::DescriptorBufferInfo buffer_info(uniform_buffer->get(), 0,
                                        sizeof(UBO));
   std::array writes = {vk::WriteDescriptorSet{
