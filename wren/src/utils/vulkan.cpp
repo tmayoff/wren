@@ -4,44 +4,62 @@
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan_core.h>
 
+#include <tl/expected.hpp>
 #include <vulkan/vulkan_to_string.hpp>
 
+#include "utils/vulkan_errors.hpp"
+
+VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
+
 // NOLINTBEGIN
-PFN_vkCreateDebugUtilsMessengerEXT pfnVkCreateDebugUtilsMessengerEXT;
+PFN_vkCreateDebugUtilsMessengerEXT pfnVkCreateDebugUtilsMessengerEXT =
+    nullptr;
 PFN_vkDestroyDebugUtilsMessengerEXT
-    pfnVkDestroyDebugUtilsMessengerEXT;
+    pfnVkDestroyDebugUtilsMessengerEXT = nullptr;
+PFN_vkCmdPushConstants pfnVkCmdPushConstants = nullptr;
 // NOLINTEND
 
 VKAPI_ATTR auto VKAPI_CALL vkCreateDebugUtilsMessengerEXT(
     VkInstance instance,
-    const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
-    const VkAllocationCallbacks *pAllocator,
+    VkDebugUtilsMessengerCreateInfoEXT const *pCreateInfo,
+    VkAllocationCallbacks const *pAllocator,
     VkDebugUtilsMessengerEXT *pMessenger) -> VkResult {
-  if (pfnVkCreateDebugUtilsMessengerEXT == nullptr) {
-    // NOLINTBEGIN
-    pfnVkCreateDebugUtilsMessengerEXT =
-        reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(
-            vkGetInstanceProcAddr(instance,
-                                  "vkCreateDebugUtilsMessengerEXT"));
-    // NOLINTEND
-  }
-
-  if (pfnVkCreateDebugUtilsMessengerEXT == nullptr) {
-    return VkResult::VK_ERROR_EXTENSION_NOT_PRESENT;
-  }
-
   return pfnVkCreateDebugUtilsMessengerEXT(instance, pCreateInfo,
                                            pAllocator, pMessenger);
+}
 
-  return VkResult::VK_ERROR_EXTENSION_NOT_PRESENT;
+VKAPI_ATTR auto VKAPI_CALL vkCmdPushDescriptorSetKHR(
+    VkCommandBuffer buffer, VkPipelineLayout layout,
+    VkShaderStageFlags stageFlags, uint32_t offset, uint32_t size,
+    void const *pValues) {
+  pfnVkCmdPushConstants(buffer, layout, stageFlags, offset, size,
+                        pValues);
 }
 
 namespace wren::vulkan {
 
+// NOLINTNEXTLINE
+#define LOAD_VULKAN_PFN(out, fn_name)                              \
+  if (out == nullptr) {                                            \
+    out = reinterpret_cast<PFN_##fn_name>(                         \
+        instance.getProcAddr(#fn_name));                           \
+    if (out == nullptr)                                            \
+      return tl::make_unexpected(                                  \
+          make_error_code(vk::Result::eErrorExtensionNotPresent)); \
+  }
+
+auto LoadFunctions(vk::Instance const &instance)
+    -> tl::expected<void, std::error_code> {
+  LOAD_VULKAN_PFN(pfnVkCmdPushConstants, vkCmdPushConstants);
+  LOAD_VULKAN_PFN(pfnVkCreateDebugUtilsMessengerEXT,
+                  vkCreateDebugUtilsMessengerEXT);
+  return {};
+}
+
 auto DebugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT severity,
     VkDebugUtilsMessageTypeFlagsEXT type,
-    const VkDebugUtilsMessengerCallbackDataEXT *msg_data,
+    VkDebugUtilsMessengerCallbackDataEXT const *msg_data,
     void *user_data) -> VkBool32 {
   switch (severity) {
     case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
@@ -62,16 +80,17 @@ auto DebugCallback(
                     msg_data->pMessage);
       break;
     default:
-     spdlog::error("[{}] {}", msg_data->pMessageIdName,
-                    msg_data->pMessage);      break;
+      spdlog::error("[{}] {}", msg_data->pMessageIdName,
+                    msg_data->pMessage);
+      break;
   }
 
   return VK_TRUE;
 }
 
 auto GetSwapchainSupportDetails(
-    const vk::PhysicalDevice &physical_device,
-    const vk::SurfaceKHR &surface)
+    vk::PhysicalDevice const &physical_device,
+    vk::SurfaceKHR const &surface)
     -> tl::expected<SwapchainSupportDetails, std::error_code> {
   SwapchainSupportDetails details;
 

@@ -67,6 +67,14 @@ void Mesh::draw(vk::CommandBuffer const& cmd) {
 }
 
 void Mesh::bind(vk::CommandBuffer const& cmd) {
+  vk::DescriptorBufferInfo buffer_info(uniform_buffer->get(), 0,
+                                       sizeof(UBO));
+  std::array writes = {vk::WriteDescriptorSet{
+      {}, 0, 0, vk::DescriptorType::eUniformBuffer, {}, buffer_info}};
+
+  cmd.pushDescriptorSetKHR(vk::PipelineBindPoint::eGraphics,
+                           shader_->pipeline_layout(), 0, writes);
+
   cmd.bindIndexBuffer(index_buffer->get(), 0, vk::IndexType::eUint16);
   cmd.bindVertexBuffers(0, vertex_buffer->get(), vk::DeviceSize{0});
 }

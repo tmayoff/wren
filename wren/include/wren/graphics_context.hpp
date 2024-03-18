@@ -8,7 +8,6 @@
 #include <vulkan/vulkan_handles.hpp>
 
 #include "wren/utils/device.hpp"
-#include "wren/utils/errors.hpp"
 #include "wren/utils/queue.hpp"
 #include "wren/utils/vulkan.hpp"
 
@@ -17,22 +16,22 @@ namespace wren {
 class GraphicsContext {
  public:
   static auto Create(
-      const std::string &application_name,
-      const std::vector<std::string_view> &requested_extensions = {},
-      const std::vector<std::string_view> &requested_layers = {})
+      std::string const &application_name,
+      std::vector<std::string_view> const &requested_extensions = {},
+      std::vector<std::string_view> const &requested_layers = {})
       -> tl::expected<std::shared_ptr<GraphicsContext>,
                       std::error_code>;
 
-  GraphicsContext(const GraphicsContext &) = delete;
+  GraphicsContext(GraphicsContext const &) = delete;
   GraphicsContext(GraphicsContext &&) = delete;
-  auto operator=(const GraphicsContext &) = delete;
+  auto operator=(GraphicsContext const &) = delete;
   auto operator=(GraphicsContext &&) = delete;
   ~GraphicsContext();
 
   auto InitializeSurface() -> tl::expected<void, std::error_code>;
 
   [[nodiscard]] auto Instance() const { return instance; }
-  void Surface(const vk::SurfaceKHR &surface) {
+  void Surface(vk::SurfaceKHR const &surface) {
     this->surface = surface;
   }
   [[nodiscard]] auto Surface() const -> vk::SurfaceKHR {
@@ -43,7 +42,7 @@ class GraphicsContext {
     return physical_device;
   }
 
-  [[nodiscard]] auto Device() const -> const vulkan::Device & {
+  [[nodiscard]] auto Device() const -> vulkan::Device const & {
     return device;
   }
 
@@ -65,16 +64,16 @@ class GraphicsContext {
   GraphicsContext() = default;
 
   auto CreateInstance(
-      const std::string &application_name,
-      const std::vector<std::string_view> &requested_extensions = {},
-      const std::vector<std::string_view> &requested_layers = {})
+      std::string const &application_name,
+      std::vector<std::string_view> const &requested_extensions = {},
+      std::vector<std::string_view> const &requested_layers = {})
       -> tl::expected<void, std::error_code>;
 
   auto CreateAllocator() -> tl::expected<void, std::error_code>;
 
   auto CreateDevice() -> tl::expected<void, std::error_code>;
   auto PickPhysicalDevice() -> tl::expected<void, std::error_code>;
-  auto IsDeviceSuitable(const vk::PhysicalDevice &device) -> bool;
+  auto IsDeviceSuitable(vk::PhysicalDevice const &device) -> bool;
 
   vk::Instance instance;
   vk::PhysicalDevice physical_device;

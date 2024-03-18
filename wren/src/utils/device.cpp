@@ -43,6 +43,7 @@ auto Device::CreateDevice(vk::Instance const &instance,
     if (res.result != vk::Result::eSuccess)
       return tl::make_unexpected(make_error_code(res.result));
     device = res.value;
+    VULKAN_HPP_DEFAULT_DISPATCHER.init(device);
   }
 
   graphics_queue = device.getQueue(indices->graphics_index, 0);

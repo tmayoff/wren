@@ -20,13 +20,15 @@
 namespace wren {
 
 auto GraphicsContext::Create(
-    const std::string &application_name,
-    const std::vector<std::string_view> &requested_extensions,
-    const std::vector<std::string_view> &requested_layers)
+    std::string const &application_name,
+    std::vector<std::string_view> const &requested_extensions,
+    std::vector<std::string_view> const &requested_layers)
     -> tl::expected<std::shared_ptr<GraphicsContext>,
                     std::error_code> {
   auto graphics_context =
       std::shared_ptr<GraphicsContext>(new GraphicsContext());
+
+  VULKAN_HPP_DEFAULT_DISPATCHER.init();
 
   {
     spdlog::debug("Creating instance...");
@@ -50,16 +52,16 @@ auto GraphicsContext::Create(
 GraphicsContext::~GraphicsContext() { instance.destroy(); }
 
 auto GraphicsContext::CreateInstance(
-    const std::string &application_name,
-    const std::vector<std::string_view> &requested_extensions,
-    const std::vector<std::string_view> &requested_layers)
+    std::string const &application_name,
+    std::vector<std::string_view> const &requested_extensions,
+    std::vector<std::string_view> const &requested_layers)
     -> tl::expected<void, std::error_code> {
-  const auto appInfo = vk::ApplicationInfo(
+  auto const appInfo = vk::ApplicationInfo(
       application_name.c_str(), 1, "wren", 1, VK_API_VERSION_1_2);
 
   spdlog::debug("Requesting extensions:");
-  std::vector<const char *> extensions = {};
-  for (const auto &ext : requested_extensions) {
+  std::vector<char const *> extensions = {};
+  for (auto const &ext : requested_extensions) {
     spdlog::debug("\t{}", ext);
     if (vulkan::IsExtensionSupport(ext)) {
       extensions.push_back(ext.data());
@@ -69,10 +71,10 @@ auto GraphicsContext::CreateInstance(
     }
   }
 
-  std::vector<const char *> layers;
+  std::vector<char const *> layers;
 
   spdlog::debug("Requesting layers:");
-  for (const auto &layer : requested_layers) {
+  for (auto const &layer : requested_layers) {
     spdlog::debug("\t{}", layer);
     if (vulkan::IsLayerSupported(layer)) {
       extensions.push_back(layer.data());
@@ -122,6 +124,8 @@ auto GraphicsContext::CreateInstance(
 
   VK_TIE_ERR_PROP(this->instance, vk::createInstance(createInfo));
 
+  VULKAN_HPP_DEFAULT_DISPATCHER.init(instance);
+
   return {};
 }
 
@@ -158,7 +162,7 @@ auto GraphicsContext::PickPhysicalDevice()
     -> tl::expected<void, std::error_code> {
   auto devices = instance.enumeratePhysicalDevices();
 
-  for (const auto &device : devices.value) {
+  for (auto const &device : devices.value) {
     if (IsDeviceSuitable(device)) {
       physical_device = device;
       break;
@@ -174,7 +178,7 @@ auto GraphicsContext::PickPhysicalDevice()
 }
 
 auto GraphicsContext::IsDeviceSuitable(
-    const vk::PhysicalDevice &device) -> bool {
+    vk::PhysicalDevice const &device) -> bool {
   auto res = vulkan::Queue::FindQueueFamilyIndices(device);
   if (!res.has_value()) {
     spdlog::error("{}", res.error().message());

@@ -127,7 +127,9 @@ auto Shader::create_graphics_pipeline(
       0, vk::DescriptorType::eUniformBuffer, 1,
       vk::ShaderStageFlagBits::eVertex);
   vk::DescriptorSetLayoutCreateInfo dl_create_info(
-      {}, ubo_layout_bindings);
+      vk::DescriptorSetLayoutCreateFlagBits::ePushDescriptorKHR,
+      ubo_layout_bindings);
+
   VK_TIE_ERR_PROP(descriptor_layout_,
                   device.createDescriptorSetLayout(dl_create_info));
 

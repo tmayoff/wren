@@ -8,6 +8,7 @@
 #include <wrenm/vector.hpp>
 
 #include "buffer.hpp"
+#include "shader.hpp"
 #include "utils/device.hpp"
 
 namespace wren {
@@ -42,10 +43,14 @@ class Mesh {
 
   Mesh(vulkan::Device const& device, VmaAllocator allocator);
 
+  void shader(std::shared_ptr<Shader> const& shader_) {
+    this->shader_ = shader_;
+  }
   void draw(vk::CommandBuffer const& cmd);
   void bind(vk::CommandBuffer const& cmd);
 
  private:
+  std::shared_ptr<Shader> shader_;
   std::vector<Vertex> vertices;
   std::vector<uint16_t> indices;
   std::shared_ptr<Buffer> index_buffer;

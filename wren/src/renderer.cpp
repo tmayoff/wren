@@ -314,6 +314,8 @@ auto Renderer::build_3D_render_graph()
                                shaders::MESH_FRAG_SHADER.data())
                     .value();
 
+  m.shader(shader);
+
   builder.add_pass("triangle", {shader, target},
                    [this](vk::CommandBuffer &cmd) {
                      m.bind(cmd);

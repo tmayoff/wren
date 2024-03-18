@@ -16,9 +16,6 @@ add_library(
   src/utils/vulkan_errors.cpp
   src/window.cpp)
 
-# target_sources(wren PUBLIC FILE_SET CXX_MODULES FILES)
-
-target_compile_definitions(wren PUBLIC VULKAN_HPP_NO_EXCEPTIONS)
 target_include_directories(wren PUBLIC include)
 target_include_directories(wren PRIVATE include/wren)
 
