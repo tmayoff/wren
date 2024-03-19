@@ -1,0 +1,24 @@
+image: alpine/edge
+oauth: pages.sr.ht/PAGES:RW
+packages:
+  - hut  
+  - python3-venv
+environment:
+  site: tmayoff.srht.site
+tasks:
+  - pacakge: |
+      python3 -m venv mkdocs
+      . mkdocs/bin/activate
+      python3 -m pip install --upgrade pip
+      pip install mkdocs mkdocs-macros mkdocs-material
+      cd $site
+      tar -C site -xzf ../site.tar.gz .
+
+  - upload: |
+      acurl -f https://pages.sr.ht/publish/$site -Fcontent@site.tar.gz
+
+triggers:
+  - action: email
+    condition: failure
+    to: Tyler Mayoff tyler@tylermayoff.com
+    
