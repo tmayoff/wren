@@ -10,9 +10,9 @@ namespace wrenm {
 auto look_at(wrenm::vec3f const& eye, wrenm::vec3f const& center,
              wrenm::vec3f const& world_up) -> wrenm::mat4f {
   wrenm::vec3f const up = world_up.normalized();
-  wrenm::vec3f const f = (eye - center).normalized();
-  wrenm::vec3f const s = (f % up).normalized();
-  wrenm::vec3f const u = s % f;
+  wrenm::vec3f const f = (center - eye).normalized();
+  wrenm::vec3f const s = (up % f).normalized();
+  wrenm::vec3f const u = f % s;
 
   mat4f mat;
 

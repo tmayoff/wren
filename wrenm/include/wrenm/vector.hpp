@@ -54,6 +54,12 @@ struct vec {
     return v;
   }
 
+  constexpr auto operator-() const {
+    vec_t v{};
+    for (std::size_t i = 0; i < N; i++) v.data.at(i) = -data.at(i);
+    return v;
+  }
+
   auto operator/(float scalar) const {
     vec_t v{};
     for (std::size_t i = 0; i < N; i++)

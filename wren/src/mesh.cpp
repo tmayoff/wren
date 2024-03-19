@@ -86,7 +86,7 @@ void Mesh::bind(vk::CommandBuffer const& cmd) {
 
   ubo.view = wrenm::look_at(wrenm::vec3f(2.0f, 2.0f, 2.0f),
                             wrenm::vec3f(0.0f, 0.0f, 0.0f),
-                            wrenm::vec3f::Z());
+                            -wrenm::vec3f::Z());
 
   uniform_buffer->set_data_raw(&ubo, sizeof(ubo));
 
