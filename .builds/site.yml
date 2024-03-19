@@ -1,4 +1,4 @@
-image: debian/stable
+image: nixos/stable
 oauth: pages.sr.ht/PAGES:RW
 packages:
   - hut  
