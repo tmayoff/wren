@@ -1,8 +1,7 @@
 image: nixos/unstable
 oauth: pages.sr.ht/PAGES:RW
 packages:
-  - hut  
-  - python3-venv
+  - nixos.hut
 environment:
   site: tmayoff.srht.site
 tasks:
