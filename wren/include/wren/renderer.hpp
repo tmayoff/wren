@@ -27,8 +27,8 @@ class Renderer {
  private:
   explicit Renderer(std::shared_ptr<Context> const &ctx);
 
-  void begin_frame();
-  void end_frame();
+  auto begin_frame() -> tl::expected<uint32_t, std::error_code>;
+  void end_frame(uint32_t image_index);
 
   auto recreate_swapchain() -> tl::expected<void, std::error_code>;
 

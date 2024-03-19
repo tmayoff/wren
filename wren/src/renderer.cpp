@@ -10,6 +10,7 @@
 
 #include "utils/errors.hpp"
 #include "utils/tracy.hpp"  // IWYU pragma: export
+#include "utils/vulkan_errors.hpp"
 #include "wren/context.hpp"
 #include "wren/graph.hpp"
 #include "wren/mesh.hpp"
@@ -20,23 +21,22 @@ namespace wren {
 
 void Renderer::draw() {
   ZoneScoped;
-  begin_frame();
-
-  end_frame();
+  auto res = begin_frame();
+  if (!res.has_value()) return;
+  end_frame(res.value());
 }
 
-void Renderer::begin_frame() {
+auto Renderer::begin_frame()
+    -> tl::expected<uint32_t, std::error_code> {
   ZoneScoped;
-
-  // TODO This needs to be cleaned up majorly
 
   vk::Result res = vk::Result::eSuccess;
 
   auto const &device = ctx->graphics_context->Device().get();
   {
     ZoneScopedN("device.waitForFences()");  // NOLINT
-    res = device.waitForFences(in_flight_fence, VK_TRUE, UINT64_MAX);
-    if (res != vk::Result::eSuccess) return;
+    VK_ERR_PROP_VOID(
+        device.waitForFences(in_flight_fence, VK_TRUE, UINT64_MAX));
     device.resetFences(in_flight_fence);
   }
 
@@ -48,9 +48,16 @@ void Renderer::begin_frame() {
         swapchain, UINT64_MAX, image_available);
     if (res == vk::Result::eErrorOutOfDateKHR) {
       recreate_swapchain();
-      return;
+      return tl::make_unexpected(make_error_code(res));
     }
   }
+
+  return image_index;
+}
+
+void Renderer::end_frame(uint32_t image_index) {
+  vk::PipelineStageFlags waitDstStageMask =
+      vk::PipelineStageFlagBits::eColorAttachmentOutput;
 
   std::vector<vk::CommandBuffer> cmd_bufs;
   for (auto g : render_graph) {
@@ -59,13 +66,11 @@ void Renderer::begin_frame() {
     cmd_bufs = g->render_pass->get_command_buffers();
   }
 
-  vk::PipelineStageFlags waitDstStageMask =
-      vk::PipelineStageFlagBits::eColorAttachmentOutput;
-
   vk::SubmitInfo submit_info(image_available, waitDstStageMask,
                              cmd_bufs, render_finished);
-  res = ctx->graphics_context->Device().get_graphics_queue().submit(
-      submit_info, in_flight_fence);
+  vk::Result res =
+      ctx->graphics_context->Device().get_graphics_queue().submit(
+          submit_info, in_flight_fence);
   if (res != vk::Result::eSuccess) {
     spdlog::warn("{}", vk::to_string(res));
   }
@@ -85,8 +90,6 @@ void Renderer::begin_frame() {
     spdlog::warn("{}", vk::to_string(res));
   }
 }
-
-void Renderer::end_frame() {}
 
 Renderer::Renderer(std::shared_ptr<Context> const &ctx)
     : ctx(ctx),

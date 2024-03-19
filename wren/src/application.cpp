@@ -29,8 +29,6 @@ auto Application::Create(std::string const &application_name)
 
   ERR_PROP(auto extensions, window->GetRequiredVulkanExtension());
 
-  extensions.emplace_back(
-      VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
   ERR_PROP(auto graphics_context,
            GraphicsContext::Create(application_name, extensions));
   spdlog::trace("Created graphics context");

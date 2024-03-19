@@ -60,7 +60,8 @@ auto GraphicsContext::CreateInstance(
       application_name.c_str(), 1, "wren", 1, VK_API_VERSION_1_2);
 
   spdlog::debug("Requesting extensions:");
-  std::vector<char const *> extensions = {};
+  std::vector<char const *> extensions = {
+      VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME};
   for (auto const &ext : requested_extensions) {
     spdlog::debug("\t{}", ext);
     if (vulkan::IsExtensionSupport(ext)) {
@@ -109,9 +110,8 @@ auto GraphicsContext::CreateInstance(
 
   vk::DebugUtilsMessageTypeFlagsEXT message_type_flags(
       // vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
-      vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation
-      //|  vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
-  );
+      vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
+      vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance);
 
   vk::DebugUtilsMessengerCreateInfoEXT debugMessengerCreateInfo(
       {}, severity_flags, message_type_flags, &vulkan::DebugCallback);

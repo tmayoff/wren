@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.28)
 
 project(wren)
 
+option(ENABLE_PROFILING "Enables profiling with tracy" Off)
+option(ENABLE_TESTING "Enables testing framework" Off)
+
 find_package(PkgConfig REQUIRED)
 list(APPEND CMAKE_MODULE_PATH
      "${PROJECT_SOURCE_DIR}/cmake/modules")
@@ -10,6 +13,9 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 
+if (ENABLE_PROFILING)
+add_compile_options("-DTRACY_ENABLE")
+endif()
 add_compile_options("$<$<CONFIG:DEBUG>:-DWREN_DEBUG>")
 add_compile_options("-DVULKAN_HPP_NO_EXCEPTIONS")
 add_compile_options("-DVULKAN_HPP_ASSERT_ON_RESULT(x)")
@@ -17,7 +23,9 @@ add_compile_options("-DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1")
 
 include(CTest)
 include(FetchContent)
-enable_testing()
+if(ENABLE_TESTING)
+  enable_testing()
+endif()
 
 find_package(SPIRV-Headers REQUIRED)
 find_package(Boost REQUIRED)
@@ -29,11 +37,11 @@ pkg_check_modules(VulkanMemoryAllocator REQUIRED)
 pkg_check_modules(shaderc REQUIRED shaderc)
 
 find_package(Tracy QUIET)
-if (NOT $Tracy_FOUND)
-     pkg_check_modules(tracy REQUIRED)
-     set(TRACY_DEP tracy)
+if(NOT $Tracy_FOUND)
+  pkg_check_modules(tracy REQUIRED)
+  set(TRACY_DEP tracy)
 else()
-     set(TRACY_DEP Tracy::TracyClient)
+  set(TRACY_DEP Tracy::TracyClient)
 endif()
 
 find_package(Catch2 3 REQUIRED)
