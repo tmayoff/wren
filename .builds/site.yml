@@ -12,7 +12,9 @@ tasks:
       python3 -m pip install --upgrade pip
       pip install mkdocs mkdocs-material mkdocs-mermaid2-plugin
       cd wren
-
+      mkdocs build -d site
+      tar -C site -cvf ../site.tar.gz .
+  
   - upload: |
       hut pages publish -d $site site.tar.gz
 
