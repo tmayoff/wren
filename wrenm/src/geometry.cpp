@@ -1,4 +1,5 @@
 #include "geometry.hpp"
+
 #include <cmath>
 
 #include "matrix.hpp"
@@ -6,14 +7,27 @@
 
 namespace wrenm {
 
-auto look_at(wrenm::vec3f const& position, wrenm::vec3f const& target,
+auto look_at(wrenm::vec3f const& eye, wrenm::vec3f const& center,
              wrenm::vec3f const& world_up) -> wrenm::mat4f {
-  wrenm::vec3f z_axis = (position - target).normalized();
-  wrenm::vec3f x_axis = (world_up.normalized() % z_axis).normalized();
-  wrenm::vec3f y_axis = z_axis % x_axis;
+  wrenm::vec3f const up = world_up.normalized();
+  wrenm::vec3f const f = (eye - center).normalized();
+  wrenm::vec3f const s = (f % up).normalized();
+  wrenm::vec3f const u = s % f;
 
   mat4f mat;
 
+  mat.data.at(0).at(0) = s.x();
+  mat.data.at(1).at(0) = s.y();
+  mat.data.at(2).at(0) = s.z();
+  mat.data.at(0).at(1) = u.x();
+  mat.data.at(1).at(1) = u.y();
+  mat.data.at(2).at(1) = u.z();
+  mat.data.at(0).at(2) = -f.x();
+  mat.data.at(1).at(2) = -f.y();
+  mat.data.at(2).at(2) = -f.z();
+  mat.data.at(3).at(0) = -(s * eye);
+  mat.data.at(3).at(1) = -(u * eye);
+  mat.data.at(3).at(2) = -(f * eye);
   return mat;
 }
 

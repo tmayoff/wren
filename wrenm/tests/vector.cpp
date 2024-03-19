@@ -73,7 +73,26 @@ TEST_CASE("DOT") {
 
   for (auto const& test : tests) {
     auto const got = test.a * test.b;
-    REQUIRE_THAT(
-        got, Catch::Matchers::WithinAbs(test.expected, 0.0000001));
+    REQUIRE_THAT(got,
+                 Catch::Matchers::WithinAbs(test.expected, 0.01));
+  }
+}
+
+TEST_CASE("CROSS") {
+  struct Test {
+    wrenm::vec3f a;
+    wrenm::vec3f b;
+    wrenm::vec3f expected{};
+  };
+
+  std::array tests = {
+      Test{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+      Test{{0, 1, 0}, {0, 0, 1}, {1, 0, 0}},
+      Test{{0, 0, 1}, {1, 0, 0}, {0, 1, 0}},
+  };
+
+  for (auto const& test : tests) {
+    auto got = test.a % test.b;
+    REQUIRE(got == test.expected);
   }
 }

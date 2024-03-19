@@ -166,8 +166,8 @@ auto Shader::create_graphics_pipeline(
 
   vk::PipelineRasterizationStateCreateInfo rasterization(
       {}, false, false, vk::PolygonMode::eFill,
-      vk::CullModeFlagBits::eBack, vk::FrontFace::eClockwise, false,
-      {}, {}, {}, 1.0f);
+      vk::CullModeFlagBits::eNone, vk::FrontFace::eCounterClockwise,
+      false, {}, {}, {}, 1.0f);
 
   vk::PipelineMultisampleStateCreateInfo multisample{
       {}, vk::SampleCountFlagBits::e1, false};

@@ -4,6 +4,8 @@
 #include <vulkan/vulkan.hpp>
 #include <wrenm/geometry.hpp>
 
+#include "wrenm/vector.hpp"
+
 namespace wren {
 
 Mesh::Mesh(vulkan::Device const& device, VmaAllocator allocator)
@@ -81,6 +83,10 @@ void Mesh::bind(vk::CommandBuffer const& cmd) {
   ubo.model =
       wrenm::rotate(wrenm::mat4f{}, time * wrenm::radians(90.0f),
                     wrenm::vec3f(0.0f, 0.0f, 1.0f));
+
+  ubo.view = wrenm::look_at(wrenm::vec3f(2.0f, 2.0f, 2.0f),
+                            wrenm::vec3f(0.0f, 0.0f, 0.0f),
+                            wrenm::vec3f::Z());
 
   uniform_buffer->set_data_raw(&ubo, sizeof(ubo));
 

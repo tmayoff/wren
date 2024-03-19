@@ -9,6 +9,10 @@ template <typename T, std::size_t N>
 struct vec {
   using vec_t = vec<T, N>;
 
+  static auto X() { return vec_t{1.0f}; }
+  static auto Y() { return vec_t{0.0f, 1.0f}; }
+  static auto Z() { return vec_t{0.0f, 0.0f, 1.0f}; }
+
   vec() : data() {}
 
   vec(auto&&... d) : data({{std::forward<decltype(d)>(d)...}}) {}
@@ -34,10 +38,6 @@ struct vec {
     for (std::size_t i = 0; i < N; i++)
       dot += a.data.at(i) * b.data.at(i);
     return dot;
-  }
-
-  constexpr auto operator%(vec_t const& other) const {
-    return vec_t{};
   }
 
   constexpr auto operator+(vec_t const& other) const {
@@ -97,11 +97,18 @@ struct vec3f : vec<float, 3> {
   [[nodiscard]] auto x() const { return data.at(0); }
   [[nodiscard]] auto y() const { return data.at(1); }
   [[nodiscard]] auto z() const { return data.at(2); }
+
+  auto operator%(vec3f const& other) const {
+    return vec3f{y() * other.z() - z() * other.y(),
+                 z() * other.x() - x() * other.z(),
+                 x() * other.y() - y() * other.x()};
+  }
 };
 
 struct vec4f : vec<float, 4> {
   vec4f() : vec<float, 4>() {}
-  vec4f(float x, float y) : vec<float, 4>(x, y) {}
+  vec4f(float x, float y, float z, float w)
+      : vec<float, 4>(x, y, z, w) {}
   vec4f(vec<float, 4> const& other) : vec<float, 4>(other) {}
 
   [[nodiscard]] auto x() const { return data.at(0); }
