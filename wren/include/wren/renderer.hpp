@@ -42,7 +42,6 @@ class Renderer {
       vk::SurfaceCapabilitiesKHR const &surface_capabilities)
       -> vk::Extent2D;
 
-
   std::shared_ptr<Context> ctx;
   vk::SwapchainKHR swapchain;
   std::vector<vk::Image> swapchain_images;
