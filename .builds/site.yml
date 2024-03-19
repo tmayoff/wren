@@ -4,7 +4,7 @@ packages:
   - nixos.hut
   - nixos.python3
 environment:
-  site: wren.srht.site
+  site: tmayoff.srht.site
 tasks:
   - pacakge: |
       python3 -m venv mkdocs
