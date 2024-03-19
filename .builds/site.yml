@@ -11,8 +11,6 @@ tasks:
       . mkdocs/bin/activate
       python3 -m pip install --upgrade pip
       pip install mkdocs mkdocs-material mkdocs-mermaid2-plugin
-
-      git clone git@git.sr.ht:~tmayoff/wren
       cd wren
 
   - upload: |
