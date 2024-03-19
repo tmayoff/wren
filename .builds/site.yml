@@ -10,7 +10,7 @@ tasks:
       python3 -m venv mkdocs
       . mkdocs/bin/activate
       python3 -m pip install --upgrade pip
-      pip install mkdocs mkdocs-macros mkdocs-material
+      pip install mkdocs mkdocs-material mkdocs-mermaid2-plugin
       cd $site
       tar -C site -xzf ../site.tar.gz .
 
