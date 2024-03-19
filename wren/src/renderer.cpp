@@ -108,8 +108,6 @@ auto Renderer::Create(std::shared_ptr<Context> const &ctx)
   auto res = renderer->recreate_swapchain();
   if (!res.has_value()) return tl::make_unexpected(res.error());
 
-  ERR_PROP_VOID(renderer->build_3D_render_graph());
-
   vk::Result vres = vk::Result::eSuccess;
   std::tie(vres, renderer->in_flight_fence) =
       device.get().createFence(
@@ -307,27 +305,4 @@ auto Renderer::choose_swapchain_extent(
     return actualExtent;
   }
 }
-
-auto Renderer::build_3D_render_graph()
-    -> tl::expected<void, std::error_code> {
-  GraphBuilder builder(ctx);
-
-  auto shader = Shader::Create(ctx->graphics_context->Device(),
-                               shaders::MESH_VERT_SHADER.data(),
-                               shaders::MESH_FRAG_SHADER.data())
-                    .value();
-
-  m.shader(shader);
-
-  builder.add_pass("triangle", {shader, target},
-                   [this](vk::CommandBuffer &cmd) {
-                     m.bind(cmd);
-                     m.draw(cmd);
-                   });
-
-  ERR_PROP(render_graph, builder.compile());
-
-  return {};
-}
-
 }  // namespace wren

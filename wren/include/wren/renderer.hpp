@@ -42,8 +42,6 @@ class Renderer {
       vk::SurfaceCapabilitiesKHR const &surface_capabilities)
       -> vk::Extent2D;
 
-  [[nodiscard]] auto build_3D_render_graph()
-      -> tl::expected<void, std::error_code>;
 
   std::shared_ptr<Context> ctx;
   vk::SwapchainKHR swapchain;

@@ -7,7 +7,6 @@
 #include <vulkan/vulkan.hpp>
 
 #include "render_pass.hpp"
-#include "shader.hpp"
 
 namespace wren {
 
