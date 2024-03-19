@@ -86,7 +86,10 @@ void Mesh::bind(vk::CommandBuffer const& cmd) {
 
   ubo.view = wrenm::look_at(wrenm::vec3f(2.0f, 2.0f, 2.0f),
                             wrenm::vec3f(0.0f, 0.0f, 0.0f),
-                            -wrenm::vec3f::Z());
+                            wrenm::vec3f::Z());
+
+  ubo.proj = wrenm::perspective(wrenm::radians(45.0f),
+                                2226.0f / 1415.0f, 0.01f, 1000.0f);
 
   uniform_buffer->set_data_raw(&ubo, sizeof(ubo));
 

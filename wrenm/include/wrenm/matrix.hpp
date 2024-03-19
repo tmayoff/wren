@@ -17,6 +17,7 @@ struct mat4f {
   }
 
   mat4f() { data = IDENTITY().data; }
+  mat4f(float d) { data.fill(std::array<float, 4>{d}); }
   mat4f(mat_t const& data) : data(data) {}
 
   auto operator==(mat4f const& rhs) const { return data == rhs.data; }

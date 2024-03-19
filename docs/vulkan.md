@@ -1,4 +1,7 @@
 
+# Coordinate system
+Vulkan uses a Left-Handed coordinate system, and it's clip space is -1,1
+
 # Descriptor Sets
 - https://vkguide.dev/docs/chapter-4/descriptors/
 

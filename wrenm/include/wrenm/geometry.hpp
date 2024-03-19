@@ -23,4 +23,19 @@ auto look_at(wrenm::vec3f const& position, wrenm::vec3f const& target,
 auto rotate(wrenm::mat4f const& matrix, float rotation,
             wrenm::vec3f const& axis) -> wrenm::mat4f;
 
+template <typename T>
+inline auto perspective(T fov_y, T aspect, T z_near, T z_far) {
+  T const tan_half_fovy = std::tan(fov_y / static_cast<T>(2));
+
+  mat4f res;
+  res.data.at(0).at(0) = static_cast<T>(1) / (aspect * tan_half_fovy);
+  res.data.at(1).at(1) = static_cast<T>(1) / (tan_half_fovy);
+  res.data.at(2).at(2) = (z_far + z_near) / (z_far - z_near);
+  res.data.at(2).at(3) = static_cast<T>(1);
+  res.data.at(3).at(2) =
+      (static_cast<T>(2) * z_far * z_near) / (z_far - z_near);
+
+  return res;
+}
+
 }  // namespace wrenm
