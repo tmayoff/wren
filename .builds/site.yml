@@ -1,4 +1,4 @@
-image: nixos/stable
+image: nixos/unstable
 oauth: pages.sr.ht/PAGES:RW
 packages:
   - hut  
