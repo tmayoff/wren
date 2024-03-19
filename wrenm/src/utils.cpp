@@ -5,7 +5,7 @@
 
 auto operator<<(std::ostream& os, wrenm::vec2f const& value)
     -> std::ostream& {
-  os << "(" << value.x << ", " << value.y << ")";
+  os << "(" << value.x() << ", " << value.y() << ")";
   return os;
 }
 

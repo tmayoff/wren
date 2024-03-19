@@ -1,25 +1,42 @@
 #include "geometry.hpp"
+#include <cmath>
 
 #include "matrix.hpp"
+#include "vector.hpp"
 
 namespace wrenm {
+
+auto look_at(wrenm::vec3f const& position, wrenm::vec3f const& target,
+             wrenm::vec3f const& world_up) -> wrenm::mat4f {
+  wrenm::vec3f z_axis = (position - target).normalized();
+  wrenm::vec3f x_axis = (world_up.normalized() % z_axis).normalized();
+  wrenm::vec3f y_axis = z_axis % x_axis;
+
+  mat4f mat;
+
+  return mat;
+}
+
+auto translate(mat4f mat, vec3f offset) -> mat4f {
+  return mat4f::IDENTITY();
+}
 
 auto rotate(wrenm::mat4f const& matrix, float angle,
             wrenm::vec3f const& axis) -> wrenm::mat4f {
   float const sin = std::sin(angle);
   float const cos = std::cos(angle);
-  float const x2 = axis.x * axis.x;
-  float const y2 = axis.y * axis.y;
-  float const z2 = axis.z * axis.z;
-  float const yx = axis.y * axis.x;
-  float const yz = axis.y * axis.z;
-  float const xy = axis.x * axis.y;
-  float const xz = axis.x * axis.z;
-  float const zx = axis.z * axis.x;
-  float const zy = axis.z * axis.y;
-  float const x = axis.x;
-  float const y = axis.y;
-  float const z = axis.z;
+  float const x2 = axis.x() * axis.x();
+  float const y2 = axis.y() * axis.y();
+  float const z2 = axis.z() * axis.z();
+  float const yx = axis.y() * axis.x();
+  float const yz = axis.y() * axis.z();
+  float const xy = axis.x() * axis.y();
+  float const xz = axis.x() * axis.z();
+  float const zx = axis.z() * axis.x();
+  float const zy = axis.z() * axis.y();
+  float const x = axis.x();
+  float const y = axis.y();
+  float const z = axis.z();
 
   mat4f mat = matrix;
 
