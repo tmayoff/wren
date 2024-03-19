@@ -4,15 +4,16 @@ packages:
   - nixos.hut
   - nixos.python3
 environment:
-  site: tmayoff.srht.site
+  site: wren.srht.site
 tasks:
   - pacakge: |
       python3 -m venv mkdocs
       . mkdocs/bin/activate
       python3 -m pip install --upgrade pip
       pip install mkdocs mkdocs-material mkdocs-mermaid2-plugin
-      cd $site
-      tar -C site -xzf ../site.tar.gz .
+
+      git clone git@git.sr.ht:~tmayoff/wren
+      cd wren
 
   - upload: |
       hut pages publish -d $site site.tar.gz
