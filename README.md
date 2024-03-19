@@ -1,5 +1,7 @@
 # wren
 
+[docs](https://tmayoff.srht.site)
+
 Custom vulkan renderer, with eventually no major dependencies
 
 [![builds.sr.ht status](https://builds.sr.ht/~tmayoff/wren.svg)](https://builds.sr.ht/~tmayoff/wren?)

@@ -15,7 +15,7 @@ tasks:
       tar -C site -xzf ../site.tar.gz .
 
   - upload: |
-      acurl -f https://pages.sr.ht/publish/$site -Fcontent@site.tar.gz
+      hut pages publish -d $site site.tar.gz
 
 triggers:
   - action: email
