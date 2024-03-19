@@ -2,6 +2,7 @@ image: nixos/unstable
 oauth: pages.sr.ht/PAGES:RW
 packages:
   - nixos.hut
+  - nixos.python3
 environment:
   site: tmayoff.srht.site
 tasks:
