@@ -16,6 +16,8 @@ auto GraphBuilder::add_pass(std::string const &name,
 auto GraphBuilder::compile() -> tl::expected<Graph, std::error_code> {
   Graph graph;
 
+  // TODO Create render passes and fill missing targets
+
   for (auto const &[name, resources, fn] : passes) {
     ERR_PROP(auto pass, RenderPass::Create(ctx, name, resources, fn));
     node_t n = std::make_shared<Node>(pass);

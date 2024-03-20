@@ -56,9 +56,6 @@ class RenderPass {
   vk::CommandPool command_pool;
   std::vector<vk::CommandBuffer> command_buffers;
 
-  vk::DescriptorPool descriptor_pool;
-  std::vector<vk::DescriptorSet> descriptor_set;
-
   // std::shared_ptr<RenderTarget> targets;
   std::vector<vk::Framebuffer> framebuffers;
 };

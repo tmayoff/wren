@@ -9,6 +9,7 @@
 
 #include "mesh.hpp"
 #include "wren/graph.hpp"
+#include "wren/pipeline.hpp"
 #include "wren/render_target.hpp"
 
 namespace wren {
@@ -17,7 +18,7 @@ struct Context;
 
 class Renderer {
  public:
-  static auto Create(std::shared_ptr<Context> const &ctx)
+  static auto New(std::shared_ptr<Context> const &ctx)
       -> tl::expected<std::shared_ptr<Renderer>, std::error_code>;
 
   void draw();
@@ -42,6 +43,8 @@ class Renderer {
       vk::SurfaceCapabilitiesKHR const &surface_capabilities)
       -> vk::Extent2D;
 
+  std::unordered_map<std::string, std::shared_ptr<Pipeline>>
+      pipelines;
   std::shared_ptr<Context> ctx;
   vk::SwapchainKHR swapchain;
   std::vector<vk::Image> swapchain_images;

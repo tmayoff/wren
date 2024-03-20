@@ -42,7 +42,7 @@ auto Application::Create(std::string const &application_name)
   auto ctx = std::make_shared<Context>(*window, Event::Dispatcher(),
                                        graphics_context);
 
-  ERR_PROP(auto renderer, Renderer::Create(ctx));
+  ERR_PROP(auto renderer, Renderer::New(ctx));
 
   return std::shared_ptr<Application>(new Application(ctx, renderer));
 }

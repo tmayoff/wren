@@ -4,7 +4,7 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
-#include "utils/vulkan.hpp"
+#include "utils/errors.hpp"
 #include "wren/context.hpp"
 #include "wren/renderer.hpp"
 #include "wren/utils/vulkan_errors.hpp"
@@ -52,10 +52,8 @@ auto RenderPass::Create(std::shared_ptr<Context> const& ctx,
   pass->render_pass = renderpass;
 
   auto size = resources.render_target->size;
-  auto pipeline_res = shader->create_graphics_pipeline(
-      device.get(), renderpass, size);
-  if (!pipeline_res.has_value())
-    return tl::make_unexpected(pipeline_res.error());
+  ERR_PROP_VOID(shader->create_graphics_pipeline(device.get(),
+                                                 renderpass, size));
 
   vk::Viewport viewport(0, 0, static_cast<float>(rt->size.width),
                         static_cast<float>(rt->size.height));
@@ -82,19 +80,6 @@ auto RenderPass::Create(std::shared_ptr<Context> const& ctx,
     pass->command_pool = pool;
     pass->command_buffers = bufs;
   }
-
-  //{
-  //  vk::DescriptorPoolSize pool_sizes{{}, 1};
-  //  vk::DescriptorPoolCreateInfo create_info({}, 1, 1, &pool_sizes);
-  //  VK_TIE_ERR_PROP(pass->descriptor_pool,
-  //                  device.get().createDescriptorPool(create_info));
-
-  //  auto const layout = resources.shader->descriptor_layout();
-  //  vk::DescriptorSetAllocateInfo alloc_info{pass->descriptor_pool,
-  //                                           layout};
-  //  VK_TIE_ERR_PROP(pass->descriptor_set,
-  //                  device.get().allocateDescriptorSets(alloc_info));
-  //}
 
   return pass;
 }
@@ -128,7 +113,7 @@ void RenderPass::execute(uint32_t image_index) {
   auto res = cmd.begin(vk::CommandBufferBeginInfo{});
   if (res != vk::Result::eSuccess) return;
 
-  auto extent = resources.render_target->size;
+  auto const extent = resources.render_target->size;
 
   vk::ClearValue clear_value(
       vk::ClearColorValue{std::array<float, 4>{0.0, 0.0, 0.0, 1.0}});

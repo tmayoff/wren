@@ -15,7 +15,6 @@
 #include "tl/expected.hpp"
 #include "vulkan/vulkan_structs.hpp"
 #include "wren/utils/vulkan_errors.hpp"
-#include "wren/window.hpp"
 
 namespace wren {
 

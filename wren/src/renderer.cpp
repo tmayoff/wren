@@ -96,7 +96,7 @@ Renderer::Renderer(std::shared_ptr<Context> const &ctx)
       m(ctx->graphics_context->Device(),
         ctx->graphics_context->allocator()) {}
 
-auto Renderer::Create(std::shared_ptr<Context> const &ctx)
+auto Renderer::New(std::shared_ptr<Context> const &ctx)
     -> tl::expected<std::shared_ptr<Renderer>, std::error_code> {
   ZoneScoped;
 

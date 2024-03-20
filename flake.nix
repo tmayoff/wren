@@ -105,6 +105,8 @@
               gdb
               just
 
+              doxygen_gui
+              graphviz
               mkdocs
               python311Packages.mkdocs-material
               python311Packages.mkdocs-mermaid2-plugin
