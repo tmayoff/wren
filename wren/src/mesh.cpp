@@ -67,11 +67,11 @@ Mesh::Mesh(vulkan::Device const& device, VmaAllocator allocator)
   }
 }
 
-void Mesh::draw(vk::CommandBuffer const& cmd) {
+void Mesh::draw(vk::CommandBuffer const& cmd) const {
   cmd.drawIndexed(indices.size(), 1, 0, 0, 0);
 }
 
-void Mesh::bind(vk::CommandBuffer const& cmd) {
+void Mesh::bind(vk::CommandBuffer const& cmd) const {
   static auto start_time = std::chrono::high_resolution_clock::now();
   auto current_time = std::chrono::high_resolution_clock::now();
   float time =
