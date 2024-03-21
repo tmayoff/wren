@@ -14,6 +14,7 @@ struct Context;
 
 struct PassResources {
   std::shared_ptr<Shader> shader;
+  std::string target_name;
   std::shared_ptr<RenderTarget> render_target;
 };
 
@@ -27,7 +28,7 @@ class RenderPass {
                      execute_fn_t const& fn)
       -> tl::expected<std::shared_ptr<RenderPass>, std::error_code>;
 
-  void execute(uint32_t image_index);
+  void execute();
 
   void on_resource_resized(std::pair<float, float> const& size);
 
@@ -35,16 +36,13 @@ class RenderPass {
     return command_buffers;
   }
 
-  [[nodiscard]] auto get_framebuffers() const { return framebuffers; }
+  [[nodiscard]] auto get_framebuffer() const { return framebuffer; }
 
   void recreate_framebuffers(vk::Device const& device);
 
  private:
   RenderPass(std::string name, PassResources resources,
-             execute_fn_t fn)
-      : name(std::move(name)),
-        resources(std::move(resources)),
-        execute_fn(std::move(fn)) {}
+             execute_fn_t fn);
 
   std::string name;
   PassResources resources;
@@ -56,8 +54,8 @@ class RenderPass {
   vk::CommandPool command_pool;
   std::vector<vk::CommandBuffer> command_buffers;
 
-  // std::shared_ptr<RenderTarget> targets;
-  std::vector<vk::Framebuffer> framebuffers;
+  std::shared_ptr<RenderTarget> target;
+  vk::Framebuffer framebuffer;
 };
 
 }  // namespace wren

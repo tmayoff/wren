@@ -15,7 +15,7 @@ test: build
 run_renderdoc:
     ENABLE_VULKAN_RENDERDOC_CAPTURE=1 ./build/editor/wren_editor
 
-gdb:
+gdb: build
     gdb --tui --args ./build/editor/wren_editor
 
 clean:

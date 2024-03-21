@@ -21,7 +21,7 @@ auto RenderPass::Create(std::shared_ptr<Context> const& ctx,
 
   auto const& device = ctx->graphics_context->Device();
   auto const& swapchain_images =
-      ctx->renderer->get_swapchain_images_views();
+      ctx->renderer->swapchain_images_views();
 
   auto const& shader = resources.shader;
 
@@ -84,30 +84,40 @@ auto RenderPass::Create(std::shared_ptr<Context> const& ctx,
   return pass;
 }
 
+RenderPass::RenderPass(std::string name, PassResources resources,
+                       execute_fn_t fn)
+    : name(std::move(name)),
+      resources(std::move(resources)),
+      execute_fn(std::move(fn)),
+      target(this->resources.render_target) {}
+
 void RenderPass::on_resource_resized(
     std::pair<float, float> const& size) {}
 
 void RenderPass::recreate_framebuffers(vk::Device const& device) {
-  vk::Result res = vk::Result::eSuccess;
-
-  framebuffers.clear();
-
   auto const& rt = resources.render_target;
-  for (auto const& image_view :
-       resources.render_target->image_views) {
-    vk::Framebuffer fb;
-    std::tie(res, fb) = device.createFramebuffer(
-        vk::FramebufferCreateInfo{{},
-                                  render_pass,
-                                  image_view,
-                                  rt->size.width,
-                                  rt->size.height,
-                                  1});
-    framebuffers.push_back(fb);
+
+  vk::FramebufferAttachmentImageInfo image_info{
+      {},
+      vk::ImageUsageFlagBits::eColorAttachment,
+      rt->size.width,
+      rt->size.height,
+      1,
+      rt->format};
+  vk::FramebufferAttachmentsCreateInfo attachements(image_info);
+  vk::FramebufferCreateInfo create_info(
+      vk::FramebufferCreateFlagBits::eImageless, render_pass, 1, {},
+      rt->size.width, rt->size.height, 1, &attachements);
+
+  auto [res, fb] = device.createFramebuffer(create_info);
+  if (res != vk::Result::eSuccess) {
+    throw std::runtime_error("Failed to create framebuffer");
   }
+
+  framebuffer = fb;
 }
 
-void RenderPass::execute(uint32_t image_index) {
+void RenderPass::execute() {
   auto& cmd = command_buffers.front();
 
   auto res = cmd.begin(vk::CommandBufferBeginInfo{});
@@ -118,9 +128,11 @@ void RenderPass::execute(uint32_t image_index) {
   vk::ClearValue clear_value(
       vk::ClearColorValue{std::array<float, 4>{0.0, 0.0, 0.0, 1.0}});
 
-  vk::RenderPassBeginInfo rp_begin(render_pass,
-                                   framebuffers.at(image_index),
-                                   {{}, extent}, clear_value);
+  vk::RenderPassAttachmentBeginInfo attachment_begin(
+      target->image_view);
+  vk::RenderPassBeginInfo rp_begin(render_pass, framebuffer,
+                                   {{}, extent}, clear_value,
+                                   &attachment_begin);
 
   cmd.beginRenderPass(rp_begin, vk::SubpassContents::eInline);
 

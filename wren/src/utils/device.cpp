@@ -38,8 +38,12 @@ auto Device::CreateDevice(vk::Instance const &instance,
                            VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME};
 
   {
+    auto features2 = physical_device.getFeatures2<
+        vk::PhysicalDeviceFeatures2,
+        vk::PhysicalDeviceImagelessFramebufferFeatures>();
+
     vk::DeviceCreateInfo createInfo({}, queue_create_info, {},
-                                    extensions);
+                                    extensions, {}, &features2);
     auto res = physical_device.createDevice(createInfo);
     if (res.result != vk::Result::eSuccess)
       return tl::make_unexpected(make_error_code(res.result));

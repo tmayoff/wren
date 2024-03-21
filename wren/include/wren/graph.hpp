@@ -7,6 +7,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "render_pass.hpp"
+#include "utils/errors.hpp"
 
 namespace wren {
 
@@ -30,7 +31,7 @@ class GraphBuilder {
   explicit GraphBuilder(std::shared_ptr<Context> const &ctx)
       : ctx(ctx) {}
 
-  auto compile() -> tl::expected<Graph, std::error_code>;
+  [[nodiscard]] auto compile() const -> expected<Graph>;
 
   auto add_pass(std::string const &name,
                 PassResources const &resources,

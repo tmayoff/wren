@@ -7,8 +7,11 @@
 #include "macros.hpp"
 
 namespace wren {
-template <typename ValueType, typename ErrorType = std::error_code>
-struct expected : public tl::expected<ValueType, ErrorType> {};
+// template <typename ValueType, typename ErrorType = std::error_code>
+// struct expected : public tl::expected<ValueType, ErrorType> {};
+
+template <typename T>
+using expected = tl::expected<T, std::error_code>;
 
 }  // namespace wren
 
@@ -33,12 +36,12 @@ struct expected : public tl::expected<ValueType, ErrorType> {};
   };                                                                \
   }                                                                 \
   inline auto ERROR_ENUM##_category()                               \
-      ->const detail::ERROR_ENUM##_category& {                      \
+      -> const detail::ERROR_ENUM##_category& {                     \
     static detail::ERROR_ENUM##_category c;                         \
     return c;                                                       \
   }                                                                 \
   inline auto make_error_code(NAMESPACE::ERROR_ENUM ec)             \
-      ->std::error_code {                                           \
+      -> std::error_code {                                          \
     return {static_cast<int32_t>(ec), ERROR_ENUM##_category()};     \
   }
 
@@ -98,7 +101,7 @@ struct expected : public tl::expected<ValueType, ErrorType> {};
 /// @param on_err The expression to run if there's an error
 ///
 // NOLINTNEXTLINE
-#define ERR_VOID_OR(err, on_err)        \
+#define ERR_VOID_OR(err, on_err)             \
   const auto LINEIZE(res, __LINE__) = err;   \
   if (!LINEIZE(res, __LINE__).has_value()) { \
     on_err                                   \

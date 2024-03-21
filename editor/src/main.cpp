@@ -31,6 +31,8 @@ auto main() -> int {
     return EXIT_FAILURE;
   }
 
+  app->context()->renderer->set_graph_builder(g_err.value());
+
   app->run();
 
   return EXIT_SUCCESS;
@@ -52,12 +54,11 @@ auto build_3D_render_graph(std::shared_ptr<wren::Context> const &ctx)
                            wren::shaders::MESH_VERT_SHADER.data(),
                            wren::shaders::MESH_FRAG_SHADER.data()));
 
-  builder.add_pass("3d_mesh", {mesh_shader},
+  builder.add_pass("3d_mesh", {mesh_shader, "swapchain_target"},
                    [](vk::CommandBuffer &cmd) {});
 
-  builder.add_pass("ui", {ui_shader}, [](vk::CommandBuffer &cmd) {});
-
-  ERR_PROP(auto render_graph, builder.compile());
+  // builder.add_pass("ui", {ui_shader}, [](vk::CommandBuffer &cmd)
+  // {});
 
   return builder;
 }

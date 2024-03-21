@@ -8,14 +8,11 @@
 #include <vulkan/vulkan_structs.hpp>
 #include <vulkan/vulkan_to_string.hpp>
 
-#include "utils/errors.hpp"
 #include "utils/tracy.hpp"  // IWYU pragma: export
 #include "utils/vulkan_errors.hpp"
 #include "wren/context.hpp"
-#include "wren/graph.hpp"
 #include "wren/mesh.hpp"
 #include "wren/render_pass.hpp"
-#include "wren/shaders/mesh.hpp"
 
 namespace wren {
 
@@ -52,6 +49,9 @@ auto Renderer::begin_frame()
     }
   }
 
+  render_targets_.at(SWAPCHAIN_RENDERTARGET_NAME.data())->image_view =
+      swapchain_image_views_.at(image_index);
+
   return image_index;
 }
 
@@ -62,7 +62,7 @@ void Renderer::end_frame(uint32_t image_index) {
   std::vector<vk::CommandBuffer> cmd_bufs;
   for (auto g : render_graph) {
     ZoneScopedN("render_pass->execute()");
-    g->render_pass->execute(image_index);
+    g->render_pass->execute();
     cmd_bufs = g->render_pass->get_command_buffers();
   }
 
@@ -143,15 +143,14 @@ auto Renderer::recreate_swapchain()
 
   // ============ Destroy previous resources
   for (auto const &node : render_graph) {
-    auto const &fbs = node->render_pass->get_framebuffers();
-    for (auto const &fb : fbs) device.get().destroyFramebuffer(fb);
+    // auto const &fbs = node->render_pass->get_framebuffers();
+    // for (auto const &fb : fbs) device.get().destroyFramebuffer(fb);
   }
 
-  if (target != nullptr) {
-    for (auto const &iv : target->image_views)
+  if (render_targets_.contains(SWAPCHAIN_RENDERTARGET_NAME.data())) {
+    for (auto const &iv : swapchain_image_views_)
       device.get().destroyImageView(iv);
-    target->image_views.clear();
-    swapchain_image_views.clear();
+    swapchain_image_views_.clear();
   }
 
   device.get().destroySwapchainKHR(swapchain);
@@ -220,7 +219,7 @@ auto Renderer::recreate_swapchain()
 
   swapchain_image_format = format.format;
 
-  swapchain_image_views.reserve(swapchain_images.size());
+  swapchain_image_views_.reserve(swapchain_images.size());
   for (auto const &swapchain_image : swapchain_images) {
     vk::ImageViewCreateInfo create_info(
         {}, swapchain_image, vk::ImageViewType::e2D,
@@ -229,24 +228,27 @@ auto Renderer::recreate_swapchain()
                                   1, 0, 1));
 
     vk::ImageView image_view;
-    std::tie(res, image_view) =
+    VK_TIE_ERR_PROP(
+        image_view,
         ctx->graphics_context->Device().get().createImageView(
-            create_info);
+            create_info));
 
-    swapchain_image_views.push_back(image_view);
-
-    if (res != vk::Result::eSuccess)
-      return tl::make_unexpected(make_error_code(res));
+    swapchain_image_views_.push_back(image_view);
   }
 
-  if (target == nullptr) {
-    target = std::make_shared<RenderTarget>(
-        swapchain_extent, swapchain_image_format,
-        vk::SampleCountFlagBits::e1, swapchain_image_views);
+  if (!render_targets_.contains(SWAPCHAIN_RENDERTARGET_NAME.data())) {
+    render_targets_.emplace(
+        SWAPCHAIN_RENDERTARGET_NAME.data(),
+        std::make_shared<RenderTarget>(
+            swapchain_extent, swapchain_image_format,
+            vk::SampleCountFlagBits::e1,
+            swapchain_image_views_.front()));
   } else {
+    auto const &target =
+        render_targets_.at(SWAPCHAIN_RENDERTARGET_NAME.data());
     target->size = swapchain_extent;
     target->format = swapchain_image_format;
-    target->image_views = swapchain_image_views;
+    target->image_view = swapchain_image_views_.front();
   }
 
   for (auto const &g : render_graph)
