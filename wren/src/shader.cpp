@@ -52,6 +52,7 @@ auto ShaderModule::get_vertex_input_attributes() const
   uint32_t offset = 0;
   std::vector<vk::VertexInputAttributeDescription> attrs;
   for (auto const &input : input_variables) {
+    if (input->location == UINT32_MAX) continue;
     attrs.emplace_back(input->location, 0,
                        static_cast<vk::Format>(input->format),
                        offset);

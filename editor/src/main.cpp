@@ -7,6 +7,7 @@
 #include <wren/shaders/mesh.hpp>
 #include <wren/shaders/triangle.hpp>
 #include <wren/utils/errors.hpp>
+#include <wren_gui/instance.hpp>
 
 class Scene {
  public:
@@ -20,6 +21,7 @@ class Scene {
       -> tl::expected<wren::GraphBuilder, std::error_code>;
 
  private:
+  std::shared_ptr<wren::gui::Instance> gui_instance;
   std::shared_ptr<wren::Context> ctx;
   wren::Mesh mesh;
 };
@@ -69,16 +71,12 @@ auto Scene::build_3D_render_graph(
                wren::shaders::TRIANGLE_VERT_SHADER.data(),
                wren::shaders::TRIANGLE_FRAG_SHADER.data()));
 
-  // mesh.shader(mesh_shader);
-  // builder.add_pass("3d_mesh", {mesh_shader, "mesh_output"},
-  //                  [this](vk::CommandBuffer &cmd) {
-  //                    mesh.bind(cmd);
-  //                    mesh.draw(cmd);
-  //                  });
-
-  builder.add_pass(
-      "ui", {ui_shader, "swapchain_target"},
-      [](vk::CommandBuffer &cmd) { cmd.draw(3, 1, 0, 0); });
+  mesh.shader(mesh_shader);
+  builder.add_pass("scene", {mesh_shader, "swapchain_target"},
+                   [this](vk::CommandBuffer &cmd) {
+                     mesh.bind(cmd);
+                     mesh.draw(cmd);
+                   });
 
   return builder;
 }
