@@ -20,7 +20,7 @@ struct PassResources {
 
 class RenderPass {
  public:
-  using execute_fn_t = std::function<void(vk::CommandBuffer&)>;
+  using execute_fn_t = std::function<void(VK_NS::CommandBuffer&)>;
 
   static auto Create(std::shared_ptr<Context> const& ctx,
                      std::string const& name,
@@ -38,7 +38,7 @@ class RenderPass {
 
   [[nodiscard]] auto get_framebuffer() const { return framebuffer; }
 
-  void recreate_framebuffers(vk::Device const& device);
+  void recreate_framebuffers(VK_NS::Device const& device);
 
  private:
   RenderPass(std::string name, PassResources resources,
@@ -49,13 +49,13 @@ class RenderPass {
 
   execute_fn_t execute_fn;
 
-  vk::RenderPass render_pass;
+  VK_NS::RenderPass render_pass;
 
-  vk::CommandPool command_pool;
-  std::vector<vk::CommandBuffer> command_buffers;
+  VK_NS::CommandPool command_pool;
+  std::vector<VK_NS::CommandBuffer> command_buffers;
 
   std::shared_ptr<RenderTarget> target;
-  vk::Framebuffer framebuffer;
+  VK_NS::Framebuffer framebuffer;
 };
 
 }  // namespace wren

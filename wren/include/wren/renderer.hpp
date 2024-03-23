@@ -42,33 +42,33 @@ class Renderer {
   auto recreate_swapchain() -> expected<void>;
 
   auto choose_swapchain_format(
-      std::vector<vk::SurfaceFormatKHR> const &formats)
-      -> vk::SurfaceFormatKHR;
+      std::vector<VK_NS::SurfaceFormatKHR> const &formats)
+      -> VK_NS::SurfaceFormatKHR;
   auto choose_swapchain_presentation_mode(
-      std::vector<vk::PresentModeKHR> const &formats)
-      -> vk::PresentModeKHR;
+      std::vector<VK_NS::PresentModeKHR> const &formats)
+      -> VK_NS::PresentModeKHR;
   auto choose_swapchain_extent(
-      vk::SurfaceCapabilitiesKHR const &surface_capabilities)
-      -> vk::Extent2D;
+      VK_NS::SurfaceCapabilitiesKHR const &surface_capabilities)
+      -> VK_NS::Extent2D;
 
   std::unordered_map<std::string, std::shared_ptr<Pipeline>>
       pipelines;
   std::shared_ptr<Context> ctx;
-  vk::SwapchainKHR swapchain;
-  std::vector<vk::Image> swapchain_images;
-  std::vector<vk::ImageView> swapchain_image_views_;
+  VK_NS::SwapchainKHR swapchain;
+  std::vector<VK_NS::Image> swapchain_images;
+  std::vector<VK_NS::ImageView> swapchain_image_views_;
 
   std::unordered_map<std::string, std::shared_ptr<RenderTarget>>
       render_targets_;
 
-  vk::Format swapchain_image_format = vk::Format::eB8G8R8Srgb;
-  vk::Extent2D swapchain_extent;
+  VK_NS::Format swapchain_image_format = VK_NS::Format::eB8G8R8Srgb;
+  VK_NS::Extent2D swapchain_extent;
 
-  vk::Semaphore image_available;
-  vk::Semaphore render_finished;
-  vk::Fence in_flight_fence;
+  VK_NS::Semaphore image_available;
+  VK_NS::Semaphore render_finished;
+  VK_NS::Fence in_flight_fence;
 
-  vk::CommandPool command_pool;
+  VK_NS::CommandPool command_pool;
 
   Graph render_graph;
 

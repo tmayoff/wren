@@ -4,7 +4,7 @@ namespace wren::gui {
 
 Instance::Instance() {}
 
-void Instance::draw(vk::CommandBuffer const& cmd) {}
+void Instance::draw(VK_NS::CommandBuffer const& cmd) {}
 
 auto Instance::BeginWindow() -> bool { return true; }
 

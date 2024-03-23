@@ -20,6 +20,8 @@ add_compile_options("$<$<CONFIG:DEBUG>:-DWREN_DEBUG>")
 add_compile_options("-DVULKAN_HPP_NO_EXCEPTIONS")
 add_compile_options("-DVULKAN_HPP_ASSERT_ON_RESULT(x)")
 add_compile_options("-DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1")
+add_compile_options("-DVULKAN_HPP_NAMESPACE=_VK_")
+add_compile_options("-DVK_NS=_VK_")
 
 include(CTest)
 include(FetchContent)

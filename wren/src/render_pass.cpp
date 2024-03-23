@@ -25,27 +25,27 @@ auto RenderPass::Create(std::shared_ptr<Context> const& ctx,
 
   auto const& shader = resources.shader;
 
-  std::vector<vk::AttachmentDescription> attachments;
+  std::vector<VK_NS::AttachmentDescription> attachments;
 
   auto const& rt = resources.render_target;
-  vk::AttachmentDescription attachment(
-      {}, rt->format, rt->sample_count, vk::AttachmentLoadOp::eClear,
-      vk::AttachmentStoreOp::eStore, vk::AttachmentLoadOp::eDontCare,
-      vk::AttachmentStoreOp::eDontCare, vk::ImageLayout::eUndefined,
-      vk::ImageLayout::ePresentSrcKHR);
+  VK_NS::AttachmentDescription attachment(
+      {}, rt->format, rt->sample_count, VK_NS::AttachmentLoadOp::eClear,
+      VK_NS::AttachmentStoreOp::eStore, VK_NS::AttachmentLoadOp::eDontCare,
+      VK_NS::AttachmentStoreOp::eDontCare, VK_NS::ImageLayout::eUndefined,
+      VK_NS::ImageLayout::ePresentSrcKHR);
   attachments.push_back(attachment);
 
-  vk::AttachmentReference attachment_ref(
-      0, vk::ImageLayout::eColorAttachmentOptimal);
-  vk::SubpassDescription subpass({}, vk::PipelineBindPoint::eGraphics,
+  VK_NS::AttachmentReference attachment_ref(
+      0, VK_NS::ImageLayout::eColorAttachmentOptimal);
+  VK_NS::SubpassDescription subpass({}, VK_NS::PipelineBindPoint::eGraphics,
                                  {}, attachment_ref);
 
-  vk::SubpassDependency dependency(
+  VK_NS::SubpassDependency dependency(
       VK_SUBPASS_EXTERNAL, 0,
-      vk::PipelineStageFlagBits::eColorAttachmentOutput,
-      vk::PipelineStageFlagBits::eColorAttachmentOutput, {},
-      vk::AccessFlagBits::eColorAttachmentWrite);
-  vk::RenderPassCreateInfo create_info({}, attachments, subpass,
+      VK_NS::PipelineStageFlagBits::eColorAttachmentOutput,
+      VK_NS::PipelineStageFlagBits::eColorAttachmentOutput, {},
+      VK_NS::AccessFlagBits::eColorAttachmentWrite);
+  VK_NS::RenderPassCreateInfo create_info({}, attachments, subpass,
                                        dependency);
 
   auto [res, renderpass] = device.get().createRenderPass(create_info);
@@ -55,25 +55,25 @@ auto RenderPass::Create(std::shared_ptr<Context> const& ctx,
   ERR_PROP_VOID(shader->create_graphics_pipeline(device.get(),
                                                  renderpass, size));
 
-  vk::Viewport viewport(0, 0, static_cast<float>(rt->size.width),
+  VK_NS::Viewport viewport(0, 0, static_cast<float>(rt->size.width),
                         static_cast<float>(rt->size.height));
-  vk::Rect2D scissor({}, rt->size);
-  vk::PipelineViewportStateCreateInfo viewport_state({}, viewport,
+  VK_NS::Rect2D scissor({}, rt->size);
+  VK_NS::PipelineViewportStateCreateInfo viewport_state({}, viewport,
                                                      scissor);
   pass->recreate_framebuffers(device.get());
 
   {
-    std::vector<vk::CommandBuffer> cmds;
+    std::vector<VK_NS::CommandBuffer> cmds;
     auto [res, pool] =
-        device.get().createCommandPool(vk::CommandPoolCreateInfo{
-            vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+        device.get().createCommandPool(VK_NS::CommandPoolCreateInfo{
+            VK_NS::CommandPoolCreateFlagBits::eResetCommandBuffer,
             ctx->graphics_context->FindQueueFamilyIndices()
                 .value()
                 .graphics_index});
 
-    vk::CommandBufferAllocateInfo alloc_info{
-        pool, vk::CommandBufferLevel::ePrimary, 1};
-    std::vector<vk::CommandBuffer> bufs;
+    VK_NS::CommandBufferAllocateInfo alloc_info{
+        pool, VK_NS::CommandBufferLevel::ePrimary, 1};
+    std::vector<VK_NS::CommandBuffer> bufs;
     std::tie(res, bufs) =
         device.get().allocateCommandBuffers(alloc_info);
 
@@ -94,23 +94,23 @@ RenderPass::RenderPass(std::string name, PassResources resources,
 void RenderPass::on_resource_resized(
     std::pair<float, float> const& size) {}
 
-void RenderPass::recreate_framebuffers(vk::Device const& device) {
+void RenderPass::recreate_framebuffers(VK_NS::Device const& device) {
   auto const& rt = resources.render_target;
 
-  vk::FramebufferAttachmentImageInfo image_info{
+  VK_NS::FramebufferAttachmentImageInfo image_info{
       {},
-      vk::ImageUsageFlagBits::eColorAttachment,
+      VK_NS::ImageUsageFlagBits::eColorAttachment,
       rt->size.width,
       rt->size.height,
       1,
       rt->format};
-  vk::FramebufferAttachmentsCreateInfo attachements(image_info);
-  vk::FramebufferCreateInfo create_info(
-      vk::FramebufferCreateFlagBits::eImageless, render_pass, 1, {},
+  VK_NS::FramebufferAttachmentsCreateInfo attachements(image_info);
+  VK_NS::FramebufferCreateInfo create_info(
+      VK_NS::FramebufferCreateFlagBits::eImageless, render_pass, 1, {},
       rt->size.width, rt->size.height, 1, &attachements);
 
   auto [res, fb] = device.createFramebuffer(create_info);
-  if (res != vk::Result::eSuccess) {
+  if (res != VK_NS::Result::eSuccess) {
     throw std::runtime_error("Failed to create framebuffer");
   }
 
@@ -120,36 +120,36 @@ void RenderPass::recreate_framebuffers(vk::Device const& device) {
 void RenderPass::execute() {
   auto& cmd = command_buffers.front();
 
-  auto res = cmd.begin(vk::CommandBufferBeginInfo{});
-  if (res != vk::Result::eSuccess) return;
+  auto res = cmd.begin(VK_NS::CommandBufferBeginInfo{});
+  if (res != VK_NS::Result::eSuccess) return;
 
   auto const extent = resources.render_target->size;
 
-  vk::ClearValue clear_value(
-      vk::ClearColorValue{std::array<float, 4>{0.0, 0.0, 0.0, 1.0}});
+  VK_NS::ClearValue clear_value(
+      VK_NS::ClearColorValue{std::array<float, 4>{0.0, 0.0, 0.0, 1.0}});
 
-  vk::RenderPassAttachmentBeginInfo attachment_begin(
+  VK_NS::RenderPassAttachmentBeginInfo attachment_begin(
       target->image_view);
-  vk::RenderPassBeginInfo rp_begin(render_pass, framebuffer,
+  VK_NS::RenderPassBeginInfo rp_begin(render_pass, framebuffer,
                                    {{}, extent}, clear_value,
                                    &attachment_begin);
 
-  cmd.beginRenderPass(rp_begin, vk::SubpassContents::eInline);
+  cmd.beginRenderPass(rp_begin, VK_NS::SubpassContents::eInline);
 
-  cmd.bindPipeline(vk::PipelineBindPoint::eGraphics,
+  cmd.bindPipeline(VK_NS::PipelineBindPoint::eGraphics,
                    resources.shader->get_pipeline());
 
   cmd.setViewport(0,
-                  vk::Viewport{0, 0, static_cast<float>(extent.width),
+                  VK_NS::Viewport{0, 0, static_cast<float>(extent.width),
                                static_cast<float>(extent.height)});
-  cmd.setScissor(0, vk::Rect2D{{0, 0}, extent});
+  cmd.setScissor(0, VK_NS::Rect2D{{0, 0}, extent});
 
   if (execute_fn) execute_fn(cmd);
 
   cmd.endRenderPass();
 
   res = cmd.end();
-  if (res != vk::Result::eSuccess) {
+  if (res != VK_NS::Result::eSuccess) {
     spdlog::error("Failed to record command buffer {}",
                   make_error_code(res).message());
   }

@@ -12,20 +12,20 @@ using spirv_t = std::vector<uint32_t>;
 
 inline auto get_vk_shader_stage(
     const spv::ExecutionModel &execution_model)
-    -> tl::expected<vk::ShaderStageFlagBits, std::error_code> {
+    -> tl::expected<VK_NS::ShaderStageFlagBits, std::error_code> {
   switch (execution_model) {
     case spv::ExecutionModelVertex:
-      return vk::ShaderStageFlagBits::eVertex;
+      return VK_NS::ShaderStageFlagBits::eVertex;
     case spv::ExecutionModelTessellationControl:
-      return vk::ShaderStageFlagBits::eTessellationControl;
+      return VK_NS::ShaderStageFlagBits::eTessellationControl;
     case spv::ExecutionModelTessellationEvaluation:
-      return vk::ShaderStageFlagBits::eTessellationEvaluation;
+      return VK_NS::ShaderStageFlagBits::eTessellationEvaluation;
     case spv::ExecutionModelGeometry:
-      return vk::ShaderStageFlagBits::eGeometry;
+      return VK_NS::ShaderStageFlagBits::eGeometry;
     case spv::ExecutionModelFragment:
-      return vk::ShaderStageFlagBits::eFragment;
+      return VK_NS::ShaderStageFlagBits::eFragment;
     case spv::ExecutionModelGLCompute:
-      return vk::ShaderStageFlagBits::eCompute;
+      return VK_NS::ShaderStageFlagBits::eCompute;
     default:
       return tl::make_unexpected(
           std::make_error_code(std::errc::invalid_argument));

@@ -8,7 +8,7 @@ class Instance {
  public:
   Instance();
 
-  void draw(vk::CommandBuffer const& cmd);
+  void draw(VK_NS::CommandBuffer const& cmd);
 
   auto BeginWindow() -> bool;
   auto EndWindow() -> bool;

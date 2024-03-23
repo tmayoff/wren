@@ -37,8 +37,8 @@ auto Window::Create(std::string const &application_name)
 
 void Window::Shutdown() { SDL_Quit(); }
 
-auto Window::CreateSurface(vk::Instance const &instance)
-    -> tl::expected<vk::SurfaceKHR, std::error_code> {
+auto Window::CreateSurface(VK_NS::Instance const &instance)
+    -> tl::expected<VK_NS::SurfaceKHR, std::error_code> {
   VkSurfaceKHR surface{};
   SDL_Vulkan_CreateSurface(window, instance, &surface);
 

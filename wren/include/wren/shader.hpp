@@ -19,18 +19,18 @@ namespace wren {
 
 struct ShaderModule {
   reflect::spirv_t spirv;
-  vk::ShaderModule module;
+  VK_NS::ShaderModule module;
   std::shared_ptr<spv_reflect::ShaderModule> reflection;
 
   ShaderModule() = default;
   ShaderModule(reflect::spirv_t spirv,
-               vk::ShaderModule const &module);
+               VK_NS::ShaderModule const &module);
 
   [[nodiscard]] auto get_vertex_input_bindings() const
-      -> std::vector<vk::VertexInputBindingDescription>;
+      -> std::vector<VK_NS::VertexInputBindingDescription>;
 
   [[nodiscard]] auto get_vertex_input_attributes() const
-      -> std::vector<vk::VertexInputAttributeDescription>;
+      -> std::vector<VK_NS::VertexInputAttributeDescription>;
 };
 
 class Shader {
@@ -40,7 +40,7 @@ class Shader {
                      std::string const &fragment_shader)
       -> tl::expected<std::shared_ptr<Shader>, std::error_code>;
 
-  static auto compile_shader(vk::Device const &device,
+  static auto compile_shader(VK_NS::Device const &device,
                              shaderc_shader_kind const &shader_kind,
                              std::string const &filename,
                              std::string const &shader_source)
@@ -62,15 +62,15 @@ class Shader {
     vertex_shader_module = vertex;
   }
 
-  auto create_graphics_pipeline(vk::Device const &device,
-                                vk::RenderPass const &render_pass,
-                                vk::Extent2D const &size)
+  auto create_graphics_pipeline(VK_NS::Device const &device,
+                                VK_NS::RenderPass const &render_pass,
+                                VK_NS::Extent2D const &size)
       -> tl::expected<void, std::error_code>;
 
  private:
-  vk::DescriptorSetLayout descriptor_layout_;
-  vk::PipelineLayout pipeline_layout_;
-  vk::Pipeline pipeline;
+  VK_NS::DescriptorSetLayout descriptor_layout_;
+  VK_NS::PipelineLayout pipeline_layout_;
+  VK_NS::Pipeline pipeline;
 
   ShaderModule vertex_shader_module;
   ShaderModule fragment_shader_module;

@@ -44,10 +44,10 @@ namespace wren::vulkan {
         instance.getProcAddr(#fn_name));                           \
     if (out == nullptr)                                            \
       return tl::make_unexpected(                                  \
-          make_error_code(vk::Result::eErrorExtensionNotPresent)); \
+          make_error_code(VK_NS::Result::eErrorExtensionNotPresent)); \
   }
 
-auto LoadFunctions(vk::Instance const &instance)
+auto LoadFunctions(VK_NS::Instance const &instance)
     -> tl::expected<void, std::error_code> {
   LOAD_VULKAN_PFN(pfnVkCmdPushConstants, vkCmdPushConstants);
   LOAD_VULKAN_PFN(pfnVkCreateDebugUtilsMessengerEXT,
@@ -88,26 +88,26 @@ auto DebugCallback(
 }
 
 auto GetSwapchainSupportDetails(
-    vk::PhysicalDevice const &physical_device,
-    vk::SurfaceKHR const &surface)
+    VK_NS::PhysicalDevice const &physical_device,
+    VK_NS::SurfaceKHR const &surface)
     -> tl::expected<SwapchainSupportDetails, std::error_code> {
   SwapchainSupportDetails details;
 
-  vk::Result res = vk::Result::eSuccess;
+  VK_NS::Result res = VK_NS::Result::eSuccess;
 
   std::tie(res, details.surface_capabilites) =
       physical_device.getSurfaceCapabilitiesKHR(surface);
-  if (res != vk::Result::eSuccess)
+  if (res != VK_NS::Result::eSuccess)
     return tl::make_unexpected(make_error_code(res));
 
   std::tie(res, details.surface_formats) =
       physical_device.getSurfaceFormatsKHR(surface);
-  if (res != vk::Result::eSuccess)
+  if (res != VK_NS::Result::eSuccess)
     return tl::make_unexpected(make_error_code(res));
 
   std::tie(res, details.present_modes) =
       physical_device.getSurfacePresentModesKHR(surface);
-  if (res != vk::Result::eSuccess)
+  if (res != VK_NS::Result::eSuccess)
     return tl::make_unexpected(make_error_code(res));
 
   return details;

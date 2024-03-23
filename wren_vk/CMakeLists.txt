@@ -1,4 +1,4 @@
-add_library(wren_vk src/errors.cpp)
+add_library(wren_vk src/errors.cpp src/buffer.cpp)
 
 target_include_directories(wren_vk PUBLIC include)
 target_include_directories(wren_vk PRIVATE include/wren_vk)

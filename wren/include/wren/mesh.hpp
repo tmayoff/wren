@@ -4,10 +4,10 @@
 #include <vulkan/vulkan_core.h>
 
 #include <vulkan/vulkan.hpp>
+#include <wren_vk/buffer.hpp>
 #include <wrenm/matrix.hpp>
 #include <wrenm/vector.hpp>
 
-#include "buffer.hpp"
 #include "shader.hpp"
 #include "utils/device.hpp"
 
@@ -46,16 +46,16 @@ class Mesh {
   void shader(std::shared_ptr<Shader> const& shader_) {
     this->shader_ = shader_;
   }
-  void draw(vk::CommandBuffer const& cmd) const;
-  void bind(vk::CommandBuffer const& cmd) const;
+  void draw(VK_NS::CommandBuffer const& cmd) const;
+  void bind(VK_NS::CommandBuffer const& cmd) const;
 
  private:
   std::shared_ptr<Shader> shader_;
   std::vector<Vertex> vertices;
   std::vector<uint16_t> indices;
-  std::shared_ptr<Buffer> index_buffer;
-  std::shared_ptr<Buffer> vertex_buffer;
-  std::shared_ptr<Buffer> uniform_buffer;
+  std::shared_ptr<vk::Buffer> index_buffer;
+  std::shared_ptr<vk::Buffer> vertex_buffer;
+  std::shared_ptr<vk::Buffer> uniform_buffer;
 };
 
 }  // namespace wren

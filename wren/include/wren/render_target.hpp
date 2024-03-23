@@ -7,12 +7,12 @@ namespace wren {
 
 class RenderTarget {
  public:
-  vk::Extent2D size;
-  vk::Format format;
-  vk::SampleCountFlagBits sample_count;
+  VK_NS::Extent2D size;
+  VK_NS::Format format;
+  VK_NS::SampleCountFlagBits sample_count;
 
-  // vk::Image image;
-  vk::ImageView image_view;
+  // VK_NS::Image image;
+  VK_NS::ImageView image_view;
 
   auto is_colour() { return true; }
 };

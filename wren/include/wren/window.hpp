@@ -20,8 +20,8 @@ class Window {
 
   void Shutdown();
 
-  auto CreateSurface(vk::Instance const &instance)
-      -> tl::expected<vk::SurfaceKHR, std::error_code>;
+  auto CreateSurface(VK_NS::Instance const &instance)
+      -> tl::expected<VK_NS::SurfaceKHR, std::error_code>;
 
   void DispatchEvents(Event::Dispatcher const &dispatcher);
 

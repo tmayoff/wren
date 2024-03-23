@@ -86,7 +86,7 @@ auto Scene::build_3D_render_graph(
 
   mesh.shader(mesh_shader);
   builder.add_pass("scene", {mesh_shader, "swapchain_target"},
-                   [this](vk::CommandBuffer &cmd) {
+                   [this](VK_NS::CommandBuffer &cmd) {
                      mesh.bind(cmd);
                      mesh.draw(cmd);
 

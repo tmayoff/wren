@@ -27,7 +27,7 @@ auto Renderer::begin_frame()
     -> tl::expected<uint32_t, std::error_code> {
   ZoneScoped;
 
-  vk::Result res = vk::Result::eSuccess;
+  VK_NS::Result res = VK_NS::Result::eSuccess;
 
   auto const &device = ctx->graphics_context->Device().get();
   {
@@ -43,7 +43,7 @@ auto Renderer::begin_frame()
     ZoneScopedN("device.acquireNextImageKHR()");
     std::tie(res, image_index) = device.acquireNextImageKHR(
         swapchain, UINT64_MAX, image_available);
-    if (res == vk::Result::eErrorOutOfDateKHR) {
+    if (res == VK_NS::Result::eErrorOutOfDateKHR) {
       recreate_swapchain();
       return tl::make_unexpected(make_error_code(res));
     }
@@ -56,38 +56,38 @@ auto Renderer::begin_frame()
 }
 
 void Renderer::end_frame(uint32_t image_index) {
-  vk::PipelineStageFlags waitDstStageMask =
-      vk::PipelineStageFlagBits::eColorAttachmentOutput;
+  VK_NS::PipelineStageFlags waitDstStageMask =
+      VK_NS::PipelineStageFlagBits::eColorAttachmentOutput;
 
-  std::vector<vk::CommandBuffer> cmd_bufs;
+  std::vector<VK_NS::CommandBuffer> cmd_bufs;
   for (auto g : render_graph) {
     ZoneScopedN("render_pass->execute()");
     g->render_pass->execute();
     cmd_bufs = g->render_pass->get_command_buffers();
   }
 
-  vk::SubmitInfo submit_info(image_available, waitDstStageMask,
+  VK_NS::SubmitInfo submit_info(image_available, waitDstStageMask,
                              cmd_bufs, render_finished);
-  vk::Result res =
+  VK_NS::Result res =
       ctx->graphics_context->Device().get_graphics_queue().submit(
           submit_info, in_flight_fence);
-  if (res != vk::Result::eSuccess) {
-    spdlog::warn("{}", vk::to_string(res));
+  if (res != VK_NS::Result::eSuccess) {
+    spdlog::warn("{}", VK_NS::to_string(res));
   }
 
-  vk::PresentInfoKHR present_info{render_finished, swapchain,
+  VK_NS::PresentInfoKHR present_info{render_finished, swapchain,
                                   image_index};
   res =
       ctx->graphics_context->Device().get_present_queue().presentKHR(
           present_info);
-  if (res == vk::Result::eErrorOutOfDateKHR ||
-      res == vk::Result::eSuboptimalKHR) {
+  if (res == VK_NS::Result::eErrorOutOfDateKHR ||
+      res == VK_NS::Result::eSuboptimalKHR) {
     recreate_swapchain();
     return;
   }
 
-  if (res != vk::Result::eSuccess) {
-    spdlog::warn("{}", vk::to_string(res));
+  if (res != VK_NS::Result::eSuccess) {
+    spdlog::warn("{}", VK_NS::to_string(res));
   }
 }
 
@@ -108,21 +108,21 @@ auto Renderer::New(std::shared_ptr<Context> const &ctx)
   auto res = renderer->recreate_swapchain();
   if (!res.has_value()) return tl::make_unexpected(res.error());
 
-  vk::Result vres = vk::Result::eSuccess;
+  VK_NS::Result vres = VK_NS::Result::eSuccess;
   std::tie(vres, renderer->in_flight_fence) =
       device.get().createFence(
-          vk::FenceCreateInfo{vk::FenceCreateFlagBits::eSignaled});
-  if (vres != vk::Result::eSuccess)
+          VK_NS::FenceCreateInfo{VK_NS::FenceCreateFlagBits::eSignaled});
+  if (vres != VK_NS::Result::eSuccess)
     return tl::make_unexpected(make_error_code(vres));
 
   std::tie(vres, renderer->image_available) =
-      device.get().createSemaphore(vk::SemaphoreCreateInfo{});
-  if (vres != vk::Result::eSuccess)
+      device.get().createSemaphore(VK_NS::SemaphoreCreateInfo{});
+  if (vres != VK_NS::Result::eSuccess)
     return tl::make_unexpected(make_error_code(vres));
 
   std::tie(vres, renderer->render_finished) =
-      device.get().createSemaphore(vk::SemaphoreCreateInfo{});
-  if (vres != vk::Result::eSuccess)
+      device.get().createSemaphore(VK_NS::SemaphoreCreateInfo{});
+  if (vres != VK_NS::Result::eSuccess)
     return tl::make_unexpected(make_error_code(vres));
 
   return renderer;
@@ -131,7 +131,7 @@ auto Renderer::New(std::shared_ptr<Context> const &ctx)
 auto Renderer::recreate_swapchain()
     -> tl::expected<void, std::error_code> {
   ZoneScoped;  // NOLINT
-  vk::Result res = vk::Result::eSuccess;
+  VK_NS::Result res = VK_NS::Result::eSuccess;
 
   auto const &device = ctx->graphics_context->Device();
 
@@ -177,10 +177,10 @@ auto Renderer::recreate_swapchain()
         swapchain_support->surface_capabilites.maxImageCount;
   }
 
-  vk::SwapchainCreateInfoKHR create_info(
+  VK_NS::SwapchainCreateInfoKHR create_info(
       {}, ctx->graphics_context->Surface(), image_count,
       format.format, format.colorSpace, swapchain_extent, 1,
-      vk::ImageUsageFlagBits::eColorAttachment);
+      VK_NS::ImageUsageFlagBits::eColorAttachment);
 
   auto queue_families = vulkan::Queue::FindQueueFamilyIndices(
       ctx->graphics_context->PhysicalDevice(),
@@ -192,42 +192,42 @@ auto Renderer::recreate_swapchain()
                               queue_families->present_index};
   if (queue_families->graphics_index !=
       queue_families->present_index) {
-    create_info.setImageSharingMode(vk::SharingMode::eConcurrent);
+    create_info.setImageSharingMode(VK_NS::SharingMode::eConcurrent);
     create_info.setQueueFamilyIndices(queue_indices);
   } else {
-    create_info.setImageSharingMode(vk::SharingMode::eExclusive);
+    create_info.setImageSharingMode(VK_NS::SharingMode::eExclusive);
   }
 
   create_info.setPreTransform(
       swapchain_support->surface_capabilites.currentTransform);
   create_info.setCompositeAlpha(
-      vk::CompositeAlphaFlagBitsKHR::eOpaque);
+      VK_NS::CompositeAlphaFlagBitsKHR::eOpaque);
   create_info.setPresentMode(present_mode);
   create_info.setClipped(true);
 
   std::tie(res, swapchain) =
       ctx->graphics_context->Device().get().createSwapchainKHR(
           create_info);
-  if (res != vk::Result::eSuccess)
+  if (res != VK_NS::Result::eSuccess)
     return tl::make_unexpected(make_error_code(res));
 
   std::tie(res, swapchain_images) =
       ctx->graphics_context->Device().get().getSwapchainImagesKHR(
           swapchain);
-  if (res != vk::Result::eSuccess)
+  if (res != VK_NS::Result::eSuccess)
     return tl::make_unexpected(make_error_code(res));
 
   swapchain_image_format = format.format;
 
   swapchain_image_views_.reserve(swapchain_images.size());
   for (auto const &swapchain_image : swapchain_images) {
-    vk::ImageViewCreateInfo create_info(
-        {}, swapchain_image, vk::ImageViewType::e2D,
+    VK_NS::ImageViewCreateInfo create_info(
+        {}, swapchain_image, VK_NS::ImageViewType::e2D,
         swapchain_image_format, {},
-        vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0,
+        VK_NS::ImageSubresourceRange(VK_NS::ImageAspectFlagBits::eColor, 0,
                                   1, 0, 1));
 
-    vk::ImageView image_view;
+    VK_NS::ImageView image_view;
     VK_TIE_ERR_PROP(
         image_view,
         ctx->graphics_context->Device().get().createImageView(
@@ -241,7 +241,7 @@ auto Renderer::recreate_swapchain()
         SWAPCHAIN_RENDERTARGET_NAME.data(),
         std::make_shared<RenderTarget>(
             swapchain_extent, swapchain_image_format,
-            vk::SampleCountFlagBits::e1,
+            VK_NS::SampleCountFlagBits::e1,
             swapchain_image_views_.front()));
   } else {
     auto const &target =
@@ -259,10 +259,10 @@ auto Renderer::recreate_swapchain()
 }
 
 auto Renderer::choose_swapchain_format(
-    std::vector<vk::SurfaceFormatKHR> const &formats)
-    -> vk::SurfaceFormatKHR {
-  auto const PREFERED_FORMAT = vk::Format::eB8G8R8Srgb;
-  auto const PREFERED_COLOR_SPACE = vk::ColorSpaceKHR::eSrgbNonlinear;
+    std::vector<VK_NS::SurfaceFormatKHR> const &formats)
+    -> VK_NS::SurfaceFormatKHR {
+  auto const PREFERED_FORMAT = VK_NS::Format::eB8G8R8Srgb;
+  auto const PREFERED_COLOR_SPACE = VK_NS::ColorSpaceKHR::eSrgbNonlinear;
 
   for (auto const &format : formats) {
     if (format.format == PREFERED_FORMAT &&
@@ -274,20 +274,20 @@ auto Renderer::choose_swapchain_format(
 }
 
 auto Renderer::choose_swapchain_presentation_mode(
-    std::vector<vk::PresentModeKHR> const &modes)
-    -> vk::PresentModeKHR {
-  auto const PREFERED_PRESENT_MDOE = vk::PresentModeKHR::eMailbox;
+    std::vector<VK_NS::PresentModeKHR> const &modes)
+    -> VK_NS::PresentModeKHR {
+  auto const PREFERED_PRESENT_MDOE = VK_NS::PresentModeKHR::eMailbox;
 
   for (auto const &mode : modes) {
     if (mode == PREFERED_PRESENT_MDOE) return mode;
   }
 
-  return vk::PresentModeKHR::eFifo;
+  return VK_NS::PresentModeKHR::eFifo;
 }
 
 auto Renderer::choose_swapchain_extent(
-    vk::SurfaceCapabilitiesKHR const &surface_capabilities)
-    -> vk::Extent2D {
+    VK_NS::SurfaceCapabilitiesKHR const &surface_capabilities)
+    -> VK_NS::Extent2D {
   if (surface_capabilities.currentExtent.width !=
       std::numeric_limits<uint32_t>::max()) {
     return surface_capabilities.currentExtent;
