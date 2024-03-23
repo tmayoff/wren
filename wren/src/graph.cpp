@@ -1,7 +1,7 @@
 #include "wren/graph.hpp"
 
 #include <tl/expected.hpp>
-#include <utils/errors.hpp>
+#include <wren_utils/errors.hpp>
 
 #include "context.hpp"
 #include "renderer.hpp"

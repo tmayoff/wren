@@ -9,8 +9,6 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
-#include "utils/vulkan_errors.hpp"
-
 namespace wren {
 
 auto Buffer::Create(

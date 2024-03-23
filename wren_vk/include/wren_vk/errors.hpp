@@ -4,8 +4,7 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_to_string.hpp>
-
-#include "errors.hpp"
+#include <wren_utils/errors.hpp>
 
 template <>
 auto enum_to_string<vk::Result>(vk::Result e) -> std::string;

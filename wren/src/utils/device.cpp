@@ -6,9 +6,9 @@
 #include <tl/expected.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
+#include <wren_vk/errors.hpp>
 
 #include "wren/utils/queue.hpp"
-#include "wren/utils/vulkan_errors.hpp"
 
 namespace wren::vulkan {
 

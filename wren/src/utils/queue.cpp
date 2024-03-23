@@ -1,28 +1,33 @@
 #include "wren/utils/queue.hpp"
-#include "vulkan/vulkan.hpp"
-#include "vulkan/vulkan_handles.hpp"
-#include "wren/utils/vulkan_errors.hpp"
+
 #include <optional>
 #include <system_error>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan_enums.hpp>
+#include <wren_vk/errors.hpp>
+
+#include "vulkan/vulkan.hpp"
+#include "vulkan/vulkan_handles.hpp"
 
 namespace wren::vulkan {
 
-auto Queue::FindQueueFamilyIndices(const vk::PhysicalDevice &physical_device,
-                                   const std::optional<vk::SurfaceKHR> &surface)
+auto Queue::FindQueueFamilyIndices(
+    vk::PhysicalDevice const &physical_device,
+    std::optional<vk::SurfaceKHR> const &surface)
     -> tl::expected<QueueFamilyIndices, std::error_code> {
-  const auto &queue_families = physical_device.getQueueFamilyProperties();
+  auto const &queue_families =
+      physical_device.getQueueFamilyProperties();
 
   std::optional<uint32_t> graphics_family;
   std::optional<uint32_t> present_family;
   uint32_t i = 0;
-  for (const auto &f : queue_families) {
+  for (auto const &f : queue_families) {
     if (f.queueFlags & vk::QueueFlagBits::eGraphics)
       graphics_family = i;
 
     if (surface.has_value()) {
-      auto res = physical_device.getSurfaceSupportKHR(i, surface.value());
+      auto res =
+          physical_device.getSurfaceSupportKHR(i, surface.value());
       if (res.result != vk::Result::eSuccess)
         return tl::make_unexpected(make_error_code(res.result));
 
@@ -46,4 +51,4 @@ auto Queue::FindQueueFamilyIndices(const vk::PhysicalDevice &physical_device,
   return QueueFamilyIndices{graphics_family.value()};
 }
 
-} // namespace wren::vulkan
+}  // namespace wren::vulkan

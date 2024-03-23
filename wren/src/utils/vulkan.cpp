@@ -6,8 +6,7 @@
 
 #include <tl/expected.hpp>
 #include <vulkan/vulkan_to_string.hpp>
-
-#include "utils/vulkan_errors.hpp"
+#include <wren_vk/errors.hpp>
 
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 

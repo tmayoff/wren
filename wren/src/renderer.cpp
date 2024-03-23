@@ -7,9 +7,9 @@
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
 #include <vulkan/vulkan_to_string.hpp>
+#include <wren_vk/errors.hpp>
 
 #include "utils/tracy.hpp"  // IWYU pragma: export
-#include "utils/vulkan_errors.hpp"
 #include "wren/context.hpp"
 #include "wren/mesh.hpp"
 #include "wren/render_pass.hpp"

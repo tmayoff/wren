@@ -6,8 +6,8 @@
 #include <wren/context.hpp>
 #include <wren/shaders/mesh.hpp>
 #include <wren/shaders/triangle.hpp>
-#include <wren/utils/errors.hpp>
 #include <wren_gui/instance.hpp>
+#include <wren_utils/errors.hpp>
 
 class Scene {
  public:
@@ -19,6 +19,8 @@ class Scene {
   auto build_3D_render_graph(
       std::shared_ptr<wren::Context> const &ctx)
       -> tl::expected<wren::GraphBuilder, std::error_code>;
+
+  void on_update();
 
  private:
   std::shared_ptr<wren::gui::Instance> gui_instance;
@@ -49,9 +51,20 @@ auto main() -> int {
 
   app->context()->renderer->set_graph_builder(g_err.value());
 
+  app->add_callback_to_phase(wren::CallbackPhase::Update,
+                             [&s]() { s.on_update(); });
+
   app->run();
 
   return EXIT_SUCCESS;
+}
+
+void Scene::on_update() {
+  gui_instance->BeginWindow();
+
+  // TODO Render text
+
+  gui_instance->EndWindow();
 }
 
 auto Scene::build_3D_render_graph(
@@ -76,6 +89,8 @@ auto Scene::build_3D_render_graph(
                    [this](vk::CommandBuffer &cmd) {
                      mesh.bind(cmd);
                      mesh.draw(cmd);
+
+                     gui_instance->draw(cmd);
                    });
 
   return builder;

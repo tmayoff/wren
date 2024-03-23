@@ -7,7 +7,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "render_pass.hpp"
-#include "utils/errors.hpp"
+#include <wren_utils/errors.hpp>
 
 namespace wren {
 

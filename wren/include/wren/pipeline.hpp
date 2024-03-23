@@ -3,9 +3,9 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <wren_utils/errors.hpp>
 
 #include "shader.hpp"
-#include "utils/errors.hpp"
 
 namespace wren {
 
@@ -18,8 +18,7 @@ class Pipeline {
       -> expected<std::shared_ptr<Pipeline>>;
 
  private:
-  Pipeline(std::string  name,
-           std::shared_ptr<Shader> const& shader)
+  Pipeline(std::string name, std::shared_ptr<Shader> const& shader)
       : name(std::move(name)), shader(shader) {}
 
   std::string name;

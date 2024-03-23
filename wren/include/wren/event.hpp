@@ -4,8 +4,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <vector>
-
-#include "utils/enums.hpp"
+#include <wren_utils/enums.hpp>
 
 namespace wren::Event {
 
@@ -22,7 +21,7 @@ struct WindowClose {
 
 struct WindowResized {
   WindowResized() = default;
-  explicit WindowResized(const std::pair<float, float> &size)
+  explicit WindowResized(std::pair<float, float> const &size)
       : width(size.first), height(size.second) {}
 
   float width = 0;
@@ -36,7 +35,7 @@ class Dispatcher {
   template <typename T>
   void dispatch(T &&value) const;
   template <typename T>
-  void on(std::function<void(const T &t)> cb);
+  void on(std::function<void(T const &t)> cb);
 
  private:
   std::unordered_map<size_t, std::vector<std::function<void(void *)>>>
@@ -45,7 +44,7 @@ class Dispatcher {
 
 template <typename Type>
 void Dispatcher::dispatch(Type &&value) const {
-  const auto id = typeid(Type{}).hash_code();
+  auto const id = typeid(Type{}).hash_code();
   if (handlers.contains(id)) {
     for (auto &cb : handlers.at(id)) {
       if (cb) cb(&value);
@@ -54,8 +53,8 @@ void Dispatcher::dispatch(Type &&value) const {
 }
 
 template <typename Type>
-void Dispatcher::on(std::function<void(const Type &)> func) {
-  const auto id = typeid(Type{}).hash_code();
+void Dispatcher::on(std::function<void(Type const &)> func) {
+  auto const id = typeid(Type{}).hash_code();
   handlers[id].push_back([func = std::move(func)](void *value) {
     func(*static_cast<Type *>(value));
   });

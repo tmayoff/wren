@@ -5,13 +5,13 @@
 
 #include <memory>
 #include <tl/expected.hpp>
+#include <wren_utils/errors.hpp>
 
 #include "utils/tracy.hpp"  // IWYU pragma: export
 #include "wren/context.hpp"
 #include "wren/event.hpp"
 #include "wren/graphics_context.hpp"
 #include "wren/renderer.hpp"
-#include "wren/utils/errors.hpp"
 
 namespace wren {
 
@@ -63,11 +63,23 @@ void Application::run() {
                       size.height);
       });
 
+  for (auto const &cb : phase_cbs.at(CallbackPhase::Startup)) {
+    if (cb) cb();
+  }
+
   while (running) {
     FrameMark;
     ctx->window.DispatchEvents(ctx->event_dispatcher);
 
+    for (auto const &cb : phase_cbs.at(CallbackPhase::Update)) {
+      if (cb) cb();
+    }
+
     ctx->renderer->draw();
+  }
+
+  for (auto const &cb : phase_cbs.at(CallbackPhase::Shutdown)) {
+    if (cb) cb();
   }
 }
 

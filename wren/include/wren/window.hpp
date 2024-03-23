@@ -7,16 +7,16 @@
 #include <system_error>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
+#include <wren_utils/errors.hpp>
 
 #include "event.hpp"
-#include "utils/errors.hpp"
 
 namespace wren {
 
 class Window {
  public:
   static auto Create(std::string const &application_name)
-      -> tl::expected<Window, std::error_code>;
+      -> expected<Window>;
 
   void Shutdown();
 

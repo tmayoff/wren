@@ -13,7 +13,6 @@ add_library(
   src/utils/device.cpp
   src/utils/queue.cpp
   src/utils/vulkan.cpp
-  src/utils/vulkan_errors.cpp
   src/window.cpp)
 
 target_include_directories(wren PUBLIC include)
@@ -23,6 +22,8 @@ target_link_libraries(
   wren
   PUBLIC wren_reflect
          wrenm
+         wren_utils
+         wren_vk
          SDL2
          vulkan
          ${shaderc_LIBRARIES}

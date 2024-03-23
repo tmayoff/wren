@@ -1,4 +1,4 @@
-#include "wren/utils/vulkan_errors.hpp"
+#include "errors.hpp"
 
 #include <vulkan/vulkan_to_string.hpp>
 

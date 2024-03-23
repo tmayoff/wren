@@ -11,11 +11,11 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
+#include <wren_utils/errors.hpp>
+#include <wren_vk/errors.hpp>
 
-#include "wren/utils/errors.hpp"
 #include "wren/utils/queue.hpp"
 #include "wren/utils/vulkan.hpp"
-#include "wren/utils/vulkan_errors.hpp"
 
 namespace wren {
 

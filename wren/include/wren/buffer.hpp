@@ -7,9 +7,9 @@
 #include <span>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
+#include <wren_vk/errors.hpp>
 
 #include "utils/device.hpp"
-#include "utils/vulkan_errors.hpp"
 
 namespace wren {
 
