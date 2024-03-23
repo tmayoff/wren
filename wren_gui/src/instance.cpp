@@ -6,8 +6,8 @@ Instance::Instance() {}
 
 void Instance::draw(vk::CommandBuffer const& cmd) {}
 
-auto BeginWindow() { return true; }
+auto Instance::BeginWindow() -> bool { return true; }
 
-auto EndWindow() { return true; }
+auto Instance::EndWindow() -> bool { return true; }
 
 }  // namespace wren::gui
