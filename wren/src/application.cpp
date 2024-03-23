@@ -47,6 +47,21 @@ auto Application::Create(std::string const &application_name)
   return std::shared_ptr<Application>(new Application(ctx, renderer));
 }
 
+void Application::add_callback_to_phase(CallbackPhase phase,
+                                        phase_cb_t const &cb) {
+  switch (phase) {
+    case CallbackPhase::Startup:
+      startup_phase.emplace_back(cb);
+      break;
+    case CallbackPhase::Update:
+      update_phase.emplace_back(cb);
+      break;
+    case CallbackPhase::Shutdown:
+      shutdown_phase.emplace_back(cb);
+      break;
+  }
+}
+
 Application::Application(std::shared_ptr<Context> const &ctx,
                          std::shared_ptr<Renderer> const &renderer)
     : ctx(ctx), renderer(renderer), running(true) {}
@@ -63,7 +78,7 @@ void Application::run() {
                       size.height);
       });
 
-  for (auto const &cb : phase_cbs.at(CallbackPhase::Startup)) {
+  for (auto const &cb : startup_phase) {
     if (cb) cb();
   }
 
@@ -71,14 +86,14 @@ void Application::run() {
     FrameMark;
     ctx->window.DispatchEvents(ctx->event_dispatcher);
 
-    for (auto const &cb : phase_cbs.at(CallbackPhase::Update)) {
+    for (auto const &cb : update_phase) {
       if (cb) cb();
     }
 
     ctx->renderer->draw();
   }
 
-  for (auto const &cb : phase_cbs.at(CallbackPhase::Shutdown)) {
+  for (auto const &cb : update_phase) {
     if (cb) cb();
   }
 }

@@ -14,7 +14,12 @@ class Scene {
   Scene(std::shared_ptr<wren::Context> const &ctx)
       : ctx(ctx),
         mesh(ctx->graphics_context->Device(),
-             ctx->graphics_context->allocator()) {}
+             ctx->graphics_context->allocator()),
+        gui_instance(std::make_shared<wren::gui::Instance>(
+            ctx->graphics_context->Device().get(),
+            ctx->graphics_context->allocator(),
+            ctx->graphics_context->Device().command_pool(),
+            ctx->graphics_context->Device().get_graphics_queue())) {}
 
   auto build_3D_render_graph(
       std::shared_ptr<wren::Context> const &ctx)

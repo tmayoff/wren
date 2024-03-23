@@ -24,8 +24,7 @@ class Buffer {
                           VK_NS::CommandPool const& command_pool,
                           std::shared_ptr<Buffer> const& src,
                           std::shared_ptr<Buffer> const& dst,
-                          size_t size)
-      -> tl::expected<void, std::error_code>;
+                          size_t size) -> expected<void>;
 
   Buffer(VmaAllocator const& allocator) : allocator(allocator) {}
   ~Buffer();
@@ -53,8 +52,9 @@ class Buffer {
 template <typename T>
 auto Buffer::set_data_raw(std::span<T const> data)
     -> tl::expected<void, std::error_code> {
-  VK_ERR_PROP_VOID(static_cast<VK_NS::Result>(vmaCopyMemoryToAllocation(
-      allocator, data.data(), allocation, {0}, {data.size_bytes()})));
+  VK_ERR_PROP_VOID(static_cast<VK_NS::Result>(
+      vmaCopyMemoryToAllocation(allocator, data.data(), allocation,
+                                {0}, {data.size_bytes()})));
   return {};
 }
 

@@ -24,7 +24,8 @@ class Application {
   auto context() -> std::shared_ptr<Context> const & { return ctx; }
   void run();
 
-  void add_callback_to_phase(CallbackPhase phase, phase_cb_t cb) {}
+  void add_callback_to_phase(CallbackPhase phase,
+                             phase_cb_t const &cb);
 
  private:
   explicit Application(std::shared_ptr<Context> const &ctx,
@@ -33,8 +34,9 @@ class Application {
   std::shared_ptr<Context> ctx;
   std::shared_ptr<Renderer> renderer;
 
-  std::unordered_map<CallbackPhase, std::vector<phase_cb_t>>
-      phase_cbs;
+  std::vector<phase_cb_t> startup_phase;
+  std::vector<phase_cb_t> update_phase;
+  std::vector<phase_cb_t> shutdown_phase;
 
   bool running;
 };
