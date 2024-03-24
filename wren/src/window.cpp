@@ -85,6 +85,11 @@ void Window::DispatchEvents(Event::Dispatcher const &dispatcher) {
               break;
           }
           break;
+        case SDL_MOUSEMOTION:
+          dispatcher.dispatch(
+              Event::MouseMoved{static_cast<float>(event.motion.x),
+                                static_cast<float>(event.motion.y)});
+          break;
       }
     }
   }

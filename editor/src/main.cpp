@@ -10,6 +10,7 @@
 #include <wren_gui/instance.hpp>
 #include <wren_gui/shader.hpp>
 #include <wren_utils/errors.hpp>
+#include <wrenm/utils.hpp>
 
 class Scene {
  public:
@@ -27,6 +28,9 @@ class Scene {
       throw std::runtime_error(
           fmt::format("{}", ui_shader_res.error()));
     }
+
+    ctx->event_dispatcher.on<wren::Event::MouseMoved>(
+        [this](auto &e) { gui_instance->mouse_position(e.x, e.y); });
 
     gui_instance = std::make_shared<wren::gui::Instance>(
         ui_shader_res.value(), ctx->graphics_context->Device().get(),
@@ -79,6 +83,8 @@ auto main() -> int {
 }
 
 void Scene::on_update() {
+  spdlog::info("{}, {}", gui_instance->mouse_position().x(),
+               gui_instance->mouse_position().y());
   gui_instance->BeginWindow();
 
   // TODO Render text

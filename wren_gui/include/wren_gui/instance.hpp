@@ -39,6 +39,9 @@ class Instance {
   auto BeginWindow() -> bool;
   auto EndWindow() -> bool;
 
+  auto mouse_position(float x, float y) { mouse_position_ = {x, y}; }
+  auto mouse_position() { return mouse_position_; }
+
  private:
   void draw_quad();
 
@@ -56,6 +59,8 @@ class Instance {
   VmaAllocator allocator;
   std::vector<Vertex> vertices;
   std::vector<uint16_t> indices;
+
+  wrenm::vec2f mouse_position_;
 };
 
 }  // namespace wren::gui

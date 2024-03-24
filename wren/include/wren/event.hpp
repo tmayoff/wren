@@ -30,6 +30,13 @@ struct WindowResized {
   APPEND_EVENT_INFO("WindowResized", Category::WINDOW)
 };
 
+struct MouseMoved {
+  float x = 0;
+  float y = 0;
+
+  APPEND_EVENT_INFO("MouseMoved", Category::MOUSE)
+};
+
 class Dispatcher {
  public:
   template <typename T>
@@ -43,6 +50,7 @@ class Dispatcher {
 };
 
 template <typename Type>
+// NOLINTNEXTLINE
 void Dispatcher::dispatch(Type &&value) const {
   auto const id = typeid(Type{}).hash_code();
   if (handlers.contains(id)) {
