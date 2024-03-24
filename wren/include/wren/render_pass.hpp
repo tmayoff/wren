@@ -4,23 +4,24 @@
 #include <string>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
+#include <wren_vk/shader.hpp>
 
 #include "render_target.hpp"
-#include "shader.hpp"
 
 namespace wren {
 
 struct Context;
 
 struct PassResources {
-  std::shared_ptr<Shader> shader;
+  std::map<std::string, std::shared_ptr<vk::Shader>> shaders;
   std::string target_name;
   std::shared_ptr<RenderTarget> render_target;
 };
 
 class RenderPass {
  public:
-  using execute_fn_t = std::function<void(VK_NS::CommandBuffer&)>;
+  using execute_fn_t =
+      std::function<void(RenderPass&, VK_NS::CommandBuffer&)>;
 
   static auto Create(std::shared_ptr<Context> const& ctx,
                      std::string const& name,
@@ -39,6 +40,8 @@ class RenderPass {
   [[nodiscard]] auto get_framebuffer() const { return framebuffer; }
 
   void recreate_framebuffers(VK_NS::Device const& device);
+
+  void bind_pipeline(std::string const& pipeline_name);
 
  private:
   RenderPass(std::string name, PassResources resources,

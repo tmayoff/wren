@@ -4,9 +4,11 @@
 #include <cstdlib>
 #include <wren/application.hpp>
 #include <wren/context.hpp>
+#include <wren/render_pass.hpp>
 #include <wren/shaders/mesh.hpp>
 #include <wren/shaders/triangle.hpp>
 #include <wren_gui/instance.hpp>
+#include <wren_gui/shader.hpp>
 #include <wren_utils/errors.hpp>
 
 class Scene {
@@ -77,26 +79,30 @@ auto Scene::build_3D_render_graph(
     -> tl::expected<wren::GraphBuilder, std::error_code> {
   wren::GraphBuilder builder(ctx);
 
-  ERR_PROP(
-      auto mesh_shader,
-      wren::Shader::Create(ctx->graphics_context->Device(),
-                           wren::shaders::MESH_VERT_SHADER.data(),
-                           wren::shaders::MESH_FRAG_SHADER.data()));
+  ERR_PROP(auto mesh_shader,
+           wren::vk::Shader::Create(
+               ctx->graphics_context->Device().get(),
+               wren::shaders::MESH_VERT_SHADER.data(),
+               wren::shaders::MESH_FRAG_SHADER.data()));
 
-  ERR_PROP(auto ui_shader,
-           wren::Shader::Create(
-               ctx->graphics_context->Device(),
-               wren::shaders::TRIANGLE_VERT_SHADER.data(),
-               wren::shaders::TRIANGLE_FRAG_SHADER.data()));
+  ERR_PROP(auto ui_shader, wren::vk::Shader::Create(
+                               ctx->graphics_context->Device().get(),
+                               wren::gui::VERTEX_SHADER.data(),
+                               wren::gui::FRAGMENT_SHADER.data()));
 
   mesh.shader(mesh_shader);
-  builder.add_pass("scene", {mesh_shader, "swapchain_target"},
-                   [this](VK_NS::CommandBuffer &cmd) {
-                     mesh.bind(cmd);
-                     mesh.draw(cmd);
+  builder.add_pass(
+      "scene",
+      {{{"mesh", mesh_shader}, {"ui", ui_shader}},
+       "swapchain_target"},
+      [this](wren::RenderPass &pass, VK_NS::CommandBuffer &cmd) {
+        pass.bind_pipeline("mesh");
+        mesh.bind(cmd);
+        mesh.draw(cmd);
 
-                     gui_instance->draw(cmd);
-                   });
+        pass.bind_pipeline("ui");
+        gui_instance->draw(cmd);
+      });
 
   return builder;
 }

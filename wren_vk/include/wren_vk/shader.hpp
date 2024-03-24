@@ -13,9 +13,7 @@
 #include <vulkan/vulkan_structs.hpp>
 #include <wren_reflect/parser.hpp>
 
-#include "wren/utils/device.hpp"
-
-namespace wren {
+namespace wren::vk {
 
 struct ShaderModule {
   reflect::spirv_t spirv;
@@ -35,7 +33,7 @@ struct ShaderModule {
 
 class Shader {
  public:
-  static auto Create(vulkan::Device const &device,
+  static auto Create(VK_NS::Device const &device,
                      std::string const &vertex_shader,
                      std::string const &fragment_shader)
       -> tl::expected<std::shared_ptr<Shader>, std::error_code>;
@@ -76,4 +74,4 @@ class Shader {
   ShaderModule fragment_shader_module;
 };
 
-}  // namespace wren
+}  // namespace wren::vk

@@ -11,6 +11,7 @@ static std::size_t const MAX_INDICES = MAX_VERTICES * 10;
 
 struct Vertex {
   wrenm::vec2f pos;
+  wrenm::vec4f colour;
 };
 
 class Instance {
@@ -19,6 +20,7 @@ class Instance {
            VK_NS::CommandPool const& command_pool,
            VK_NS::Queue const& graphics_queue);
 
+  void bind(VK_NS::CommandBuffer const& cmd);
   void draw(VK_NS::CommandBuffer const& cmd);
 
   auto BeginWindow() -> bool;

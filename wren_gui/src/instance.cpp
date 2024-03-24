@@ -17,8 +17,7 @@ Instance::Instance(VK_NS::Device const& device,
     vertex_buffer =
         vk::Buffer::Create(allocator, sizeof(Vertex) * MAX_VERTICES,
                            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
-                               VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                               VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+                               VK_BUFFER_USAGE_TRANSFER_DST_BIT);
   }
 
   // ============== Index buffer ============== //
@@ -26,8 +25,7 @@ Instance::Instance(VK_NS::Device const& device,
     index_buffer =
         vk::Buffer::Create(allocator, sizeof(uint16_t) * MAX_INDICES,
                            VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
-                               VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                               VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+                               VK_BUFFER_USAGE_TRANSFER_DST_BIT);
   }
 }
 
@@ -35,7 +33,7 @@ void Instance::draw(VK_NS::CommandBuffer const& cmd) {
   if (vertices.empty() || indices.empty()) return;
 
   {
-    std::span data{indices.begin(), indices.end()};
+    std::span data{vertices.begin(), vertices.end()};
 
     auto staging_buffer = vk::Buffer::Create(
         allocator, data.size_bytes(),
@@ -44,15 +42,31 @@ void Instance::draw(VK_NS::CommandBuffer const& cmd) {
             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
         VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT);
 
-    staging_buffer->set_data_raw<uint16_t>(data);
+    staging_buffer->set_data_raw<Vertex>(data);
 
     vk::Buffer::copy_buffer(device, graphics_queue, command_pool,
                             staging_buffer, vertex_buffer,
                             data.size_bytes());
   }
 
-  cmd.bindIndexBuffer(index_buffer->get(),
-                      VK_NS::DeviceSize{indices.size()},
+  {
+    std::span data{indices.begin(), indices.end()};
+
+    auto staging_buffer = vk::Buffer::Create(
+        allocator, data.size_bytes(),
+        VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT |
+            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT);
+
+    staging_buffer->set_data_raw<uint16_t>(data);
+
+    vk::Buffer::copy_buffer(device, graphics_queue, command_pool,
+                            staging_buffer, index_buffer,
+                            data.size_bytes());
+  }
+
+  cmd.bindIndexBuffer(index_buffer->get(), 0,
                       VK_NS::IndexType::eUint16);
   cmd.bindVertexBuffers(0, vertex_buffer->get(), {0});
   cmd.drawIndexed(indices.size(), 1, 0, 0, 0);
@@ -70,10 +84,10 @@ auto Instance::EndWindow() -> bool { return true; }
 
 void Instance::draw_quad() {
   static std::array quad_vertices = {
-      Vertex{{-0.5, -0.5}},
-      Vertex{{0.5, -0.5}},
-      Vertex{{0.5, 0.5}},
-      Vertex{{-0.5, 0.5}},
+      Vertex{{-0.5, -0.5}, {1.0, 1.0, 1.0, 1.0}},
+      Vertex{{0.5, -0.5}, {1.0, 1.0, 1.0, 1.0}},
+      Vertex{{0.5, 0.5}, {1.0, 1.0, 1.0, 1.0}},
+      Vertex{{-0.5, 0.5}, {1.0, 1.0, 1.0, 1.0}},
   };
   std::array quad_indices = {
       0, 1, 2, 2, 3, 0,

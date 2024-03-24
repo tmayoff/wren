@@ -1,4 +1,4 @@
-#include "wren/shader.hpp"
+#include "wren_vk/shader.hpp"
 
 #include <shaderc/shaderc.h>
 #include <shaderc/status.h>
@@ -11,11 +11,10 @@
 #include <vulkan/vulkan_handles.hpp>
 #include <wren_reflect/parser.hpp>
 #include <wren_vk/errors.hpp>
-#include <wrenm/vector.hpp>
 
 #include "vulkan/vulkan_structs.hpp"
 
-namespace wren {
+namespace wren::vk {
 
 ShaderModule::ShaderModule(reflect::spirv_t spirv,
                            VK_NS::ShaderModule const &module)
@@ -62,21 +61,21 @@ auto ShaderModule::get_vertex_input_attributes() const
   return attrs;
 }
 
-auto Shader::Create(vulkan::Device const &device,
+auto Shader::Create(VK_NS::Device const &device,
                     std::string const &vertex_shader,
                     std::string const &fragment_shader)
     -> tl::expected<std::shared_ptr<Shader>, std::error_code> {
   auto shader = std::make_shared<Shader>();
 
   auto v_result = compile_shader(
-      device.get(), shaderc_shader_kind::shaderc_glsl_vertex_shader,
+      device, shaderc_shader_kind::shaderc_glsl_vertex_shader,
       "vertex_shader", vertex_shader);
   if (!v_result.has_value()) {
     return tl::make_unexpected(v_result.error());
   }
 
   auto f_result = compile_shader(
-      device.get(), shaderc_shader_kind::shaderc_glsl_fragment_shader,
+      device, shaderc_shader_kind::shaderc_glsl_fragment_shader,
       "fragment_shader", fragment_shader);
   if (!f_result.has_value()) {
     return tl::make_unexpected(f_result.error());
@@ -119,7 +118,8 @@ auto Shader::compile_shader(VK_NS::Device const &device,
 
 auto Shader::create_graphics_pipeline(
     VK_NS::Device const &device, VK_NS::RenderPass const &render_pass,
-    VK_NS::Extent2D const &size) -> tl::expected<void, std::error_code> {
+    VK_NS::Extent2D const &size)
+    -> tl::expected<void, std::error_code> {
   VK_NS::Result res = VK_NS::Result::eSuccess;
 
   VK_NS::DescriptorSetLayoutBinding ubo_layout_bindings(
@@ -132,7 +132,8 @@ auto Shader::create_graphics_pipeline(
   VK_TIE_ERR_PROP(descriptor_layout_,
                   device.createDescriptorSetLayout(dl_create_info));
 
-  VK_NS::PipelineLayoutCreateInfo layout_create({}, descriptor_layout_);
+  VK_NS::PipelineLayoutCreateInfo layout_create({},
+                                                descriptor_layout_);
   std::tie(res, pipeline_layout_) =
       device.createPipelineLayout(layout_create);
   if (res != VK_NS::Result::eSuccess)
@@ -141,7 +142,7 @@ auto Shader::create_graphics_pipeline(
   std::array dynamic_states = {VK_NS::DynamicState::eViewport,
                                VK_NS::DynamicState::eScissor};
   VK_NS::PipelineDynamicStateCreateInfo dynamic_state({},
-                                                   dynamic_states);
+                                                      dynamic_states);
   auto const input_bindings =
       vertex_shader_module.get_vertex_input_bindings();
   auto const input_attributes =
@@ -154,19 +155,19 @@ auto Shader::create_graphics_pipeline(
       {}, VK_NS::PrimitiveTopology::eTriangleList, false);
 
   VK_NS::Viewport viewport{0,
-                        0,
-                        static_cast<float>(size.width),
-                        static_cast<float>(size.height),
-                        0,
-                        1};
+                           0,
+                           static_cast<float>(size.width),
+                           static_cast<float>(size.height),
+                           0,
+                           1};
   VK_NS::Rect2D scissor{{0, 0}, size};
   VK_NS::PipelineViewportStateCreateInfo viewport_state{
       {}, viewport, scissor};
 
   VK_NS::PipelineRasterizationStateCreateInfo rasterization(
       {}, false, false, VK_NS::PolygonMode::eFill,
-      VK_NS::CullModeFlagBits::eNone, VK_NS::FrontFace::eCounterClockwise,
-      false, {}, {}, {}, 1.0f);
+      VK_NS::CullModeFlagBits::eNone,
+      VK_NS::FrontFace::eCounterClockwise, false, {}, {}, {}, 1.0f);
 
   VK_NS::PipelineMultisampleStateCreateInfo multisample{
       {}, VK_NS::SampleCountFlagBits::e1, false};
@@ -210,4 +211,4 @@ auto Shader::create_graphics_pipeline(
   return {};
 }
 
-}  // namespace wren
+}  // namespace wren::vk

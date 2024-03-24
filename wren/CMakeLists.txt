@@ -8,7 +8,6 @@ add_library(
   src/mesh.cpp
   src/render_pass.cpp
   src/renderer.cpp
-  src/shader.cpp
   src/utils/device.cpp
   src/utils/queue.cpp
   src/utils/vulkan.cpp
