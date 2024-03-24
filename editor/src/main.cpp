@@ -101,7 +101,7 @@ auto Scene::build_3D_render_graph(
         mesh.draw(cmd);
 
         pass.bind_pipeline("ui");
-        gui_instance->draw(cmd);
+        gui_instance->flush(cmd);
       });
 
   return builder;

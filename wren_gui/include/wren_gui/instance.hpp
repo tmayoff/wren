@@ -21,7 +21,7 @@ class Instance {
            VK_NS::Queue const& graphics_queue);
 
   void bind(VK_NS::CommandBuffer const& cmd);
-  void draw(VK_NS::CommandBuffer const& cmd);
+  void flush(VK_NS::CommandBuffer const& cmd);
 
   auto BeginWindow() -> bool;
   auto EndWindow() -> bool;

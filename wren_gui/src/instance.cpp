@@ -29,7 +29,7 @@ Instance::Instance(VK_NS::Device const& device,
   }
 }
 
-void Instance::draw(VK_NS::CommandBuffer const& cmd) {
+void Instance::flush(VK_NS::CommandBuffer const& cmd) {
   if (vertices.empty() || indices.empty()) return;
 
   {
