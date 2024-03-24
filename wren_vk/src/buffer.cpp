@@ -36,7 +36,7 @@ auto Buffer::Create(
 }
 
 auto Buffer::set_data_raw(void const* data, std::size_t size)
-    -> tl::expected<void, std::error_code> {
+    -> expected<void> {
   VK_ERR_PROP_VOID(
       static_cast<::VK_NS::Result>(vmaCopyMemoryToAllocation(
           allocator, data, allocation, 0, size)));
@@ -48,8 +48,7 @@ auto Buffer::copy_buffer(::VK_NS::Device const& device,
                          ::VK_NS::CommandPool const& command_pool,
                          std::shared_ptr<Buffer> const& src,
                          std::shared_ptr<Buffer> const& dst,
-                         size_t size)
-    -> tl::expected<void, std::error_code> {
+                         size_t size) -> expected<void> {
   ::VK_NS::CommandBufferAllocateInfo const alloc_info(
       command_pool, ::VK_NS::CommandBufferLevel::ePrimary, 1);
 

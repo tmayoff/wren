@@ -127,11 +127,10 @@ void RenderPass::execute() {
   auto res = cmd.begin(VK_NS::CommandBufferBeginInfo{});
   if (res != VK_NS::Result::eSuccess) return;
 
-  auto const extent = resources.render_target->size;
-
   VK_NS::ClearValue clear_value(VK_NS::ClearColorValue{
       std::array<float, 4>{0.0, 0.0, 0.0, 1.0}});
 
+  auto const extent = current_target_size();
   VK_NS::RenderPassAttachmentBeginInfo attachment_begin(
       target->image_view);
   VK_NS::RenderPassBeginInfo rp_begin(render_pass, framebuffer,

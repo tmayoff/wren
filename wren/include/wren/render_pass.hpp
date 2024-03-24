@@ -33,6 +33,8 @@ class RenderPass {
 
   void on_resource_resized(std::pair<float, float> const& size);
 
+  auto current_target_size() { return resources.render_target->size; }
+
   [[nodiscard]] auto get_command_buffers() const {
     return command_buffers;
   }

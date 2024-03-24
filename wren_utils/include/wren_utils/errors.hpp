@@ -1,5 +1,9 @@
 #pragma once
 
+#include <fmt/core.h>
+#include <fmt/format.h>
+#include <fmt/ostream.h>
+
 #include <system_error>
 #include <tl/expected.hpp>
 
@@ -7,13 +11,26 @@
 #include "macros.hpp"
 
 namespace wren {
-// template <typename ValueType, typename ErrorType = std::error_code>
-// struct expected : public tl::expected<ValueType, ErrorType> {};
+
+struct error_code : public std::error_code {
+  error_code(int32_t ec, std::error_category const& cat)
+      : std::error_code(ec, cat) {}
+
+  error_code(std::error_code ec) : std::error_code(ec) {}
+
+  friend auto operator<<(std::ostream& os, error_code const& ec)
+      -> std::ostream& {
+    return os << ec.category().name() << " : " << ec.message();
+  }
+};
 
 template <typename T>
-using expected = tl::expected<T, std::error_code>;
+using expected = tl::expected<T, error_code>;
 
 }  // namespace wren
+
+template <>
+struct fmt::formatter<wren::error_code> : ostream_formatter {};
 
 // NOLINTNEXTLINE
 #define ERROR_CODE(NAMESPACE, ERROR_ENUM)                           \
@@ -41,7 +58,7 @@ using expected = tl::expected<T, std::error_code>;
     return c;                                                       \
   }                                                                 \
   inline auto make_error_code(NAMESPACE::ERROR_ENUM ec)             \
-      -> std::error_code {                                          \
+      -> wren::error_code {                                         \
     return {static_cast<int32_t>(ec), ERROR_ENUM##_category()};     \
   }
 

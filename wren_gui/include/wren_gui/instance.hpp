@@ -2,6 +2,8 @@
 
 #include <vulkan/vulkan.hpp>
 #include <wren_vk/buffer.hpp>
+#include <wren_vk/shader.hpp>
+#include <wrenm/matrix.hpp>
 #include <wrenm/vector.hpp>
 
 namespace wren::gui {
@@ -14,14 +16,25 @@ struct Vertex {
   wrenm::vec4f colour;
 };
 
+struct UBO {
+  wrenm::mat4f proj;
+};
+
 class Instance {
  public:
-  Instance(VK_NS::Device const& device, VmaAllocator const& allocator,
+  Instance(std::shared_ptr<vk::Shader> const& shader,
+           VK_NS::Device const& device, VmaAllocator const& allocator,
            VK_NS::CommandPool const& command_pool,
            VK_NS::Queue const& graphics_queue);
 
+  [[nodiscard]] auto shader() const { return shader_; }
+
   void bind(VK_NS::CommandBuffer const& cmd);
   void flush(VK_NS::CommandBuffer const& cmd);
+
+  void resize_viewport(VK_NS::Extent2D const& size) {
+    this->size = size;
+  }
 
   auto BeginWindow() -> bool;
   auto EndWindow() -> bool;
@@ -29,12 +42,16 @@ class Instance {
  private:
   void draw_quad();
 
+  std::shared_ptr<vk::Shader> shader_;
   std::shared_ptr<wren::vk::Buffer> index_buffer;
   std::shared_ptr<wren::vk::Buffer> vertex_buffer;
+  std::shared_ptr<vk::Buffer> uniform_buffer;
 
   VK_NS::Device device;
   VK_NS::Queue graphics_queue;
   VK_NS::CommandPool command_pool;
+
+  VK_NS::Extent2D size;
 
   VmaAllocator allocator;
   std::vector<Vertex> vertices;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <shaderc/shaderc.h>
+#include <shaderc/status.h>
 #include <wren_reflect/spirv_reflect.h>
 
 #include <memory>
@@ -12,6 +13,17 @@
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
 #include <wren_reflect/parser.hpp>
+#include <wren_utils/errors.hpp>
+
+ERROR_CODE(, shaderc_compilation_status)
+BOOST_DESCRIBE_ENUM(shaderc_compilation_status,
+                    shaderc_compilation_status_invalid_stage,
+                    shaderc_compilation_status_compilation_error,
+                    shaderc_compilation_status_internal_error,
+                    shaderc_compilation_status_null_result_object,
+                    shaderc_compilation_status_validation_error,
+                    shaderc_compilation_status_transformation_error,
+                    shaderc_compilation_status_configuration_error)
 
 namespace wren::vk {
 
@@ -36,7 +48,7 @@ class Shader {
   static auto Create(VK_NS::Device const &device,
                      std::string const &vertex_shader,
                      std::string const &fragment_shader)
-      -> tl::expected<std::shared_ptr<Shader>, std::error_code>;
+      -> expected<std::shared_ptr<Shader>>;
 
   static auto compile_shader(VK_NS::Device const &device,
                              shaderc_shader_kind const &shader_kind,

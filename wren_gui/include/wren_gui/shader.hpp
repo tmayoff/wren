@@ -10,10 +10,14 @@ constexpr std::string_view VERTEX_SHADER = R"(
 layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec4 in_colour;
 
+layout(binding = 0) uniform UBO {
+    mat4 proj;
+} ubo;
+
 layout(location = 0) out vec4 out_colour;
 
 void main () {
-    gl_Position = vec4(in_position, 0.0, 1.0);
+    gl_Position = ubo.proj * vec4(in_position, 0.0, 1.0);
     out_colour = in_colour;
 }
 )";

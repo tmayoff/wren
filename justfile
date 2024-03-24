@@ -1,7 +1,7 @@
 default: build
 
 configure:
-    cmake -S. -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTING=On
+    cmake -S. -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_COLOR_DIAGNOSTICS=ON -DENABLE_TESTING=On
 
 build:
     cmake --build build

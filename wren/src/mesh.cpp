@@ -25,8 +25,7 @@ Mesh::Mesh(vulkan::Device const& device, VmaAllocator allocator)
     vertex_buffer =
         vk::Buffer::Create(allocator, data.size_bytes(),
                            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
-                               VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                               VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+                               VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 
     vk::Buffer::copy_buffer(device.get(), device.get_graphics_queue(),
                             device.command_pool(), staging_buffer,
@@ -49,8 +48,7 @@ Mesh::Mesh(vulkan::Device const& device, VmaAllocator allocator)
     index_buffer =
         vk::Buffer::Create(allocator, data.size_bytes(),
                            VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
-                               VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                               VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+                               VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 
     vk::Buffer::copy_buffer(device.get(), device.get_graphics_queue(),
                             device.command_pool(), staging_buffer,

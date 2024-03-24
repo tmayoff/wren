@@ -15,7 +15,7 @@
 namespace wren {
 
 auto Window::Create(std::string const &application_name)
-    -> tl::expected<Window, std::error_code> {
+    -> expected<Window> {
   ZoneScoped;
   spdlog::debug("Initializing window");
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {

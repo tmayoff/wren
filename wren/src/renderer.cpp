@@ -1,7 +1,6 @@
 #include "wren/renderer.hpp"
 
 #include <cstdint>
-#include <system_error>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
@@ -23,8 +22,7 @@ void Renderer::draw() {
   end_frame(res.value());
 }
 
-auto Renderer::begin_frame()
-    -> tl::expected<uint32_t, std::error_code> {
+auto Renderer::begin_frame() -> expected<uint32_t> {
   ZoneScoped;
 
   VK_NS::Result res = VK_NS::Result::eSuccess;
@@ -67,7 +65,7 @@ void Renderer::end_frame(uint32_t image_index) {
   }
 
   VK_NS::SubmitInfo submit_info(image_available, waitDstStageMask,
-                             cmd_bufs, render_finished);
+                                cmd_bufs, render_finished);
   VK_NS::Result res =
       ctx->graphics_context->Device().get_graphics_queue().submit(
           submit_info, in_flight_fence);
@@ -76,7 +74,7 @@ void Renderer::end_frame(uint32_t image_index) {
   }
 
   VK_NS::PresentInfoKHR present_info{render_finished, swapchain,
-                                  image_index};
+                                     image_index};
   res =
       ctx->graphics_context->Device().get_present_queue().presentKHR(
           present_info);
@@ -97,7 +95,7 @@ Renderer::Renderer(std::shared_ptr<Context> const &ctx)
         ctx->graphics_context->allocator()) {}
 
 auto Renderer::New(std::shared_ptr<Context> const &ctx)
-    -> tl::expected<std::shared_ptr<Renderer>, std::error_code> {
+    -> expected<std::shared_ptr<Renderer>> {
   ZoneScoped;
 
   auto device = ctx->graphics_context->Device();
@@ -110,8 +108,8 @@ auto Renderer::New(std::shared_ptr<Context> const &ctx)
 
   VK_NS::Result vres = VK_NS::Result::eSuccess;
   std::tie(vres, renderer->in_flight_fence) =
-      device.get().createFence(
-          VK_NS::FenceCreateInfo{VK_NS::FenceCreateFlagBits::eSignaled});
+      device.get().createFence(VK_NS::FenceCreateInfo{
+          VK_NS::FenceCreateFlagBits::eSignaled});
   if (vres != VK_NS::Result::eSuccess)
     return tl::make_unexpected(make_error_code(vres));
 
@@ -128,8 +126,7 @@ auto Renderer::New(std::shared_ptr<Context> const &ctx)
   return renderer;
 }
 
-auto Renderer::recreate_swapchain()
-    -> tl::expected<void, std::error_code> {
+auto Renderer::recreate_swapchain() -> expected<void> {
   ZoneScoped;  // NOLINT
   VK_NS::Result res = VK_NS::Result::eSuccess;
 
@@ -224,8 +221,8 @@ auto Renderer::recreate_swapchain()
     VK_NS::ImageViewCreateInfo create_info(
         {}, swapchain_image, VK_NS::ImageViewType::e2D,
         swapchain_image_format, {},
-        VK_NS::ImageSubresourceRange(VK_NS::ImageAspectFlagBits::eColor, 0,
-                                  1, 0, 1));
+        VK_NS::ImageSubresourceRange(
+            VK_NS::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
 
     VK_NS::ImageView image_view;
     VK_TIE_ERR_PROP(
@@ -262,7 +259,8 @@ auto Renderer::choose_swapchain_format(
     std::vector<VK_NS::SurfaceFormatKHR> const &formats)
     -> VK_NS::SurfaceFormatKHR {
   auto const PREFERED_FORMAT = VK_NS::Format::eB8G8R8Srgb;
-  auto const PREFERED_COLOR_SPACE = VK_NS::ColorSpaceKHR::eSrgbNonlinear;
+  auto const PREFERED_COLOR_SPACE =
+      VK_NS::ColorSpaceKHR::eSrgbNonlinear;
 
   for (auto const &format : formats) {
     if (format.format == PREFERED_FORMAT &&

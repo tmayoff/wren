@@ -2,6 +2,7 @@
 
 #include <shaderc/shaderc.h>
 #include <shaderc/status.h>
+#include <spdlog/spdlog.h>
 #include <vulkan/vulkan_core.h>
 #include <wren_reflect/spirv_reflect.h>
 
@@ -64,7 +65,7 @@ auto ShaderModule::get_vertex_input_attributes() const
 auto Shader::Create(VK_NS::Device const &device,
                     std::string const &vertex_shader,
                     std::string const &fragment_shader)
-    -> tl::expected<std::shared_ptr<Shader>, std::error_code> {
+    -> expected<std::shared_ptr<Shader>> {
   auto shader = std::make_shared<Shader>();
 
   auto v_result = compile_shader(
@@ -98,10 +99,11 @@ auto Shader::compile_shader(VK_NS::Device const &device,
   auto const compilation_result = compiler.CompileGlslToSpv(
       shader_source, shader_kind, filename.c_str());
 
-  if (compilation_result.GetCompilationStatus() !=
-      shaderc_compilation_status_success) {
-    return tl::make_unexpected(
-        std::make_error_code(std::errc::invalid_argument));
+  auto const compilation_status =
+      compilation_result.GetCompilationStatus();
+  if (compilation_status != shaderc_compilation_status_success) {
+    spdlog::error("{}", compilation_result.GetErrorMessage());
+    return tl::make_unexpected(make_error_code(compilation_status));
   }
 
   std::span spirv(compilation_result.cbegin(),
