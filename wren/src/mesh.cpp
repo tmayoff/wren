@@ -86,7 +86,7 @@ void Mesh::bind(VK_NS::CommandBuffer const& cmd) const {
 
   ubo.view = wrenm::look_at(wrenm::vec3f(2.0f, 2.0f, 2.0f),
                             wrenm::vec3f(0.0f, 0.0f, 0.0f),
-                            wrenm::vec3f::Z());
+                            wrenm::vec3f::UnitZ());
 
   ubo.proj = wrenm::perspective(wrenm::radians(45.0f),
                                 2226.0f / 1415.0f, 0.01f, 1000.0f);

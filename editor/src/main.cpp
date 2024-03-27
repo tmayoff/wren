@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <wren/application.hpp>
 #include <wren/context.hpp>
+#include <wren/event.hpp>
 #include <wren/render_pass.hpp>
 #include <wren/shaders/mesh.hpp>
 #include <wren/shaders/triangle.hpp>
@@ -11,6 +12,8 @@
 #include <wren_gui/shader.hpp>
 #include <wren_utils/errors.hpp>
 #include <wrenm/utils.hpp>
+
+#include "wren/keycode.hpp"
 
 class Scene {
  public:
@@ -30,7 +33,24 @@ class Scene {
     }
 
     ctx->event_dispatcher.on<wren::Event::MouseMoved>(
-        [this](auto &e) { gui_instance->mouse_position(e.x, e.y); });
+        [this](auto &e) {
+          if (e.relative)
+            gui_instance->IO().mouse_position_rel = {e.x, e.y};
+          else
+            gui_instance->IO().mouse_position = {e.x, e.y};
+        });
+
+    ctx->event_dispatcher.on<wren::Event::MouseButtonUp>(
+        [this](auto const &e) {
+          if (e.button == wren::MouseCode::Left)
+            gui_instance->IO().left_mouse = true;
+        });
+
+    ctx->event_dispatcher.on<wren::Event::MouseButtonDown>(
+        [this](auto const &e) {
+          if (e.button == wren::MouseCode::Left)
+            gui_instance->IO().left_mouse = true;
+        });
 
     gui_instance = std::make_shared<wren::gui::Instance>(
         ui_shader_res.value(), ctx->graphics_context->Device().get(),
@@ -83,9 +103,7 @@ auto main() -> int {
 }
 
 void Scene::on_update() {
-  spdlog::info("{}, {}", gui_instance->mouse_position().x(),
-               gui_instance->mouse_position().y());
-  gui_instance->BeginWindow();
+  gui_instance->BeginWindow("Main", {400, 400});
 
   // TODO Render text
 

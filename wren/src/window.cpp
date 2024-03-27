@@ -6,6 +6,8 @@
 
 #include <system_error>
 
+#include "SDL_mouse.h"
+#include "keycode.hpp"
 #include "tl/expected.hpp"
 #include "utils/tracy.hpp"  // IWYU pragma: export
 #include "vulkan/vulkan_core.h"
@@ -67,6 +69,16 @@ auto Window::GetRequiredVulkanExtension() const
                                        extensions.end()};
 }
 
+auto SDLMouse_WrenMouse(uint8_t sdl_button) {
+  MouseCode code = MouseCode::Left;
+  if (sdl_button == SDL_BUTTON_LEFT) return MouseCode::Left;
+  if (sdl_button == SDL_BUTTON_MIDDLE)
+    return code = MouseCode::Middle;
+  if (sdl_button == SDL_BUTTON_RIGHT) return code = MouseCode::Right;
+
+  return MouseCode::Middle;
+}
+
 void Window::DispatchEvents(Event::Dispatcher const &dispatcher) {
   ZoneScoped;
   SDL_Event event;
@@ -89,7 +101,23 @@ void Window::DispatchEvents(Event::Dispatcher const &dispatcher) {
           dispatcher.dispatch(
               Event::MouseMoved{static_cast<float>(event.motion.x),
                                 static_cast<float>(event.motion.y)});
+
+          dispatcher.dispatch(Event::MouseMoved{
+              static_cast<float>(event.motion.x),
+              static_cast<float>(event.motion.y), true});
           break;
+
+        case SDL_MOUSEBUTTONDOWN: {
+          dispatcher.dispatch(Event::MouseButtonDown{
+              SDLMouse_WrenMouse(event.button.button)});
+          break;
+        }
+
+        case SDL_MOUSEBUTTONUP: {
+          dispatcher.dispatch(Event::MouseButtonUp{
+              SDLMouse_WrenMouse(event.button.button)});
+          break;
+        }
       }
     }
   }
