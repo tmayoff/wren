@@ -86,6 +86,10 @@
             nativeBuildInputs = rawNativeBuildInputs;
             buildInputs = rawBuildInputs;
 
+            cmakeFlags = [
+              "-DSKIP_DOWNLOADS=On"
+            ];
+
             installPhase = ''
               mkdir -p $out/bin
               ninja install

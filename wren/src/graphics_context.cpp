@@ -117,7 +117,8 @@ auto GraphicsContext::CreateInstance(
       {}, severity_flags, message_type_flags, &vulkan::DebugCallback);
 #endif
 
-  VK_NS::InstanceCreateInfo createInfo({}, &appInfo, layers, extensions);
+  VK_NS::InstanceCreateInfo createInfo({}, &appInfo, layers,
+                                       extensions);
 #ifdef WREN_DEBUG
   createInfo.setPNext(&debugMessengerCreateInfo);
 #endif

@@ -39,7 +39,7 @@ class Parser {
   auto peek(spirv_t::iterator it) { return *(it + 1); }
 
   static auto string_literal(
-      const std::span<uint32_t>& string_literal) -> std::string;
+      std::span<uint32_t> const& string_literal) -> std::string;
 
   spirv_t spirv;
 

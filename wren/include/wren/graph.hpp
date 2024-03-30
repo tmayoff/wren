@@ -5,9 +5,9 @@
 #include <tl/expected.hpp>
 #include <vector>
 #include <vulkan/vulkan.hpp>
+#include <wren_utils/errors.hpp>
 
 #include "render_pass.hpp"
-#include <wren_utils/errors.hpp>
 
 namespace wren {
 

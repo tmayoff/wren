@@ -26,20 +26,20 @@ void Parser::load_reflection_info() {
   it++;  // skip reserved
 
   while (it != spirv.end()) {
-    const auto instruction = *it;
-    const auto length = instruction >> 16;
-    const auto op = instruction & 0x0ffffu;
+    auto const instruction = *it;
+    auto const length = instruction >> 16;
+    auto const op = instruction & 0x0ffffu;
 
-    const std::span<uint32_t> arguments(it + 1, it + length);
+    std::span<uint32_t> const arguments(it + 1, it + length);
     auto arg_it = arguments.begin();
 
     switch (static_cast<spv::Op>(op)) {
       case spv::Op::OpEntryPoint: {
-        const auto execution_model =
+        auto const execution_model =
             static_cast<spv::ExecutionModel>(*(arg_it++));
 
         arg_it++;  // const auto entry_point_id = *(arg_it++);
-        const std::string entry_point_name =
+        std::string const entry_point_name =
             string_literal({arg_it, arguments.end()});
         entry_points_.push_back({execution_model, entry_point_name});
 
@@ -47,17 +47,17 @@ void Parser::load_reflection_info() {
       }
 
       case spv::Op::OpName: {
-        const auto target_id = *(arg_it++);
-        const auto op_name =
+        auto const target_id = *(arg_it++);
+        auto const op_name =
             string_literal({arg_it, arguments.end()});
         op_names_.insert({target_id, op_name});
         break;
       }
 
       default:
-        const auto id = *arg_it;
+        auto const id = *arg_it;
         arg_it++;
-        const auto type = static_cast<spv::Op>(*(arg_it));
+        auto const type = static_cast<spv::Op>(*(arg_it));
         SpvType t{id, type};
 
         if (arg_it != arguments.end()) {
@@ -79,16 +79,16 @@ void Parser::load_reflection_info() {
   }
 }
 
-auto Parser::string_literal(const std::span<uint32_t> &literal_set)
+auto Parser::string_literal(std::span<uint32_t> const &literal_set)
     -> std::string {
   std::string literal = "";
 
   auto it = literal_set.begin();
   while (it != literal_set.end()) {
-    const uint32_t arg = *(it++);
+    uint32_t const arg = *(it++);
     auto chars = to_bytes(arg);
     bool done = false;
-    for (const auto &c : chars) {
+    for (auto const &c : chars) {
       if (c == '\0') {
         done = true;
         break;

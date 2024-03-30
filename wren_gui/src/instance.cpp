@@ -1,7 +1,11 @@
 #include "instance.hpp"
 
+#include <spdlog/spdlog.h>
+
 #include <wren_vk/buffer.hpp>
 #include <wrenm/geometry.hpp>
+
+#include "wrenm/vector.hpp"
 
 namespace wren::gui {
 
@@ -43,6 +47,13 @@ Instance::Instance(std::shared_ptr<vk::Shader> const& shader,
   }
 }
 
+void Instance::Begin() {
+  // Mouse down
+  io.left_mouse_down = io.left_mouse && !previous_io.left_mouse;
+}
+
+void Instance::End() { previous_io = io; }
+
 void Instance::flush(VK_NS::CommandBuffer const& cmd) {
   if (vertices.empty() || indices.empty()) return;
 
@@ -80,10 +91,12 @@ void Instance::flush(VK_NS::CommandBuffer const& cmd) {
                             data.size_bytes());
   }
 
-  float const aspect_ratio = static_cast<float>(size.width) /
-                             static_cast<float>(size.height);
+  float const aspect_ratio = static_cast<float>(output_size.width) /
+                             static_cast<float>(output_size.height);
   UBO ubo{};
-  ubo.proj = wrenm::ortho(-aspect_ratio, aspect_ratio, -1.0f, 1.0f);
+  ubo.proj =
+      wrenm::ortho(0.0f, static_cast<float>(output_size.width), 0.0f,
+                   static_cast<float>(output_size.height));
   uniform_buffer->set_data_raw(&ubo, sizeof(UBO));
 
   VK_NS::DescriptorBufferInfo buffer_info{uniform_buffer->get(), 0,
@@ -108,19 +121,61 @@ void Instance::flush(VK_NS::CommandBuffer const& cmd) {
   indices.clear();
 }
 
-auto Instance::BeginWindow() -> bool {
-  draw_quad();
-  return true;
+auto Instance::BeginWindow(std::string const& name,
+                           wrenm::vec2f const& size) -> bool {
+  if (!windows_.contains(name)) {
+    wrenm::vec2f const pos = {
+        static_cast<float>(output_size.width) / 2.0f,
+        static_cast<float>(output_size.height) / 2.0f};
+    bool const hovered =
+        point_in_bounds(io.mouse_position, pos, size);
+    windows_.emplace(name, Window{name, pos, size, hovered});
+  }
+
+  stack.push(name);
+
+  auto& window = windows_.at(name);
+  bool const hovered =
+      point_in_bounds(io.mouse_position, windows_.at(name).pos, size);
+  spdlog::debug("Window: ({}, {}), hovered: {}", window.pos.x(),
+                window.pos.y(), hovered);
+
+  if (io.left_mouse_down && hovered) {
+    window.selected = true;
+    window.mouse_offset = window.pos - io.mouse_position;
+  }
+  if (!io.left_mouse) {
+    window.selected = false;
+  }
+
+  return hovered;
 }
 
-auto Instance::EndWindow() -> bool { return true; }
+void Instance::EndWindow() {
+  auto const& window_name = stack.front();
+  stack.pop();
 
-void Instance::draw_quad() {
-  static std::array quad_vertices = {
-      Vertex{{-0.5, -0.5}, {1.0, 1.0, 1.0, 1.0}},
-      Vertex{{0.5, -0.5}, {1.0, 1.0, 1.0, 1.0}},
-      Vertex{{0.5, 0.5}, {1.0, 1.0, 1.0, 1.0}},
-      Vertex{{-0.5, 0.5}, {1.0, 1.0, 1.0, 1.0}},
+  if (windows_.contains(window_name)) {
+    auto& window = windows_.at(window_name);
+    draw_quad(window.pos, window.size,
+              window.hovered ? wrenm::vec4f{1.0, 1.0, 1.0, 1.0}
+                             : wrenm::vec4f{0.5f, 0.5f, 0.5f, 1.0f});
+
+    if (window.selected) {
+      // Move window
+      window.pos = io.mouse_position + window.mouse_offset;
+    }
+  }
+}
+
+void Instance::draw_quad(wrenm::vec2f const& pos,
+                         wrenm::vec2f const& size,
+                         wrenm::vec4f const& colour) {
+  std::array quad_vertices = {
+      Vertex{(wrenm::vec2f{0.0, 0.0} * size) + pos, colour},
+      Vertex{(wrenm::vec2f{1.0, 0.0} * size) + pos, colour},
+      Vertex{(wrenm::vec2f{1.0, 1.0} * size) + pos, colour},
+      Vertex{(wrenm::vec2f{0.0, 1.0} * size) + pos, colour},
   };
   std::array quad_indices = {
       0, 1, 2, 2, 3, 0,
@@ -131,6 +186,16 @@ void Instance::draw_quad() {
 
   indices.insert(indices.end(), quad_indices.begin(),
                  quad_indices.end());
+}
+
+auto Instance::point_in_bounds(wrenm::vec2f const& p,
+                               wrenm::vec2f const& pos,
+                               wrenm::vec2f const& size) -> bool {
+  wrenm::vec2f const top_left = pos;
+  wrenm::vec2f const bottom_right = pos + size;
+
+  return top_left.x() <= p.x() && p.x() <= bottom_right.x() &&
+         top_left.y() <= p.y() && p.y() <= bottom_right.y();
 }
 
 }  // namespace wren::gui

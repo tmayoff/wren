@@ -38,13 +38,13 @@ VKAPI_ATTR auto VKAPI_CALL vkCmdPushDescriptorSetKHR(
 namespace wren::vulkan {
 
 // NOLINTNEXTLINE
-#define LOAD_VULKAN_PFN(out, fn_name)                              \
-  if (out == nullptr) {                                            \
-    out = reinterpret_cast<PFN_##fn_name>(                         \
-        instance.getProcAddr(#fn_name));                           \
-    if (out == nullptr)                                            \
-      return tl::make_unexpected(                                  \
-          make_error_code(VK_NS::Result::eErrorExtensionNotPresent)); \
+#define LOAD_VULKAN_PFN(out, fn_name)                 \
+  if (out == nullptr) {                               \
+    out = reinterpret_cast<PFN_##fn_name>(            \
+        instance.getProcAddr(#fn_name));              \
+    if (out == nullptr)                               \
+      return tl::make_unexpected(make_error_code(     \
+          VK_NS::Result::eErrorExtensionNotPresent)); \
   }
 
 auto LoadFunctions(VK_NS::Instance const &instance)

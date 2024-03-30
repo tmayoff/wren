@@ -9,9 +9,9 @@ template <typename T, std::size_t N>
 struct vec {
   using vec_t = vec<T, N>;
 
-  static auto X() { return vec_t{1.0f}; }
-  static auto Y() { return vec_t{0.0f, 1.0f}; }
-  static auto Z() { return vec_t{0.0f, 0.0f, 1.0f}; }
+  static auto UnitX() { return vec_t{1.0f}; }
+  static auto UnitY() { return vec_t{0.0f, 1.0f}; }
+  static auto UnitZ() { return vec_t{0.0f, 0.0f, 1.0f}; }
 
   vec() : data() {}
 
@@ -31,13 +31,32 @@ struct vec {
     return v;
   }
 
+  constexpr auto operator*=(vec_t const& other) {
+    for (std::size_t i = 0; i < N; i++) {
+      data.at(i) = data.at(i) * other.data.at(i);
+    }
+  }
+
   constexpr auto operator*(vec_t const& other) const {
+    vec_t v{};
+    for (std::size_t i = 0; i < N; i++) {
+      v.data.at(i) = data.at(i) * other.data.at(i);
+    }
+    return v;
+  }
+
+  [[nodiscard]] constexpr auto dot(vec_t const& other) const {
     T dot = 0;
     auto const a = this->normalized();
     auto const b = other.normalized();
     for (std::size_t i = 0; i < N; i++)
       dot += a.data.at(i) * b.data.at(i);
     return dot;
+  }
+
+  constexpr auto operator+=(vec_t const& other) {
+    for (std::size_t i = 0; i < N; i++)
+      data.at(i) = data.at(i) + other.data.at(i);
   }
 
   constexpr auto operator+(vec_t const& other) const {

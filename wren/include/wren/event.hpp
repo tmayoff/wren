@@ -6,6 +6,8 @@
 #include <vector>
 #include <wren_utils/enums.hpp>
 
+#include "keycode.hpp"
+
 namespace wren::Event {
 
 DESCRIBED_ENUM(Category, WINDOW, KEYBOARD, MOUSE)
@@ -30,6 +32,24 @@ struct WindowResized {
   APPEND_EVENT_INFO("WindowResized", Category::WINDOW)
 };
 
+struct MouseMoved {
+  float x = 0;
+  float y = 0;
+  bool relative = false;
+
+  APPEND_EVENT_INFO("MouseMoved", Category::MOUSE)
+};
+
+struct MouseButtonDown {
+  MouseCode button;
+  APPEND_EVENT_INFO("MouseButtonDown", Category::MOUSE)
+};
+
+struct MouseButtonUp {
+  MouseCode button;
+  APPEND_EVENT_INFO("MouseButtonUp", Category::MOUSE)
+};
+
 class Dispatcher {
  public:
   template <typename T>
@@ -43,6 +63,7 @@ class Dispatcher {
 };
 
 template <typename Type>
+// NOLINTNEXTLINE
 void Dispatcher::dispatch(Type &&value) const {
   auto const id = typeid(Type{}).hash_code();
   if (handlers.contains(id)) {

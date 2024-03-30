@@ -72,7 +72,7 @@ TEST_CASE("DOT") {
   };
 
   for (auto const& test : tests) {
-    auto const got = test.a * test.b;
+    auto const got = test.a.dot(test.b);
     REQUIRE_THAT(got,
                  Catch::Matchers::WithinAbs(test.expected, 0.01));
   }

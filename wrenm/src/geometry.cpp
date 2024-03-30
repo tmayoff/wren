@@ -25,9 +25,9 @@ auto look_at(wrenm::vec3f const& eye, wrenm::vec3f const& center,
   mat.data.at(0).at(2) = -f.x();
   mat.data.at(1).at(2) = -f.y();
   mat.data.at(2).at(2) = -f.z();
-  mat.data.at(3).at(0) = -(s * eye);
-  mat.data.at(3).at(1) = -(u * eye);
-  mat.data.at(3).at(2) = -(f * eye);
+  mat.data.at(3).at(0) = -(s.dot(eye));
+  mat.data.at(3).at(1) = -(u.dot(eye));
+  mat.data.at(3).at(2) = -(f.dot(eye));
   return mat;
 }
 

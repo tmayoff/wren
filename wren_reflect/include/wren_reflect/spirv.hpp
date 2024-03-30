@@ -11,7 +11,7 @@ namespace wren::reflect {
 using spirv_t = std::vector<uint32_t>;
 
 inline auto get_vk_shader_stage(
-    const spv::ExecutionModel &execution_model)
+    spv::ExecutionModel const &execution_model)
     -> tl::expected<VK_NS::ShaderStageFlagBits, std::error_code> {
   switch (execution_model) {
     case spv::ExecutionModelVertex:

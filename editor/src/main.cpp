@@ -4,12 +4,15 @@
 #include <cstdlib>
 #include <wren/application.hpp>
 #include <wren/context.hpp>
+#include <wren/event.hpp>
+#include <wren/keycode.hpp>
 #include <wren/render_pass.hpp>
 #include <wren/shaders/mesh.hpp>
 #include <wren/shaders/triangle.hpp>
 #include <wren_gui/instance.hpp>
 #include <wren_gui/shader.hpp>
 #include <wren_utils/errors.hpp>
+#include <wrenm/utils.hpp>
 
 class Scene {
  public:
@@ -27,6 +30,26 @@ class Scene {
       throw std::runtime_error(
           fmt::format("{}", ui_shader_res.error()));
     }
+
+    ctx->event_dispatcher.on<wren::Event::MouseMoved>(
+        [this](auto &e) {
+          if (e.relative)
+            gui_instance->IO().mouse_position_rel = {e.x, e.y};
+          else
+            gui_instance->IO().mouse_position = {e.x, e.y};
+        });
+
+    ctx->event_dispatcher.on<wren::Event::MouseButtonUp>(
+        [this](auto const &e) {
+          if (e.button == wren::MouseCode::Left)
+            gui_instance->IO().left_mouse = false;
+        });
+
+    ctx->event_dispatcher.on<wren::Event::MouseButtonDown>(
+        [this](auto const &e) {
+          if (e.button == wren::MouseCode::Left)
+            gui_instance->IO().left_mouse = true;
+        });
 
     gui_instance = std::make_shared<wren::gui::Instance>(
         ui_shader_res.value(), ctx->graphics_context->Device().get(),
@@ -79,11 +102,22 @@ auto main() -> int {
 }
 
 void Scene::on_update() {
-  gui_instance->BeginWindow();
+  spdlog::info("Position: ({} {}), Moved ({}, {}), Mouse down: {}",
+               gui_instance->IO().mouse_position.x(),
+               gui_instance->IO().mouse_position.y(),
+               gui_instance->IO().mouse_position_rel.x(),
+               gui_instance->IO().mouse_position_rel.y(),
+               gui_instance->IO().left_mouse);
+
+  gui_instance->Begin();
+
+  gui_instance->BeginWindow("Main", {400, 400});
 
   // TODO Render text
 
   gui_instance->EndWindow();
+
+  gui_instance->End();
 }
 
 auto Scene::build_3D_render_graph(
