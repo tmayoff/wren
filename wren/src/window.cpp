@@ -103,8 +103,8 @@ void Window::DispatchEvents(Event::Dispatcher const &dispatcher) {
                                 static_cast<float>(event.motion.y)});
 
           dispatcher.dispatch(Event::MouseMoved{
-              static_cast<float>(event.motion.x),
-              static_cast<float>(event.motion.y), true});
+              static_cast<float>(event.motion.xrel),
+              static_cast<float>(event.motion.yrel), true});
           break;
 
         case SDL_MOUSEBUTTONDOWN: {

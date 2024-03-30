@@ -17,7 +17,7 @@ class Queue {
  public:
   static auto FindQueueFamilyIndices(
       const VK_NS::PhysicalDevice &physical_device,
-      const std::optional<VK_NS::SurfaceKHR> &surface = {})
+      std::optional<VK_NS::SurfaceKHR> const &surface = {})
       -> tl::expected<QueueFamilyIndices, std::error_code>;
 };
 

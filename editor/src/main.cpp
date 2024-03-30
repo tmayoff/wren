@@ -5,6 +5,7 @@
 #include <wren/application.hpp>
 #include <wren/context.hpp>
 #include <wren/event.hpp>
+#include <wren/keycode.hpp>
 #include <wren/render_pass.hpp>
 #include <wren/shaders/mesh.hpp>
 #include <wren/shaders/triangle.hpp>
@@ -12,8 +13,6 @@
 #include <wren_gui/shader.hpp>
 #include <wren_utils/errors.hpp>
 #include <wrenm/utils.hpp>
-
-#include "wren/keycode.hpp"
 
 class Scene {
  public:
@@ -43,7 +42,7 @@ class Scene {
     ctx->event_dispatcher.on<wren::Event::MouseButtonUp>(
         [this](auto const &e) {
           if (e.button == wren::MouseCode::Left)
-            gui_instance->IO().left_mouse = true;
+            gui_instance->IO().left_mouse = false;
         });
 
     ctx->event_dispatcher.on<wren::Event::MouseButtonDown>(
@@ -103,11 +102,22 @@ auto main() -> int {
 }
 
 void Scene::on_update() {
+  spdlog::info("Position: ({} {}), Moved ({}, {}), Mouse down: {}",
+               gui_instance->IO().mouse_position.x(),
+               gui_instance->IO().mouse_position.y(),
+               gui_instance->IO().mouse_position_rel.x(),
+               gui_instance->IO().mouse_position_rel.y(),
+               gui_instance->IO().left_mouse);
+
+  gui_instance->Begin();
+
   gui_instance->BeginWindow("Main", {400, 400});
 
   // TODO Render text
 
   gui_instance->EndWindow();
+
+  gui_instance->End();
 }
 
 auto Scene::build_3D_render_graph(

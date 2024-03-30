@@ -24,9 +24,10 @@ auto Device::Create(VK_NS::Instance const &instance,
   return device;
 }
 
-auto Device::CreateDevice(VK_NS::Instance const &instance,
-                          VK_NS::PhysicalDevice const &physical_device,
-                          VK_NS::SurfaceKHR const &surface)
+auto Device::CreateDevice(
+    VK_NS::Instance const &instance,
+    VK_NS::PhysicalDevice const &physical_device,
+    VK_NS::SurfaceKHR const &surface)
     -> tl::expected<void, std::error_code> {
   auto const indices =
       Queue::FindQueueFamilyIndices(physical_device, surface);
@@ -43,7 +44,7 @@ auto Device::CreateDevice(VK_NS::Instance const &instance,
         VK_NS::PhysicalDeviceImagelessFramebufferFeatures>();
 
     VK_NS::DeviceCreateInfo createInfo({}, queue_create_info, {},
-                                    extensions, {}, &features2);
+                                       extensions, {}, &features2);
     auto res = physical_device.createDevice(createInfo);
     if (res.result != VK_NS::Result::eSuccess)
       return tl::make_unexpected(make_error_code(res.result));

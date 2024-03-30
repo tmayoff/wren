@@ -1,5 +1,7 @@
 #include "instance.hpp"
 
+#include <spdlog/spdlog.h>
+
 #include <wren_vk/buffer.hpp>
 #include <wrenm/geometry.hpp>
 
@@ -44,6 +46,13 @@ Instance::Instance(std::shared_ptr<vk::Shader> const& shader,
     uniform_buffer->set_data_raw(&ubo, size);
   }
 }
+
+void Instance::Begin() {
+  // Mouse down
+  io.left_mouse_down = io.left_mouse && !previous_io.left_mouse;
+}
+
+void Instance::End() { previous_io = io; }
 
 void Instance::flush(VK_NS::CommandBuffer const& cmd) {
   if (vertices.empty() || indices.empty()) return;
@@ -114,22 +123,49 @@ void Instance::flush(VK_NS::CommandBuffer const& cmd) {
 
 auto Instance::BeginWindow(std::string const& name,
                            wrenm::vec2f const& size) -> bool {
-  wrenm::vec2f const pos = {
-      static_cast<float>(output_size.width) / 2.0f,
-      static_cast<float>(output_size.height) / 2.0f};
-  windows_.push(
-      Window{name, pos, size,
-             point_in_bounds(io.mouse_position, pos, size)});
-  return true;
+  if (!windows_.contains(name)) {
+    wrenm::vec2f const pos = {
+        static_cast<float>(output_size.width) / 2.0f,
+        static_cast<float>(output_size.height) / 2.0f};
+    bool const hovered =
+        point_in_bounds(io.mouse_position, pos, size);
+    windows_.emplace(name, Window{name, pos, size, hovered});
+  }
+
+  stack.push(name);
+
+  auto& window = windows_.at(name);
+  bool const hovered =
+      point_in_bounds(io.mouse_position, windows_.at(name).pos, size);
+  spdlog::debug("Window: ({}, {}), hovered: {}", window.pos.x(),
+                window.pos.y(), hovered);
+
+  if (io.left_mouse_down && hovered) {
+    window.selected = true;
+    window.mouse_offset = window.pos - io.mouse_position;
+  }
+  if (!io.left_mouse) {
+    window.selected = false;
+  }
+
+  return hovered;
 }
 
-auto Instance::EndWindow() -> bool {
-  auto const& window = windows_.front();
-  windows_.pop();
-  draw_quad(window.pos, window.size,
-            window.hovered ? wrenm::vec4f{1.0, 1.0, 1.0, 1.0}
-                           : wrenm::vec4f{0.5f, 0.5f, 0.5f, 1.0f});
-  return true;
+void Instance::EndWindow() {
+  auto const& window_name = stack.front();
+  stack.pop();
+
+  if (windows_.contains(window_name)) {
+    auto& window = windows_.at(window_name);
+    draw_quad(window.pos, window.size,
+              window.hovered ? wrenm::vec4f{1.0, 1.0, 1.0, 1.0}
+                             : wrenm::vec4f{0.5f, 0.5f, 0.5f, 1.0f});
+
+    if (window.selected) {
+      // Move window
+      window.pos = io.mouse_position + window.mouse_offset;
+    }
+  }
 }
 
 void Instance::draw_quad(wrenm::vec2f const& pos,

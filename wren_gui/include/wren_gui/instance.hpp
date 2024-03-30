@@ -13,7 +13,12 @@ struct Window {
   std::string name;
   wrenm::vec2f pos;
   wrenm::vec2f size;
+
+  // IO
+
   bool hovered = false;
+  bool selected = false;
+  wrenm::vec2f mouse_offset;
 };
 
 static std::size_t const MAX_VERTICES = 10000;
@@ -32,6 +37,9 @@ struct Inputs {
   wrenm::vec2f mouse_position = {0.0f, 0.0f};
   wrenm::vec2f mouse_position_rel = {0.0f, 0.0f};
   bool left_mouse = false;
+
+  // Left mouse down this frame
+  bool left_mouse_down = false;
 };
 
 class Instance {
@@ -50,9 +58,12 @@ class Instance {
     this->output_size = size;
   }
 
+  void Begin();
+  void End();
+
   auto BeginWindow(std::string const& name, wrenm::vec2f const& size)
       -> bool;
-  auto EndWindow() -> bool;
+  void EndWindow();
 
   auto IO() -> Inputs& { return io; }
 
@@ -78,9 +89,11 @@ class Instance {
   std::vector<Vertex> vertices;
   std::vector<uint16_t> indices;
 
-  std::queue<Window> windows_;
+  std::map<std::string, Window> windows_;
+  std::queue<std::string> stack;
 
   Inputs io;
+  Inputs previous_io;
 };
 
 }  // namespace wren::gui

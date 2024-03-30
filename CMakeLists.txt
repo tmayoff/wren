@@ -2,6 +2,17 @@ cmake_minimum_required(VERSION 3.28)
 
 project(wren)
 
+include(cmake/CPM.cmake)
+cpmaddpackage(
+  NAME
+  Format.cmake
+  VERSION
+  1.7.3
+  GITHUB_REPOSITORY
+  TheLartians/Format.cmake
+  OPTIONS
+  "FORMAT_SKIP_CMAKE NO")
+
 option(ENABLE_PROFILING "Enables profiling with tracy" Off)
 option(ENABLE_TESTING "Enables testing framework" Off)
 

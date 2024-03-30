@@ -72,7 +72,8 @@ inline auto IsLayerSupported(std::string_view const &name) -> bool {
 }
 
 inline auto IsDeviceExtensionSupported(
-    std::string_view const &name, VK_NS::PhysicalDevice const &device) {
+    std::string_view const &name,
+    VK_NS::PhysicalDevice const &device) {
   auto res = device.enumerateDeviceExtensionProperties();
 
   bool found = false;

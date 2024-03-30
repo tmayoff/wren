@@ -54,6 +54,11 @@ struct vec {
     return dot;
   }
 
+  constexpr auto operator+=(vec_t const& other) {
+    for (std::size_t i = 0; i < N; i++)
+      data.at(i) = data.at(i) + other.data.at(i);
+  }
+
   constexpr auto operator+(vec_t const& other) const {
     vec_t v{};
     for (std::size_t i = 0; i < N; i++)
