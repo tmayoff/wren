@@ -2,19 +2,9 @@ cmake_minimum_required(VERSION 3.28)
 
 project(wren)
 
-include(cmake/CPM.cmake)
-cpmaddpackage(
-  NAME
-  Format.cmake
-  VERSION
-  1.7.3
-  GITHUB_REPOSITORY
-  TheLartians/Format.cmake
-  OPTIONS
-  "FORMAT_SKIP_CMAKE NO")
-
 option(ENABLE_PROFILING "Enables profiling with tracy" Off)
 option(ENABLE_TESTING "Enables testing framework" Off)
+option(SKIP_DOWNLOADS "Skips downloading packages" Off)
 
 find_package(PkgConfig REQUIRED)
 list(APPEND CMAKE_MODULE_PATH
@@ -23,6 +13,19 @@ list(APPEND CMAKE_MODULE_PATH
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
+
+if(NOT SKIP_DOWNLOADS)
+  include(cmake/CPM.cmake)
+  cpmaddpackage(
+    NAME
+    Format.cmake
+    VERSION
+    1.7.3
+    GITHUB_REPOSITORY
+    TheLartians/Format.cmake
+    OPTIONS
+    "FORMAT_SKIP_CMAKE NO")
+endif()
 
 if(ENABLE_PROFILING)
   add_compile_options("-DTRACY_ENABLE")
