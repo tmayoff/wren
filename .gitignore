@@ -5,3 +5,5 @@ site
 result
 .idea
 CMakeUserPresets.json
+
+cmake/
