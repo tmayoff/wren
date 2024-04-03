@@ -2,10 +2,10 @@
 
 #include <spdlog/spdlog.h>
 
+#include <wren_text/font.hpp>
 #include <wren_vk/buffer.hpp>
 #include <wrenm/geometry.hpp>
-
-#include "wrenm/vector.hpp"
+#include <wrenm/vector.hpp>
 
 namespace wren::gui {
 
@@ -45,6 +45,8 @@ Instance::Instance(std::shared_ptr<vk::Shader> const& shader,
             VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
     uniform_buffer->set_data_raw(&ubo, size);
   }
+
+  text::load_default_font();
 }
 
 void Instance::Begin() {
@@ -137,8 +139,8 @@ auto Instance::BeginWindow(std::string const& name,
   auto& window = windows_.at(name);
   bool const hovered =
       point_in_bounds(io.mouse_position, windows_.at(name).pos, size);
-  spdlog::debug("Window: ({}, {}), hovered: {}", window.pos.x(),
-                window.pos.y(), hovered);
+  //  spdlog::debug("Window: ({}, {}), hovered: {}", window.pos.x(),
+  //              window.pos.y(), hovered);
 
   if (io.left_mouse_down && hovered) {
     window.selected = true;

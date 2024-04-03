@@ -102,12 +102,12 @@ auto main() -> int {
 }
 
 void Scene::on_update() {
-  spdlog::info("Position: ({} {}), Moved ({}, {}), Mouse down: {}",
-               gui_instance->IO().mouse_position.x(),
-               gui_instance->IO().mouse_position.y(),
-               gui_instance->IO().mouse_position_rel.x(),
-               gui_instance->IO().mouse_position_rel.y(),
-               gui_instance->IO().left_mouse);
+  // spdlog::info("Position: ({} {}), Moved ({}, {}), Mouse down: {}",
+  //              gui_instance->IO().mouse_position.x(),
+  //              gui_instance->IO().mouse_position.y(),
+  //              gui_instance->IO().mouse_position_rel.x(),
+  //              gui_instance->IO().mouse_position_rel.y(),
+  //              gui_instance->IO().left_mouse);
 
   gui_instance->Begin();
 

@@ -54,6 +54,7 @@
           shaderc
           spirv-headers
           glm
+          fontconfig
         ];
       in rec {
         vulkan_layer_path = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d:${pkgs.renderdoc}/share/vulkan/implicit_layer.d";
