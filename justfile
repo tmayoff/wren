@@ -1,16 +1,16 @@
 default: build
 
 configure:
-    cmake -S. -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_COLOR_DIAGNOSTICS=ON -DENABLE_TESTING=On
+    meson setup build
 
 build:
-    cmake --build build
+    meson compile -C build
 
 run: build
     ./build/editor/wren_editor
 
 test: build
-    cd build && ctest --output-on-failure
+    cd build && meson test
 
 run_renderdoc:
     ENABLE_VULKAN_RENDERDOC_CAPTURE=1 ./build/editor/wren_editor
@@ -21,7 +21,5 @@ gdb: build
 clean:
     rm -rf build
 
-everything: deps configure build
+everything: configure build
 
-deps:
-    conan install . --build=missing -s build_type=Debug

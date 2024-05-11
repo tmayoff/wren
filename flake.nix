@@ -23,7 +23,7 @@
             owner = "GPUOpen-LibrariesAndSDKs";
             repo = "VulkanMemoryAllocator";
             rev = "master";
-            hash = "sha256-KizY8khBzY2+qbIFSJpTNb3ZFWqxRWhoh5hPomM6HGc=";
+            hash = "sha256-oUcwmVEcjcM8r1q3kQsNEebLFFs7mDXOH1+hWUFlAr8=";
           };
 
           nativeBuildInputs = with pkgs; [
@@ -73,6 +73,7 @@
           ];
 
           nativeBuildInputs = [
+            pkgs.meson
             pkgs.cmake
             pkgs.ninja
           ];
@@ -109,6 +110,7 @@
               clang-tools
               gdb
               just
+              muon
 
               doxygen_gui
               graphviz

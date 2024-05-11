@@ -1,0 +1,17 @@
+wren_vk = library(
+    'wren_vk',
+    'src/errors.cpp',
+    include_directories: ['include', 'include/wren_vk'],
+    dependencies: [
+        wren_utils_dep,
+        wren_reflect_dep,
+    ],
+)
+wren_vk_dep = declare_dependency(
+    include_directories: 'include',
+    link_with: wren_vk,
+    dependencies: [
+        wren_utils_dep,
+        wren_reflect_dep,
+    ],
+)
