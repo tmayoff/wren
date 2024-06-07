@@ -16,9 +16,9 @@ Instance::Instance(std::shared_ptr<vk::Shader> const& shader,
                    VK_NS::Queue const& graphics_queue)
     : shader_(shader),
       device(device),
-      allocator(allocator),
       graphics_queue(graphics_queue),
-      command_pool(command_pool) {
+      command_pool(command_pool),
+      allocator(allocator) {
   // ================ Vertex buffer =================== //
   {
     vertex_buffer =

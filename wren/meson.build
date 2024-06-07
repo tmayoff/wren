@@ -1,12 +1,22 @@
 wren = library(
     'wren',
     'src/application.cpp',
-    include_directories: 'include',
+    'src/event.cpp',
+    'src/graph.cpp',
+    'src/graphics_context.cpp',
+    'src/mesh.cpp',
+    'src/pipeline.cpp',
+    'src/render_pass.cpp',
+    'src/renderer.cpp',
+    'src/window.cpp',
+    include_directories: ['include', 'include/wren'],
     dependencies: [
         vulkan,
         wren_vk_dep,
         wren_reflect_dep,
         wrenm_dep,
+        spdlog,
+        sdl2,
     ],
 )
 wren_dep = declare_dependency(
@@ -17,5 +27,7 @@ wren_dep = declare_dependency(
         wren_vk_dep,
         wren_reflect_dep,
         wrenm_dep,
+        spdlog,
+        sdl2,
     ],
 )

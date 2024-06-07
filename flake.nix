@@ -33,6 +33,7 @@
 
         rawNativeBuildInputs = with pkgs; [
           pkg-config
+          meson
           cmake
           ninja
           tracy

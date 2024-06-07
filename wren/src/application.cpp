@@ -7,11 +7,11 @@
 #include <tl/expected.hpp>
 #include <wren_utils/errors.hpp>
 
-#include "utils/tracy.hpp"  // IWYU pragma: export
 #include "wren/context.hpp"
 #include "wren/event.hpp"
 #include "wren/graphics_context.hpp"
 #include "wren/renderer.hpp"
+#include "wren/utils/tracy.hpp"  // IWYU pragma: export
 
 namespace wren {
 

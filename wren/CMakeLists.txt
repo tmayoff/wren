@@ -4,7 +4,7 @@ add_library(
   src/event.cpp
   src/graph.cpp
   src/graphics_context.cpp
-  src/memory.cpp
+  # src/memory.cpp
   src/mesh.cpp
   src/render_pass.cpp
   src/renderer.cpp
