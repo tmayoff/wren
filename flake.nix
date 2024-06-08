@@ -22,8 +22,8 @@
           src = pkgs.fetchFromGitHub {
             owner = "GPUOpen-LibrariesAndSDKs";
             repo = "VulkanMemoryAllocator";
-            rev = "master";
-            hash = "sha256-oUcwmVEcjcM8r1q3kQsNEebLFFs7mDXOH1+hWUFlAr8=";
+            rev = "7942b798289f752dc23b0a79516fd8545febd718";
+            hash = "sha256-x/5OECXCG4rxNtyHZKaMnrNbDjxiP9bQFtQiqEFjNKQ=";
           };
 
           nativeBuildInputs = with pkgs; [
@@ -89,10 +89,6 @@
             nativeBuildInputs = rawNativeBuildInputs;
             buildInputs = rawBuildInputs;
 
-            cmakeFlags = [
-              "-DSKIP_DOWNLOADS=On"
-            ];
-
             installPhase = ''
               mkdir -p $out/bin
               ninja install
@@ -119,9 +115,8 @@
               python311Packages.mkdocs-material
               python311Packages.mkdocs-mermaid2-plugin
 
-              vscode-extensions.llvm-org.lldb-vscode
-              cmake-language-server
               renderdoc
+              tracy
             ]
             ++ rawNativeBuildInputs;
 
