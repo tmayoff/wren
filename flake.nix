@@ -99,19 +99,7 @@
           nativeBuildInputs = with pkgs;
             [
               vulkan-loader
-              # clang-tools
-              # gdb
-              # just
-              # muon
-
-              # doxygen_gui
-              # graphviz
-              # mkdocs
-              # python311Packages.mkdocs-material
-              # python311Packages.mkdocs-mermaid2-plugin
-
-              # renderdoc
-              # tracy
+              vulkan-tools
             ]
             ++ rawNativeBuildInputs;
 
