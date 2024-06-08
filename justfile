@@ -7,7 +7,7 @@ build:
     meson compile -C build
 
 run: build
-    ./build/editor/wren_editor
+    ./build/editor/editor
 
 test: build
     cd build && meson test

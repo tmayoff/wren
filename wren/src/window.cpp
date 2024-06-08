@@ -3,13 +3,14 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_vulkan.h>
+#include <SDL_error.h>
+#include <SDL_mouse.h>
 
 #include <system_error>
+#include <tl/expected.hpp>
 
-#include "SDL_mouse.h"
 #include "keycode.hpp"
-#include "tl/expected.hpp"
-#include "utils/tracy.hpp"  // IWYU pragma: export
+#include "utils/tracy.hpp"  // IWYU pragma: keep
 #include "vulkan/vulkan_core.h"
 #include "vulkan/vulkan_handles.hpp"
 #include "wren/event.hpp"
@@ -30,8 +31,9 @@ auto Window::Create(std::string const &application_name)
       SDL_WINDOWPOS_UNDEFINED, 640, 480,
       SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
   if (window == nullptr) {
+    spdlog::error("Failed to create window: {}", SDL_GetError());
     return tl::make_unexpected(
-        make_error_code(WindowErrors::SDL_INIT));
+        make_error_code(WindowErrors::SDL_WINDOW));
   }
 
   return Window(window);

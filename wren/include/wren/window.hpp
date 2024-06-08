@@ -4,6 +4,7 @@
 #include <SDL2/SDL_video.h>
 #include <spdlog/spdlog.h>
 
+#include <boost/describe/enum.hpp>
 #include <system_error>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
@@ -42,4 +43,5 @@ class Window {
 
 }  // namespace wren
 
-ERROR_ENUM(wren, WindowErrors, SDL_INIT, SDL_VULKAN_EXTENSION)
+ERROR_ENUM(wren, WindowErrors, SDL_INIT, SDL_WINDOW,
+           SDL_VULKAN_EXTENSION)

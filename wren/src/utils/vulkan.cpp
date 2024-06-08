@@ -8,8 +8,6 @@
 #include <vulkan/vulkan_to_string.hpp>
 #include <wren_vk/errors.hpp>
 
-VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
-
 // NOLINTBEGIN
 PFN_vkCreateDebugUtilsMessengerEXT pfnVkCreateDebugUtilsMessengerEXT =
     nullptr;

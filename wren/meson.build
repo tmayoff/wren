@@ -9,6 +9,10 @@ wren = library(
     'src/render_pass.cpp',
     'src/renderer.cpp',
     'src/window.cpp',
+    'src/utils/vulkan.cpp',
+    'src/utils/queue.cpp',
+    'src/utils/device.cpp',
+
     include_directories: ['include', 'include/wren'],
     dependencies: [
         vulkan,

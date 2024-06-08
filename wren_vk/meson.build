@@ -4,6 +4,8 @@ wren_vk = library(
     'src/buffer.cpp',
     'src/shader.cpp',
     'src/memory.cpp',
+    'src/vulkan.cpp',
+    
     include_directories: ['include', 'include/wren_vk'],
     dependencies: [
         wren_utils_dep,
