@@ -19,7 +19,7 @@ gdb: build
     gdb --tui --args ./build/editor/wren_editor
 
 clean:
-    rm -rf build
+    ninja -C build clean
 
 everything: configure build
 

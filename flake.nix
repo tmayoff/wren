@@ -2,7 +2,7 @@
   description = "Wren game engine";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -36,25 +36,19 @@
           meson
           cmake
           ninja
-          tracy
-          doxygen
         ];
 
         rawBuildInputs = with pkgs; [
-          catch2_3
+          # catch2_3
           SDL2
           spdlog
           tl-expected
           boost
-          gsl-lite
-          vulkan-validation-layers
           vulkan-headers
-          vulkan-loader
-          vulkan-tools
+          tracy
           vma
           shaderc
           spirv-headers
-          glm
           fontconfig
         ];
       in rec {
@@ -104,24 +98,26 @@
 
           nativeBuildInputs = with pkgs;
             [
-              clang-tools
-              gdb
-              just
-              muon
+              vulkan-loader
+              # clang-tools
+              # gdb
+              # just
+              # muon
 
-              doxygen_gui
-              graphviz
-              mkdocs
-              python311Packages.mkdocs-material
-              python311Packages.mkdocs-mermaid2-plugin
+              # doxygen_gui
+              # graphviz
+              # mkdocs
+              # python311Packages.mkdocs-material
+              # python311Packages.mkdocs-mermaid2-plugin
 
-              renderdoc
-              tracy
+              # renderdoc
+              # tracy
             ]
             ++ rawNativeBuildInputs;
 
-          buildInputs =
+          buildInputs = with pkgs;
             [
+              vulkan-validation-layers
             ]
             ++ rawBuildInputs;
         };

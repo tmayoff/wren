@@ -10,6 +10,9 @@ vma = dependency(
 vulkan = dependency('vulkan')
 shaderc = dependency('shaderc')
 sdl2 = dependency('SDL2')
+boost = dependency('boost')
+expected = dependency('tl-expected', modules: ['tl::expected'])
+spirv = dependency('SPIRV-Headers')
 
 add_project_arguments(
     '-DVULKAN_HPP_NAMESPACE=_VK_',
@@ -25,7 +28,7 @@ if get_option('buildtype') == 'debug'
 endif
 
 if get_option('profiling')
-    add_project_arguments('-DWREN_PROFILING', language: 'cpp')   
+    add_project_arguments('-DWREN_PROFILING', language: 'cpp')
 endif
 
 if get_option('build_profiling')
