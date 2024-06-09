@@ -1,3 +1,5 @@
+# imgui = dependency('imgui')
+
 wren_gui = library(
     'wren_gui',
     'src/instance.cpp',
@@ -8,6 +10,7 @@ wren_gui = library(
         wren_utils_dep,
         wren_text_dep,
         spdlog,
+        # imgui,
     ],
 )
 wren_gui_dep = declare_dependency(
@@ -19,5 +22,6 @@ wren_gui_dep = declare_dependency(
         wren_utils_dep,
         wren_text_dep,
         spdlog,
+        # imgui,
     ],
 )

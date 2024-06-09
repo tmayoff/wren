@@ -4,17 +4,23 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
     flake-utils.url = "github:numtide/flake-utils";
+    nixgl.url = "github:nix-community/nixGL";
   };
 
   outputs = {
     self,
     nixpkgs,
+    nixgl,
     flake-utils,
   }:
     flake-utils.lib.eachDefaultSystem (
       system: let
+        overlays = [
+          nixgl.overlay
+        ];
+
         pkgs = import nixpkgs {
-          inherit system;
+          inherit system overlays;
         };
 
         vma = pkgs.stdenv.mkDerivation {
@@ -50,6 +56,7 @@
           shaderc
           spirv-headers
           fontconfig
+          imgui
         ];
       in rec {
         vulkan_layer_path = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d:${pkgs.renderdoc}/share/vulkan/implicit_layer.d";
@@ -100,6 +107,8 @@
             [
               vulkan-loader
               vulkan-tools
+
+              pkgs.nixgl.nixVulkanIntel
             ]
             ++ rawNativeBuildInputs;
 

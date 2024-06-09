@@ -3,6 +3,9 @@ default: build
 configure:
     meson setup build
 
+reconfigure:
+    meson setup build --wipe
+
 build:
     meson compile -C build
 
