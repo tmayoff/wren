@@ -1,4 +1,4 @@
-# imgui = dependency('imgui')
+imgui = dependency('imgui')
 
 wren_gui = library(
     'wren_gui',

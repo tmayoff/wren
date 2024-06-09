@@ -9,6 +9,9 @@ reconfigure:
 build:
     meson compile -C build
 
+nix_run: build
+    nixVulkanIntel ./build/editor/editor
+
 run: build
     ./build/editor/editor
 

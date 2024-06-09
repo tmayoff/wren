@@ -23,6 +23,34 @@
           inherit system overlays;
         };
 
+        imgui_patched = pkgs.stdenv.mkDerivation rec {
+          name = "imgui";
+          version = "1.89.9";
+          srcs = [
+            (pkgs.fetchFromGitHub {
+              name = "imgui";
+              owner = "ocornut";
+              repo = "imgui";
+              rev = "v${version}";
+              hash = "sha256-0k9jKrJUrG9piHNFQaBBY3zgNIKM23ZA879NY+MNYTU=";
+            })
+            (pkgs.fetchzip {
+              name = "imgui-meson-patch";
+              url = "https://wrapdb.mesonbuild.com/v2/imgui_${version}-1/get_patch.zip";
+              hash = "sha256-ZTs7rqoASbMP7qsDb8G/q4IiLX+aPct2Nwyv16oulfk=";
+            })
+          ];
+
+          sourceRoot = ".";
+
+          installPhase = ''
+            mkdir -p $out
+            ls -la
+            cp -r imgui/* $out
+            cp -r imgui-meson-patch/* $out
+          '';
+        };
+
         vma = pkgs.stdenv.mkDerivation {
           name = "VulkanMemoryAllocator";
           src = pkgs.fetchFromGitHub {
@@ -36,6 +64,26 @@
             cmake
           ];
         };
+
+        # spirv-reflect = pkgs.stdenv.mkDerivation {
+        #   name = "spirv-reflect";
+        #   src = pkgs.fetchFromGitHub {
+        #     owner = "KhronosGroup";
+        #     repo = "SPIRV-Reflect";
+        #     rev = "vulkan-sdk-1.3.275.0";
+        #     hash = "sha256-WnbNEyoutiWs+4Cu9Nv9KfNNmT4gKe/IzyiL/bLb3rg=";
+        #   };
+
+        #   cmakeFlags = [
+        #     "-DSPIRV_REFLECT_STATIC_LIB=On"
+        #   ];
+
+        #   nativeBuildInputs = [
+        #     pkgs.meson
+        #     pkgs.cmake
+        #     pkgs.ninja
+        #   ];
+        # };
 
         rawNativeBuildInputs = with pkgs; [
           pkg-config
@@ -51,6 +99,7 @@
           tl-expected
           boost
           vulkan-headers
+          vulkan-loader
           tracy
           vma
           shaderc
@@ -61,34 +110,21 @@
       in rec {
         vulkan_layer_path = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d:${pkgs.renderdoc}/share/vulkan/implicit_layer.d";
 
-        spirv-reflect = pkgs.stdenv.mkDerivation {
-          name = "spirv-reflect";
-          src = pkgs.fetchFromGitHub {
-            owner = "KhronosGroup";
-            repo = "SPIRV-Reflect";
-            rev = "vulkan-sdk-1.3.275.0";
-            hash = "sha256-WnbNEyoutiWs+4Cu9Nv9KfNNmT4gKe/IzyiL/bLb3rg=";
-          };
-
-          cmakeFlags = [
-            "-DSPIRV_REFLECT_STATIC_LIB=On"
-          ];
-
-          nativeBuildInputs = [
-            pkgs.meson
-            pkgs.cmake
-            pkgs.ninja
-          ];
-        };
-
         packages = rec {
           wren_editor = pkgs.stdenv.mkDerivation {
             name = "wren_editor";
             src = ./.;
+
             VK_LAYER_PATH = vulkan_layer_path;
 
             nativeBuildInputs = rawNativeBuildInputs;
             buildInputs = rawBuildInputs;
+
+            patchPhase = ''
+              mkdir -p subprojects
+              cp -r ${imgui_patched} subprojects/imgui
+              ls -la subprojects/imgui
+            '';
 
             installPhase = ''
               mkdir -p $out/bin
@@ -105,7 +141,6 @@
 
           nativeBuildInputs = with pkgs;
             [
-              vulkan-loader
               vulkan-tools
 
               pkgs.nixgl.nixVulkanIntel

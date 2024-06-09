@@ -4,6 +4,3 @@ build
 site
 result
 .idea
-CMakeUserPresets.json
-
-cmake/
