@@ -4,6 +4,7 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
+#include <cstdint>
 #include <system_error>
 #include <tl/expected.hpp>
 
@@ -14,7 +15,7 @@ namespace wren {
 
 struct error_code : public std::error_code {
   error_code(int32_t ec, std::error_category const& cat)
-      : std::error_code(ec, cat) {}
+      : ::error_code(ec, cat) {}
 
   error_code(std::error_code ec) : std::error_code(ec) {}
 

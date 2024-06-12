@@ -1,4 +1,4 @@
-project('wren', 'cpp', version: '0.0.1', default_options: 'cpp_std=c++20')
+project('wren', 'cpp', version: '0.0.1', default_options: 'cpp_std=c++23')
 
 spdlog = dependency('spdlog')
 vulkan = dependency('vulkan')
@@ -37,9 +37,9 @@ endif
 
 subdir('wrenm')
 subdir('wren_utils')
-subdir('wren_reflect')
-subdir('wren_text')
-subdir('wren_vk')
-subdir('wren_gui')
-subdir('wren')
-subdir('editor')
+# subdir('wren_reflect')
+# subdir('wren_text')
+# subdir('wren_vk')
+# subdir('wren_gui')
+# subdir('wren')
+# subdir('editor')

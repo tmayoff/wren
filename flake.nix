@@ -45,7 +45,6 @@
 
           installPhase = ''
             mkdir -p $out
-            ls -la
             cp -r imgui/* $out
             cp -r imgui-meson-patch/* $out
           '';
@@ -123,7 +122,6 @@
             patchPhase = ''
               mkdir -p subprojects
               cp -r ${imgui_patched} subprojects/imgui
-              ls -la subprojects/imgui
             '';
 
             installPhase = ''
@@ -136,7 +134,7 @@
         };
 
         devShell = pkgs.mkShell.override {stdenv = pkgs.clangStdenv;} {
-          NIX_CFLAGS_COMPILE = "-U_FORTIFY_SOURCE";
+          hardeningDisable = ["all"];
           VK_LAYER_PATH = vulkan_layer_path;
 
           nativeBuildInputs = with pkgs;
