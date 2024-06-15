@@ -3,7 +3,7 @@
 #include <array>
 #include <cmath>
 
-namespace wrenm {
+namespace wren::math {
 
 template <typename T, std::size_t N>
 struct vec {
@@ -86,11 +86,11 @@ struct vec {
     return v;
   }
 
-  constexpr auto operator==(vec_t const& other) {
+  constexpr auto operator==(vec_t const& other) const {
     return data == other.data;
   }
 
-  constexpr auto operator!=(vec_t const& other) {
+  constexpr auto operator!=(vec_t const& other) const {
     return !(*this == other);
   }
 
@@ -142,4 +142,4 @@ struct vec4f : vec<float, 4> {
   [[nodiscard]] auto w() const { return data.at(3); }
 };
 
-}  // namespace wrenm
+}  // namespace wren::math

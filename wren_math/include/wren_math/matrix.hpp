@@ -2,7 +2,7 @@
 
 #include <array>
 
-namespace wrenm {
+namespace wren::math {
 
 struct mat4f {
   using mat_t = std::array<std::array<float, 4>, 4>;
@@ -42,4 +42,4 @@ struct mat4f {
   mat_t data{};
 };
 
-}  // namespace wrenm
+}  // namespace wren::math

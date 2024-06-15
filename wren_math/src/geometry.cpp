@@ -5,14 +5,14 @@
 #include "matrix.hpp"
 #include "vector.hpp"
 
-namespace wrenm {
+namespace wren::math {
 
-auto look_at(wrenm::vec3f const& eye, wrenm::vec3f const& center,
-             wrenm::vec3f const& world_up) -> wrenm::mat4f {
-  wrenm::vec3f const up = world_up.normalized();
-  wrenm::vec3f const f = (center - eye).normalized();
-  wrenm::vec3f const s = (up % f).normalized();
-  wrenm::vec3f const u = f % s;
+auto look_at(vec3f const& eye, vec3f const& center,
+             vec3f const& world_up) -> mat4f {
+  vec3f const up = world_up.normalized();
+  vec3f const f = (center - eye).normalized();
+  vec3f const s = (up % f).normalized();
+  vec3f const u = f % s;
 
   mat4f mat;
 
@@ -35,8 +35,8 @@ auto translate(mat4f mat, vec3f offset) -> mat4f {
   return mat4f::IDENTITY();
 }
 
-auto rotate(wrenm::mat4f const& matrix, float angle,
-            wrenm::vec3f const& axis) -> wrenm::mat4f {
+auto rotate(mat4f const& matrix, float angle,
+            vec3f const& axis) -> mat4f {
   float const sin = std::sin(angle);
   float const cos = std::cos(angle);
   float const x2 = axis.x() * axis.x();
@@ -65,4 +65,4 @@ auto rotate(wrenm::mat4f const& matrix, float angle,
   return mat;
 }
 
-}  // namespace wrenm
+}  // namespace wren::math

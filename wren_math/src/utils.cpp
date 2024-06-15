@@ -1,8 +1,10 @@
-#include "wrenm/utils.hpp"
+#include "utils.hpp"
 
 #include "matrix.hpp"
 
-auto operator<<(std::ostream& os, wrenm::mat4f const& value)
+namespace wren::math {
+
+auto operator<<(std::ostream& os, mat4f const& value)
     -> std::ostream& {
   for (std::size_t i = 0; i < value.data.size(); i++) {
     for (std::size_t j = 0; j < value.data.size(); j++) {
@@ -13,3 +15,5 @@ auto operator<<(std::ostream& os, wrenm::mat4f const& value)
 
   return os;
 }
+
+}  // namespace wren::math

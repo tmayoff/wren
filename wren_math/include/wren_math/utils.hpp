@@ -5,9 +5,10 @@
 #include "matrix.hpp"
 #include "vector.hpp"
 
+namespace wren::math {
+
 template <typename T, std::size_t N>
-inline auto operator<<(std::ostream& os,
-                       wrenm::vec<T, N> const& value)
+auto operator<<(std::ostream& os, vec<T, N> const& value)
     -> std::ostream& {
   os << "(";
   for (std::size_t i = 0; i < value.data.size(); i++) {
@@ -19,5 +20,7 @@ inline auto operator<<(std::ostream& os,
   return os;
 }
 
-auto operator<<(std::ostream& os, wrenm::mat4f const& value)
+auto operator<<(std::ostream& os, mat4f const& value)
     -> std::ostream&;
+
+}  // namespace wren::math

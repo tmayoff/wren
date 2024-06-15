@@ -1,19 +1,17 @@
-#include <wrenm/utils.hpp>
-#include <wrenm/vector.hpp>
+#include <boost/test/unit_test.hpp>
+#include <wren_math/utils.hpp>
+#include <wren_math/vector.hpp>
 
-// This needs to be after wrenm/utils.hpp to get the stringization
-// functions
-#include <catch2/catch_test_macros.hpp>
-#include <catch2/matchers/catch_matchers_floating_point.hpp>
+BOOST_AUTO_TEST_SUITE(VECTOR)
 
-TEST_CASE("ADD/SUB") {
+BOOST_AUTO_TEST_CASE(ADD_SUB) {
   enum class OP { ADD, SUB };
 
   struct Test {
-    wrenm::vec2f a;
-    wrenm::vec2f b;
+    wren::math::vec2f a;
+    wren::math::vec2f b;
 
-    wrenm::vec2f expected;
+    wren::math::vec2f expected;
 
     OP op = OP::ADD;
   };
@@ -24,7 +22,7 @@ TEST_CASE("ADD/SUB") {
   };
 
   for (auto const& test : tests) {
-    wrenm::vec2f c;
+    wren::math::vec2f c;
     switch (test.op) {
       case OP::ADD:
         c = test.a + test.b;
@@ -34,16 +32,16 @@ TEST_CASE("ADD/SUB") {
         break;
     }
 
-    REQUIRE(c == test.expected);
+    BOOST_TEST(c == test.expected);
   }
 }
 
-TEST_CASE("MUL") {
+BOOST_AUTO_TEST_CASE(MUL) {
   struct Test {
-    wrenm::vec2f a;
+    wren::math::vec2f a;
     float scalar = 1;
 
-    wrenm::vec2f expected;
+    wren::math::vec2f expected;
   };
 
   std::array tests = {
@@ -52,17 +50,16 @@ TEST_CASE("MUL") {
   };
 
   for (auto const& test : tests) {
-    wrenm::vec2f c = test.a * test.scalar;
-
-    REQUIRE(c == test.expected);
+    wren::math::vec2f c = test.a * test.scalar;
+    BOOST_TEST(c == test.expected);
   }
 }
 
-TEST_CASE("DOT") {
+BOOST_AUTO_TEST_CASE(DOT) {
   struct Test {
-    wrenm::vec3f a;
-    wrenm::vec3f b;
-    float expected{};
+    wren::math::vec3f a;
+    wren::math::vec3f b;
+    float expected = 0;
   };
 
   std::array tests = {
@@ -72,17 +69,15 @@ TEST_CASE("DOT") {
   };
 
   for (auto const& test : tests) {
-    auto const got = test.a.dot(test.b);
-    REQUIRE_THAT(got,
-                 Catch::Matchers::WithinAbs(test.expected, 0.01));
+    BOOST_TEST(test.a.dot(test.b) == test.expected);
   }
 }
 
-TEST_CASE("CROSS") {
+BOOST_AUTO_TEST_CASE(CROSS) {
   struct Test {
-    wrenm::vec3f a;
-    wrenm::vec3f b;
-    wrenm::vec3f expected{};
+    wren::math::vec3f a;
+    wren::math::vec3f b;
+    wren::math::vec3f expected{};
   };
 
   std::array tests = {
@@ -93,6 +88,8 @@ TEST_CASE("CROSS") {
 
   for (auto const& test : tests) {
     auto got = test.a % test.b;
-    REQUIRE(got == test.expected);
+    BOOST_TEST(got == test.expected);
   }
 }
+
+BOOST_AUTO_TEST_SUITE_END()

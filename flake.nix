@@ -2,6 +2,7 @@
   description = "Wren game engine";
 
   inputs = {
+    # nix-mesonlsp.url = "https://flakehub.com/f/tmayoff/nix-mesonlsp/0.1.7.tar.gz";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
     flake-utils.url = "github:numtide/flake-utils";
     nixgl.url = "github:nix-community/nixGL";
@@ -12,11 +13,13 @@
     nixpkgs,
     nixgl,
     flake-utils,
+    # nix-mesonlsp,
   }:
     flake-utils.lib.eachDefaultSystem (
       system: let
         overlays = [
           nixgl.overlay
+          # nix-mesonlsp.overlay.default
         ];
 
         pkgs = import nixpkgs {
@@ -92,19 +95,19 @@
         ];
 
         rawBuildInputs = with pkgs; [
-          # catch2_3
-          SDL2
-          spdlog
-          tl-expected
-          boost
-          vulkan-headers
-          vulkan-loader
-          tracy
-          vma
-          shaderc
-          spirv-headers
-          fontconfig
-          imgui
+          boost183
+          # SDL2
+          # spdlog
+          # tl-expected
+          # boost
+          # vulkan-headers
+          # vulkan-loader
+          # tracy
+          # vma
+          # shaderc
+          # spirv-headers
+          # fontconfig
+          # imgui
         ];
       in rec {
         vulkan_layer_path = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d:${pkgs.renderdoc}/share/vulkan/implicit_layer.d";
@@ -140,6 +143,10 @@
           nativeBuildInputs = with pkgs;
             [
               vulkan-tools
+              clang-tools
+              ccache
+              # mesonlsp
+              muon
 
               pkgs.nixgl.nixVulkanIntel
             ]
@@ -150,6 +157,9 @@
               vulkan-validation-layers
             ]
             ++ rawBuildInputs;
+
+          BOOST_INCLUDEDIR = "${pkgs.lib.getDev pkgs.boost}/include";
+          BOOST_LIBRARYDIR = "${pkgs.lib.getLib pkgs.boost}/lib";
         };
 
         shellHook = ''

@@ -16,7 +16,7 @@ run: build
     ./build/editor/editor
 
 test: build
-    cd build && meson test
+    meson test -C build --print-errorlogs
 
 run_renderdoc:
     ENABLE_VULKAN_RENDERDOC_CAPTURE=1 ./build/editor/wren_editor

@@ -1,14 +1,16 @@
-#include <wrenm/matrix.hpp>
-#include <wrenm/utils.hpp>
+#include <boost/test/unit_test.hpp>
+#include <wren_math/matrix.hpp>
+#include <wren_math/utils.hpp>
 
-// After utils.hpp
-#include <catch2/catch_test_macros.hpp>
+BOOST_AUTO_TEST_SUITE(MATRIX)
 
-TEST_CASE("Identity") {
-  wrenm::mat4f a = wrenm::mat4f::IDENTITY();
-  wrenm::mat4f b = wrenm::mat4f::IDENTITY();
+BOOST_AUTO_TEST_CASE(Identity) {
+  wren::math::mat4f a = wren::math::mat4f::IDENTITY();
+  wren::math::mat4f b = wren::math::mat4f::IDENTITY();
 
-  auto c = a * b;
-  REQUIRE(c == a);
-  REQUIRE(c == b);
+  auto const c = a * b;
+  BOOST_TEST(c == a);
+  BOOST_TEST(c == b);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

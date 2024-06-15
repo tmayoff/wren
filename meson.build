@@ -1,5 +1,6 @@
 project('wren', 'cpp', version: '0.0.1', default_options: 'cpp_std=c++23')
 
+fmt = dependency('fmt')
 spdlog = dependency('spdlog')
 vulkan = dependency('vulkan')
 fontconfig = dependency('Fontconfig')
@@ -11,6 +12,7 @@ vulkan = dependency('vulkan')
 shaderc = dependency('shaderc')
 sdl2 = dependency('SDL2')
 boost = dependency('boost')
+boost_test = dependency('boost', modules: ['unit_test_framework'])
 expected = dependency('tl-expected', modules: ['tl::expected'])
 spirv = dependency('SPIRV-Headers')
 
@@ -35,8 +37,8 @@ if get_option('build_profiling')
     add_project_arguments('-ftime-trace', language: 'cpp')
 endif
 
-subdir('wrenm')
 subdir('wren_utils')
+subdir('wren_math')
 # subdir('wren_reflect')
 # subdir('wren_text')
 # subdir('wren_vk')

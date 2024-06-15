@@ -5,7 +5,7 @@
 #include "matrix.hpp"
 #include "vector.hpp"
 
-namespace wrenm {
+namespace wren::math {
 
 inline auto degrees(float radian) -> float {
   return radian * static_cast<float>(180 / std::numbers::pi);
@@ -17,11 +17,11 @@ inline auto radians(float degrees) -> float {
 
 auto translate(mat4f mat, vec3f offset) -> mat4f;
 
-auto look_at(wrenm::vec3f const& position, wrenm::vec3f const& target,
-             wrenm::vec3f const& world_up) -> wrenm::mat4f;
+auto look_at(vec3f const& position, vec3f const& target,
+             vec3f const& world_up) -> mat4f;
 
-auto rotate(wrenm::mat4f const& matrix, float rotation,
-            wrenm::vec3f const& axis) -> wrenm::mat4f;
+auto rotate(mat4f const& matrix, float rotation, vec3f const& axis)
+    -> mat4f;
 
 template <typename T>
 inline auto ortho(T left, T right, T bottom, T top) {
@@ -65,4 +65,4 @@ inline auto perspective(T fov_y, T aspect, T z_near, T z_far) {
   return res;
 }
 
-}  // namespace wrenm
+}  // namespace wren::math
