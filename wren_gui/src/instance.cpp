@@ -4,8 +4,8 @@
 
 #include <wren_text/font.hpp>
 #include <wren_vk/buffer.hpp>
-#include <wrenm/geometry.hpp>
-#include <wrenm/vector.hpp>
+#include <wren_math/geometry.hpp>
+#include <wren_math/vector.hpp>
 
 namespace wren::gui {
 
@@ -97,7 +97,7 @@ void Instance::flush(VK_NS::CommandBuffer const& cmd) {
                              static_cast<float>(output_size.height);
   UBO ubo{};
   ubo.proj =
-      wrenm::ortho(0.0f, static_cast<float>(output_size.width), 0.0f,
+      wren::math::ortho(0.0f, static_cast<float>(output_size.width), 0.0f,
                    static_cast<float>(output_size.height));
   uniform_buffer->set_data_raw(&ubo, sizeof(UBO));
 
@@ -124,9 +124,9 @@ void Instance::flush(VK_NS::CommandBuffer const& cmd) {
 }
 
 auto Instance::BeginWindow(std::string const& name,
-                           wrenm::vec2f const& size) -> bool {
+                           wren::math::vec2f const& size) -> bool {
   if (!windows_.contains(name)) {
-    wrenm::vec2f const pos = {
+    wren::math::vec2f const pos = {
         static_cast<float>(output_size.width) / 2.0f,
         static_cast<float>(output_size.height) / 2.0f};
     bool const hovered =
@@ -160,8 +160,8 @@ void Instance::EndWindow() {
   if (windows_.contains(window_name)) {
     auto& window = windows_.at(window_name);
     draw_quad(window.pos, window.size,
-              window.hovered ? wrenm::vec4f{1.0, 1.0, 1.0, 1.0}
-                             : wrenm::vec4f{0.5f, 0.5f, 0.5f, 1.0f});
+              window.hovered ? wren::math::vec4f{1.0, 1.0, 1.0, 1.0}
+                             : wren::math::vec4f{0.5f, 0.5f, 0.5f, 1.0f});
 
     if (window.selected) {
       // Move window
@@ -170,14 +170,14 @@ void Instance::EndWindow() {
   }
 }
 
-void Instance::draw_quad(wrenm::vec2f const& pos,
-                         wrenm::vec2f const& size,
-                         wrenm::vec4f const& colour) {
+void Instance::draw_quad(wren::math::vec2f const& pos,
+                         wren::math::vec2f const& size,
+                         wren::math::vec4f const& colour) {
   std::array quad_vertices = {
-      Vertex{(wrenm::vec2f{0.0, 0.0} * size) + pos, colour},
-      Vertex{(wrenm::vec2f{1.0, 0.0} * size) + pos, colour},
-      Vertex{(wrenm::vec2f{1.0, 1.0} * size) + pos, colour},
-      Vertex{(wrenm::vec2f{0.0, 1.0} * size) + pos, colour},
+      Vertex{(wren::math::vec2f{0.0, 0.0} * size) + pos, colour},
+      Vertex{(wren::math::vec2f{1.0, 0.0} * size) + pos, colour},
+      Vertex{(wren::math::vec2f{1.0, 1.0} * size) + pos, colour},
+      Vertex{(wren::math::vec2f{0.0, 1.0} * size) + pos, colour},
   };
   std::array quad_indices = {
       0, 1, 2, 2, 3, 0,
@@ -190,11 +190,11 @@ void Instance::draw_quad(wrenm::vec2f const& pos,
                  quad_indices.end());
 }
 
-auto Instance::point_in_bounds(wrenm::vec2f const& p,
-                               wrenm::vec2f const& pos,
-                               wrenm::vec2f const& size) -> bool {
-  wrenm::vec2f const top_left = pos;
-  wrenm::vec2f const bottom_right = pos + size;
+auto Instance::point_in_bounds(wren::math::vec2f const& p,
+                               wren::math::vec2f const& pos,
+                               wren::math::vec2f const& size) -> bool {
+  wren::math::vec2f const top_left = pos;
+  wren::math::vec2f const bottom_right = pos + size;
 
   return top_left.x() <= p.x() && p.x() <= bottom_right.x() &&
          top_left.y() <= p.y() && p.y() <= bottom_right.y();

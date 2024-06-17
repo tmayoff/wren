@@ -4,24 +4,24 @@
 #include <vulkan/vulkan_core.h>
 
 #include <vulkan/vulkan.hpp>
+#include <wren_math/matrix.hpp>
+#include <wren_math/vector.hpp>
 #include <wren_vk/buffer.hpp>
 #include <wren_vk/shader.hpp>
-#include <wrenm/matrix.hpp>
-#include <wrenm/vector.hpp>
 
 #include "utils/device.hpp"
 
 namespace wren {
 
 struct UBO {
-  wrenm::mat4f model;
-  wrenm::mat4f view;
-  wrenm::mat4f proj;
+  wren::math::mat4f model;
+  wren::math::mat4f view;
+  wren::math::mat4f proj;
 };
 
 struct Vertex {
-  wrenm::vec2f pos;
-  wrenm::vec3f colour;
+  wren::math::vec2f pos;
+  wren::math::vec3f colour;
 };
 
 std::vector<Vertex> const TRIANGLE_VERTICES = {

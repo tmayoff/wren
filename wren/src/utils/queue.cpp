@@ -1,7 +1,6 @@
 #include "wren/utils/queue.hpp"
 
 #include <optional>
-#include <system_error>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <wren_vk/errors.hpp>
@@ -14,7 +13,7 @@ namespace wren::vulkan {
 auto Queue::FindQueueFamilyIndices(
     VK_NS::PhysicalDevice const &physical_device,
     std::optional<VK_NS::SurfaceKHR> const &surface)
-    -> tl::expected<QueueFamilyIndices, std::error_code> {
+    -> expected<QueueFamilyIndices> {
   auto const &queue_families =
       physical_device.getQueueFamilyProperties();
 

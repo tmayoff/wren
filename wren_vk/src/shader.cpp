@@ -92,7 +92,7 @@ auto Shader::compile_shader(VK_NS::Device const &device,
                             shaderc_shader_kind const &shader_kind,
                             std::string const &filename,
                             std::string const &shader_source)
-    -> tl::expected<ShaderModule, std::error_code> {
+    -> expected<ShaderModule> {
   shaderc::Compiler compiler;
   shaderc::CompileOptions options;
 
@@ -120,8 +120,7 @@ auto Shader::compile_shader(VK_NS::Device const &device,
 
 auto Shader::create_graphics_pipeline(
     VK_NS::Device const &device, VK_NS::RenderPass const &render_pass,
-    VK_NS::Extent2D const &size)
-    -> tl::expected<void, std::error_code> {
+    VK_NS::Extent2D const &size) -> expected<void> {
   VK_NS::Result res = VK_NS::Result::eSuccess;
 
   VK_NS::DescriptorSetLayoutBinding ubo_layout_bindings(

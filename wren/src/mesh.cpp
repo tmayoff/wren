@@ -2,9 +2,8 @@
 
 #include <chrono>
 #include <vulkan/vulkan.hpp>
-#include <wrenm/geometry.hpp>
-
-#include "wrenm/vector.hpp"
+#include <wren_math/geometry.hpp>
+#include <wren_math/vector.hpp>
 
 namespace wren {
 
@@ -80,16 +79,16 @@ void Mesh::bind(VK_NS::CommandBuffer const& cmd) const {
           .count();
 
   UBO ubo{};
-  ubo.model =
-      wrenm::rotate(wrenm::mat4f{}, time * wrenm::radians(90.0f),
-                    wrenm::vec3f(0.0f, 0.0f, 1.0f));
+  ubo.model = wren::math::rotate(wren::math::mat4f{},
+                                 time * wren::math::radians(90.0f),
+                                 wren::math::vec3f(0.0f, 0.0f, 1.0f));
 
-  ubo.view = wrenm::look_at(wrenm::vec3f(2.0f, 2.0f, 2.0f),
-                            wrenm::vec3f(0.0f, 0.0f, 0.0f),
-                            wrenm::vec3f::UnitZ());
+  ubo.view = wren::math::look_at(wren::math::vec3f(2.0f, 2.0f, 2.0f),
+                                 wren::math::vec3f(0.0f, 0.0f, 0.0f),
+                                 wren::math::vec3f::UnitZ());
 
-  ubo.proj = wrenm::perspective(wrenm::radians(45.0f),
-                                2226.0f / 1415.0f, 0.01f, 1000.0f);
+  ubo.proj = wren::math::perspective(
+      wren::math::radians(45.0f), 2226.0f / 1415.0f, 0.01f, 1000.0f);
 
   uniform_buffer->set_data_raw(&ubo, sizeof(ubo));
 

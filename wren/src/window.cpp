@@ -6,11 +6,10 @@
 #include <SDL_error.h>
 #include <SDL_mouse.h>
 
-#include <system_error>
+#include <Tracy/tracy/Tracy.hpp>
 #include <tl/expected.hpp>
 
 #include "keycode.hpp"
-#include "utils/tracy.hpp"  // IWYU pragma: keep
 #include "vulkan/vulkan_core.h"
 #include "vulkan/vulkan_handles.hpp"
 #include "wren/event.hpp"
@@ -42,7 +41,7 @@ auto Window::Create(std::string const &application_name)
 void Window::Shutdown() { SDL_Quit(); }
 
 auto Window::CreateSurface(VK_NS::Instance const &instance)
-    -> tl::expected<VK_NS::SurfaceKHR, std::error_code> {
+    -> expected<VK_NS::SurfaceKHR> {
   VkSurfaceKHR surface{};
   SDL_Vulkan_CreateSurface(window, instance, &surface);
 
@@ -50,7 +49,7 @@ auto Window::CreateSurface(VK_NS::Instance const &instance)
 }
 
 auto Window::GetRequiredVulkanExtension() const
-    -> tl::expected<std::vector<std::string_view>, std::error_code> {
+    -> expected<std::vector<std::string_view>> {
   uint32_t count = 0;
   bool res =
       SDL_Vulkan_GetInstanceExtensions(window, &count, nullptr);

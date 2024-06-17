@@ -5,7 +5,6 @@
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan_core.h>
 
-#include <system_error>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_enums.hpp>
@@ -23,8 +22,7 @@ auto GraphicsContext::Create(
     std::string const &application_name,
     std::vector<std::string_view> const &requested_extensions,
     std::vector<std::string_view> const &requested_layers)
-    -> tl::expected<std::shared_ptr<GraphicsContext>,
-                    std::error_code> {
+    -> expected<std::shared_ptr<GraphicsContext>> {
   auto graphics_context =
       std::shared_ptr<GraphicsContext>(new GraphicsContext());
 
@@ -55,7 +53,7 @@ auto GraphicsContext::CreateInstance(
     std::string const &application_name,
     std::vector<std::string_view> const &requested_extensions,
     std::vector<std::string_view> const &requested_layers)
-    -> tl::expected<void, std::error_code> {
+    -> expected<void> {
   auto const appInfo = VK_NS::ApplicationInfo(
       application_name.c_str(), 1, "wren", 1, VK_API_VERSION_1_2);
 
@@ -130,8 +128,7 @@ auto GraphicsContext::CreateInstance(
   return {};
 }
 
-auto GraphicsContext::SetupDevice()
-    -> tl::expected<void, std::error_code> {
+auto GraphicsContext::SetupDevice() -> expected<void> {
   {
     spdlog::debug("Picking physical device...");
     ERR_PROP_VOID(PickPhysicalDevice());
@@ -159,8 +156,7 @@ auto GraphicsContext::SetupDevice()
   return {};
 }
 
-auto GraphicsContext::PickPhysicalDevice()
-    -> tl::expected<void, std::error_code> {
+auto GraphicsContext::PickPhysicalDevice() -> expected<void> {
   auto devices = instance.enumeratePhysicalDevices();
 
   for (auto const &device : devices.value) {
@@ -203,16 +199,14 @@ auto GraphicsContext::IsDeviceSuitable(
   return true;
 }
 
-auto GraphicsContext::CreateDevice()
-    -> tl::expected<void, std::error_code> {
+auto GraphicsContext::CreateDevice() -> expected<void> {
   ERR_PROP(device, vulkan::Device::Create(instance, physical_device,
                                           surface));
   return {};
 }
 
 #ifdef WREN_DEBUG
-auto GraphicsContext::CreateDebugMessenger()
-    -> tl::expected<void, std::error_code> {
+auto GraphicsContext::CreateDebugMessenger() -> expected<void> {
   VK_NS::DebugUtilsMessageSeverityFlagsEXT severity_flags(
       VK_NS::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
       VK_NS::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |

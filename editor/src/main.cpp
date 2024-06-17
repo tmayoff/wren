@@ -11,8 +11,8 @@
 #include <wren/shaders/triangle.hpp>
 #include <wren_gui/instance.hpp>
 #include <wren_gui/shader.hpp>
+#include <wren_math/utils.hpp>
 #include <wren_utils/errors.hpp>
-#include <wrenm/utils.hpp>
 
 class Scene {
  public:

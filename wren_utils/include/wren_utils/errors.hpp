@@ -4,7 +4,7 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
-#include <cstdint>
+#include <optional>
 #include <system_error>
 #include <tl/expected.hpp>
 
@@ -13,25 +13,47 @@
 
 namespace wren {
 
-struct error_code : public std::error_code {
-  error_code(int32_t ec, std::error_category const& cat)
-      : ::error_code(ec, cat) {}
+class Err {
+ public:
+  template <typename T>
+  Err(T error) : error_code_(make_error_code(error)) {}
+  Err(std::error_code const& ec) : error_code_(ec) {}
+  Err(int32_t ec, std::error_category const& e_cat)
+      : error_code_(ec, e_cat) {}
 
-  error_code(std::error_code ec) : std::error_code(ec) {}
+  [[nodiscard]] auto error() const { return error_code_; }
 
-  friend auto operator<<(std::ostream& os, error_code const& ec)
-      -> std::ostream& {
-    return os << ec.category().name() << " : " << ec.message();
-  }
+  [[nodiscard]] auto message() const { return error_code_.message(); }
+
+  [[nodiscard]] auto extra_msg() const { return extra_message_; }
+
+ private:
+  std::error_code error_code_;
+  std::optional<std::string> extra_message_;
 };
 
+// struct error_code : public std::error_code {
+//   error_code(int32_t ec, std::error_category const& cat)
+//       : ::error_code(ec, cat) {}
+
+//   error_code(std::error_code ec) : std::error_code(ec) {}
+
+//   friend auto operator<<(std::ostream& os, error_code const& ec)
+//       -> std::ostream& {
+//     return os << ec.category().name() << " : " << ec.message();
+//   }
+// };
+
 template <typename T>
-using expected = tl::expected<T, error_code>;
+using expected = tl::expected<T, Err>;
 
 }  // namespace wren
 
 template <>
-struct fmt::formatter<wren::error_code> : ostream_formatter {};
+struct fmt::formatter<wren::Err> : fmt::formatter<std::string> {
+  auto format(wren::Err, fmt::format_context& ctx) const
+      -> decltype(ctx.out());
+};
 
 // NOLINTNEXTLINE
 #define ERROR_CODE(NAMESPACE, ERROR_ENUM)                           \
@@ -58,9 +80,9 @@ struct fmt::formatter<wren::error_code> : ostream_formatter {};
     static detail::ERROR_ENUM##_category c;                         \
     return c;                                                       \
   }                                                                 \
-  inline auto make_error_code(NAMESPACE::ERROR_ENUM ec)             \
-      -> wren::error_code {                                         \
-    return {static_cast<int32_t>(ec), ERROR_ENUM##_category()};     \
+  inline auto make_error_code(NAMESPACE::ERROR_ENUM ec) {           \
+    return wren::Err(static_cast<int32_t>(ec),                      \
+                     ERROR_ENUM##_category());                      \
   }
 
 // NOLINTNEXTLINE

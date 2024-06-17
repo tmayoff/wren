@@ -27,7 +27,7 @@ class RenderPass {
                      std::string const& name,
                      PassResources const& resources,
                      execute_fn_t const& fn)
-      -> tl::expected<std::shared_ptr<RenderPass>, std::error_code>;
+      -> expected<std::shared_ptr<RenderPass>>;
 
   void execute();
 

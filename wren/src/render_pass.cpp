@@ -15,7 +15,7 @@ auto RenderPass::Create(std::shared_ptr<Context> const& ctx,
                         std::string const& name,
                         PassResources const& resources,
                         execute_fn_t const& fn)
-    -> tl::expected<std::shared_ptr<RenderPass>, std::error_code> {
+    -> expected<std::shared_ptr<RenderPass>> {
   auto pass = std::shared_ptr<RenderPass>(
       new RenderPass(name, resources, fn));
 

@@ -19,8 +19,7 @@ class GraphicsContext {
       std::string const &application_name,
       std::vector<std::string_view> const &requested_extensions = {},
       std::vector<std::string_view> const &requested_layers = {})
-      -> tl::expected<std::shared_ptr<GraphicsContext>,
-                      std::error_code>;
+      -> expected<std::shared_ptr<GraphicsContext>>;
 
   GraphicsContext(GraphicsContext const &) = delete;
   GraphicsContext(GraphicsContext &&) = delete;
@@ -28,7 +27,7 @@ class GraphicsContext {
   auto operator=(GraphicsContext &&) = delete;
   ~GraphicsContext();
 
-  auto InitializeSurface() -> tl::expected<void, std::error_code>;
+  auto InitializeSurface() -> expected<void>;
 
   [[nodiscard]] auto Instance() const { return instance; }
   void Surface(VK_NS::SurfaceKHR const &surface) {
@@ -48,7 +47,7 @@ class GraphicsContext {
 
   [[nodiscard]] auto allocator() const { return allocator_; }
 
-  auto SetupDevice() -> tl::expected<void, std::error_code>;
+  auto SetupDevice() -> expected<void>;
 
   auto GetSwapchainSupport() {
     return vulkan::GetSwapchainSupportDetails(physical_device,
@@ -67,12 +66,12 @@ class GraphicsContext {
       std::string const &application_name,
       std::vector<std::string_view> const &requested_extensions = {},
       std::vector<std::string_view> const &requested_layers = {})
-      -> tl::expected<void, std::error_code>;
+      -> expected<void>;
 
-  auto CreateAllocator() -> tl::expected<void, std::error_code>;
+  auto CreateAllocator() -> expected<void>;
 
-  auto CreateDevice() -> tl::expected<void, std::error_code>;
-  auto PickPhysicalDevice() -> tl::expected<void, std::error_code>;
+  auto CreateDevice() -> expected<void>;
+  auto PickPhysicalDevice() -> expected<void>;
   auto IsDeviceSuitable(VK_NS::PhysicalDevice const &device) -> bool;
 
   VK_NS::Instance instance;
@@ -85,7 +84,7 @@ class GraphicsContext {
   VmaAllocator allocator_{};
 
 #ifdef WREN_DEBUG
-  auto CreateDebugMessenger() -> tl::expected<void, std::error_code>;
+  auto CreateDebugMessenger() -> expected<void>;
   VK_NS::DebugUtilsMessengerEXT debug_messenger;
 #endif
 };

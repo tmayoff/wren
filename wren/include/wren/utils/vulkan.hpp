@@ -10,6 +10,7 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
+#include <wren_utils/errors.hpp>
 
 // VKAPI_ATTR auto VKAPI_CALL vkCreateDebugUtilsMessengerEXT(
 //     VkInstance instance,
@@ -29,13 +30,12 @@ struct SwapchainSupportDetails {
   std::vector<VK_NS::PresentModeKHR> present_modes;
 };
 
-auto LoadFunctions(VK_NS::Instance const &instance)
-    -> tl::expected<void, std::error_code>;
+auto LoadFunctions(VK_NS::Instance const &instance) -> expected<void>;
 
 auto GetSwapchainSupportDetails(
     VK_NS::PhysicalDevice const &physical_device,
     VK_NS::SurfaceKHR const &surface)
-    -> tl::expected<SwapchainSupportDetails, std::error_code>;
+    -> expected<SwapchainSupportDetails>;
 
 VKAPI_ATTR auto VKAPI_CALL DebugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

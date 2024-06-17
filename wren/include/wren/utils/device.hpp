@@ -1,9 +1,8 @@
 #pragma once
 
-#include <system_error>
-#include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_handles.hpp>
+#include <wren_utils/errors.hpp>
 
 namespace wren::vulkan {
 
@@ -12,7 +11,7 @@ class Device {
   static auto Create(VK_NS::Instance const &instance,
                      VK_NS::PhysicalDevice const &physical_device,
                      VK_NS::SurfaceKHR const &surface)
-      -> tl::expected<Device, std::error_code>;
+      -> expected<Device>;
 
   [[nodiscard]] auto get() const -> VK_NS::Device { return device; }
 
@@ -30,7 +29,7 @@ class Device {
   auto CreateDevice(VK_NS::Instance const &instance,
                     VK_NS::PhysicalDevice const &physical_device,
                     VK_NS::SurfaceKHR const &surface)
-      -> tl::expected<void, std::error_code>;
+      -> expected<void>;
 
   VK_NS::CommandPool command_pool_;
   VK_NS::Device device;

@@ -15,7 +15,7 @@ namespace wren::vulkan {
 auto Device::Create(VK_NS::Instance const &instance,
                     VK_NS::PhysicalDevice const &physical_device,
                     VK_NS::SurfaceKHR const &surface)
-    -> tl::expected<Device, std::error_code> {
+    -> expected<Device> {
   Device device;
 
   auto res = device.CreateDevice(instance, physical_device, surface);
@@ -28,7 +28,7 @@ auto Device::CreateDevice(
     VK_NS::Instance const &instance,
     VK_NS::PhysicalDevice const &physical_device,
     VK_NS::SurfaceKHR const &surface)
-    -> tl::expected<void, std::error_code> {
+    -> expected<void> {
   auto const indices =
       Queue::FindQueueFamilyIndices(physical_device, surface);
 

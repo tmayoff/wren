@@ -95,18 +95,17 @@
         ];
 
         rawBuildInputs = with pkgs; [
-          boost183
-          # SDL2
+          boost185
+          SDL2
           # spdlog
-          # tl-expected
-          # boost
-          # vulkan-headers
+          tl-expected
+          vulkan-headers
           # vulkan-loader
-          # tracy
-          # vma
-          # shaderc
-          # spirv-headers
-          # fontconfig
+          tracy
+          vma
+          shaderc
+          spirv-headers
+          fontconfig
           # imgui
         ];
       in rec {

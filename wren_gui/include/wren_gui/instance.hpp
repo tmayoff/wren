@@ -4,38 +4,38 @@
 #include <vulkan/vulkan.hpp>
 #include <wren_vk/buffer.hpp>
 #include <wren_vk/shader.hpp>
-#include <wrenm/matrix.hpp>
-#include <wrenm/vector.hpp>
+#include <wren_math/matrix.hpp>
+#include <wren_math/vector.hpp>
 
 namespace wren::gui {
 
 struct Window {
   std::string name;
-  wrenm::vec2f pos;
-  wrenm::vec2f size;
+  wren::math::vec2f pos;
+  wren::math::vec2f size;
 
   // IO
 
   bool hovered = false;
   bool selected = false;
-  wrenm::vec2f mouse_offset;
+  wren::math::vec2f mouse_offset;
 };
 
 static std::size_t const MAX_VERTICES = 10000;
 static std::size_t const MAX_INDICES = MAX_VERTICES * 10;
 
 struct Vertex {
-  wrenm::vec2f pos;
-  wrenm::vec4f colour;
+  wren::math::vec2f pos;
+  wren::math::vec4f colour;
 };
 
 struct UBO {
-  wrenm::mat4f proj;
+  wren::math::mat4f proj;
 };
 
 struct Inputs {
-  wrenm::vec2f mouse_position = {0.0f, 0.0f};
-  wrenm::vec2f mouse_position_rel = {0.0f, 0.0f};
+  wren::math::vec2f mouse_position = {0.0f, 0.0f};
+  wren::math::vec2f mouse_position_rel = {0.0f, 0.0f};
   bool left_mouse = false;
 
   // Left mouse down this frame
@@ -61,18 +61,18 @@ class Instance {
   void Begin();
   void End();
 
-  auto BeginWindow(std::string const& name, wrenm::vec2f const& size)
+  auto BeginWindow(std::string const& name, wren::math::vec2f const& size)
       -> bool;
   void EndWindow();
 
   auto IO() -> Inputs& { return io; }
 
  private:
-  void draw_quad(wrenm::vec2f const& pos, wrenm::vec2f const& size,
-                 wrenm::vec4f const& colour);
+  void draw_quad(wren::math::vec2f const& pos, wren::math::vec2f const& size,
+                 wren::math::vec4f const& colour);
 
-  auto point_in_bounds(wrenm::vec2f const& p, wrenm::vec2f const& pos,
-                       wrenm::vec2f const& size) -> bool;
+  auto point_in_bounds(wren::math::vec2f const& p, wren::math::vec2f const& pos,
+                       wren::math::vec2f const& size) -> bool;
 
   std::shared_ptr<vk::Shader> shader_;
   std::shared_ptr<wren::vk::Buffer> index_buffer;

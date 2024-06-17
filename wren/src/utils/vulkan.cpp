@@ -46,7 +46,7 @@ namespace wren::vulkan {
   }
 
 auto LoadFunctions(VK_NS::Instance const &instance)
-    -> tl::expected<void, std::error_code> {
+    -> expected<void> {
   LOAD_VULKAN_PFN(pfnVkCmdPushConstants, vkCmdPushConstants);
   LOAD_VULKAN_PFN(pfnVkCreateDebugUtilsMessengerEXT,
                   vkCreateDebugUtilsMessengerEXT);
@@ -88,7 +88,7 @@ auto DebugCallback(
 auto GetSwapchainSupportDetails(
     VK_NS::PhysicalDevice const &physical_device,
     VK_NS::SurfaceKHR const &surface)
-    -> tl::expected<SwapchainSupportDetails, std::error_code> {
+    -> expected<SwapchainSupportDetails> {
   SwapchainSupportDetails details;
 
   VK_NS::Result res = VK_NS::Result::eSuccess;

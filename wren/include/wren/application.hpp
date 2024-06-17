@@ -19,7 +19,7 @@ class Application {
   enum class errors {};
 
   static auto Create(std::string const &application_name)
-      -> tl::expected<std::shared_ptr<Application>, std::error_code>;
+      -> expected<std::shared_ptr<Application>>;
 
   auto context() -> std::shared_ptr<Context> const & { return ctx; }
   void run();

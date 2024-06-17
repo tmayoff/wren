@@ -2,9 +2,9 @@
 
 #include <cstdint>
 #include <optional>
-#include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_handles.hpp>
+#include <wren_utils/errors.hpp>
 
 namespace wren::vulkan {
 
@@ -18,7 +18,7 @@ class Queue {
   static auto FindQueueFamilyIndices(
       const VK_NS::PhysicalDevice &physical_device,
       std::optional<VK_NS::SurfaceKHR> const &surface = {})
-      -> tl::expected<QueueFamilyIndices, std::error_code>;
+      -> expected<QueueFamilyIndices>;
 };
 
 }  // namespace wren::vulkan

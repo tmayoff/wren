@@ -16,7 +16,7 @@
 namespace wren {
 
 auto Application::Create(std::string const &application_name)
-    -> tl::expected<std::shared_ptr<Application>, std::error_code> {
+    -> expected<std::shared_ptr<Application>> {
   spdlog::set_level(spdlog::level::debug);
   ZoneScoped;
 

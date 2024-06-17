@@ -54,7 +54,7 @@ class Shader {
                              shaderc_shader_kind const &shader_kind,
                              std::string const &filename,
                              std::string const &shader_source)
-      -> tl::expected<ShaderModule, std::error_code>;
+      -> wren::expected<ShaderModule>;
 
   [[nodiscard]] auto get_pipeline() const { return pipeline; }
   [[nodiscard]] auto pipeline_layout() const {
@@ -75,7 +75,7 @@ class Shader {
   auto create_graphics_pipeline(VK_NS::Device const &device,
                                 VK_NS::RenderPass const &render_pass,
                                 VK_NS::Extent2D const &size)
-      -> tl::expected<void, std::error_code>;
+      -> expected<void>;
 
  private:
   VK_NS::DescriptorSetLayout descriptor_layout_;

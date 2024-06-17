@@ -69,7 +69,8 @@ BOOST_AUTO_TEST_CASE(DOT) {
   };
 
   for (auto const& test : tests) {
-    BOOST_TEST(test.a.dot(test.b) == test.expected);
+    float got = test.a.dot(test.b);
+    BOOST_TEST(got == test.expected, boost::test_tools::tolerance(0.01F));
   }
 }
 

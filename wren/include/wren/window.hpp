@@ -5,8 +5,6 @@
 #include <spdlog/spdlog.h>
 
 #include <boost/describe/enum.hpp>
-#include <system_error>
-#include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
 #include <wren_utils/errors.hpp>
 
@@ -22,12 +20,12 @@ class Window {
   void Shutdown();
 
   auto CreateSurface(VK_NS::Instance const &instance)
-      -> tl::expected<VK_NS::SurfaceKHR, std::error_code>;
+      -> expected<VK_NS::SurfaceKHR>;
 
   void DispatchEvents(Event::Dispatcher const &dispatcher);
 
   [[nodiscard]] auto GetRequiredVulkanExtension() const
-      -> tl::expected<std::vector<std::string_view>, std::error_code>;
+      -> expected<std::vector<std::string_view>>;
 
   auto GetSize() -> std::pair<int32_t, int32_t> {
     int w = 0, h = 0;
