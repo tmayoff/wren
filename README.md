@@ -1,10 +1,10 @@
 # wren
 
+[![Build](https://github.com/tmayoff/wren/actions/workflows/build.yml/badge.svg)](https://github.com/tmayoff/wren/actions/workflows/build.yml)
+
 [docs](https://tmayoff.srht.site)
 
 Custom vulkan renderer, with eventually no major dependencies
-
-[![builds.sr.ht status](https://builds.sr.ht/~tmayoff/wren.svg)](https://builds.sr.ht/~tmayoff/wren?)
 
 **Dependencies to remove**
 - SPIRV-Reflect
