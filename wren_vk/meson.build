@@ -5,7 +5,7 @@ wren_vk = library(
     'src/shader.cpp',
     'src/memory.cpp',
     'src/vulkan.cpp',
-    
+
     include_directories: ['include', 'include/wren_vk'],
     dependencies: [
         wren_utils_dep,
@@ -15,6 +15,7 @@ wren_vk = library(
         vulkan,
         shaderc,
     ],
+    install: true,
 )
 wren_vk_dep = declare_dependency(
     include_directories: 'include',

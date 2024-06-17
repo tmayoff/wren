@@ -97,16 +97,15 @@
         rawBuildInputs = with pkgs; [
           boost185
           SDL2
-          # spdlog
+          spdlog
           tl-expected
           vulkan-headers
-          # vulkan-loader
+          vulkan-loader
           tracy
           vma
           shaderc
           spirv-headers
           fontconfig
-          # imgui
         ];
       in rec {
         vulkan_layer_path = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d:${pkgs.renderdoc}/share/vulkan/implicit_layer.d";
@@ -123,13 +122,16 @@
 
             patchPhase = ''
               mkdir -p subprojects
-              cp -r ${imgui_patched} subprojects/imgui
+              cp -r ${imgui_patched} subprojects/imgui-${imgui_patched.version}
+              ls -ls subprojects
             '';
 
-            installPhase = ''
-              mkdir -p $out/bin
-              ninja install
-            '';
+            mesonFlags = [
+              "-Dauto_features=disabled"
+            ];
+
+            BOOST_INCLUDEDIR = "${pkgs.lib.getDev pkgs.boost}/include";
+            BOOST_LIBRARYDIR = "${pkgs.lib.getLib pkgs.boost}/lib";
           };
 
           default = wren_editor;

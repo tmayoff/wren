@@ -22,6 +22,7 @@ wren = library(
         spdlog,
         sdl2,
     ],
+    install: true
 )
 wren_dep = declare_dependency(
     include_directories: 'include',
