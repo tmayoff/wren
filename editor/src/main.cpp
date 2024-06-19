@@ -1,7 +1,15 @@
+#include <backward.hpp>
 #include <memory>
 #include <wren/application.hpp>
 #include <wren/context.hpp>
 #include <wren/graph.hpp>
+#include <wren/shaders/mesh.hpp>
+
+namespace backward {
+
+backward::SignalHandling sh;  // NOLINT
+
+}  // namespace backward
 
 class Scene {
  public:
@@ -54,7 +62,7 @@ class Scene {
  private:
   // std::shared_ptr<wren::gui::Instance> gui_instance;
   std::shared_ptr<wren::Context> ctx;
-  // wren::Mesh mesh;
+  wren::Mesh mesh;
 };
 
 auto main() -> int {
@@ -112,26 +120,28 @@ auto Scene::build_3D_render_graph(
     -> wren::expected<wren::GraphBuilder> {
   wren::GraphBuilder builder(ctx);
 
-  // ERR_PROP(auto mesh_shader,
-  //          wren::vk::Shader::Create(
-  //              ctx->graphics_context->Device().get(),
-  //              wren::shaders::MESH_VERT_SHADER.data(),
-  //              wren::shaders::MESH_FRAG_SHADER.data()));
+  ERR_PROP(auto mesh_shader,
+           wren::vk::Shader::Create(
+               ctx->graphics_context->Device().get(),
+               wren::shaders::MESH_VERT_SHADER.data(),
+               wren::shaders::MESH_FRAG_SHADER.data()));
 
-  // mesh.shader(mesh_shader);
-  // builder.add_pass(
-  //     "scene",
-  //     {{{"mesh", mesh_shader}, {"ui", gui_instance->shader()}},
-  //      "swapchain_target"},
-  //     [this](wren::RenderPass &pass, VK_NS::CommandBuffer &cmd) {
-  //       pass.bind_pipeline("mesh");
-  //       mesh.bind(cmd);
-  //       mesh.draw(cmd);
+  mesh.shader(mesh_shader);
+  builder.add_pass(
+      "scene",
+      {{
+           {"mesh", mesh_shader},
+       },
+       "swapchain_target"},
+      [this](wren::RenderPass &pass, VK_NS::CommandBuffer &cmd) {
+        pass.bind_pipeline("mesh");
+        mesh.bind(cmd);
+        // mesh.draw(cmd);
 
-  //       pass.bind_pipeline("ui");
-  //       gui_instance->resize_viewport(pass.current_target_size());
-  //       gui_instance->flush(cmd);
-  //     });
+        // pass.bind_pipeline("ui");
+        // gui_instance->resize_viewport(pass.current_target_size());
+        // gui_instance->flush(cmd);
+      });
 
   return builder;
 }

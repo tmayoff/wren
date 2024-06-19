@@ -10,7 +10,7 @@ build:
     meson compile -C build
 
 nix_run: build
-    nixVulkanIntel ./build/editor/editor
+    nixVulkanIntel ./build/editor/wren_editor
 
 run: build
     ./build/editor/editor

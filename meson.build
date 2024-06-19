@@ -1,5 +1,7 @@
 project('wren', 'cpp', version: '0.0.1', default_options: 'cpp_std=c++23')
 
+cpp = meson.get_compiler('cpp')
+
 fmt = dependency('fmt')
 spdlog = dependency('spdlog')
 vulkan = dependency('vulkan')

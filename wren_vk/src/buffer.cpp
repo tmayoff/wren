@@ -37,6 +37,9 @@ auto Buffer::Create(
 
 auto Buffer::set_data_raw(void const* data, std::size_t size)
     -> expected<void> {
+  if (data == nullptr) {
+    return {};
+  }
   VK_ERR_PROP_VOID(
       static_cast<::VK_NS::Result>(vmaCopyMemoryToAllocation(
           allocator, data, allocation, 0, size)));

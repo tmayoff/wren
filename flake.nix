@@ -96,6 +96,7 @@
 
         rawBuildInputs = with pkgs; [
           boost185
+
           SDL2
           spdlog
           tl-expected
@@ -156,6 +157,10 @@
           buildInputs = with pkgs;
             [
               vulkan-validation-layers
+              binutils
+              elfutils
+              libdwarf
+              backward-cpp
             ]
             ++ rawBuildInputs;
 
