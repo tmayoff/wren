@@ -6,9 +6,7 @@
 #include <wren/shaders/mesh.hpp>
 
 namespace backward {
-
 backward::SignalHandling sh;  // NOLINT
-
 }  // namespace backward
 
 class Scene {

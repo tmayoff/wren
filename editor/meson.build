@@ -13,7 +13,7 @@ if dw.found()
     deps += dw
 endif
 
-dwarf = dependency('libdwarf', required: true)
+dwarf = dependency('libdwarf', required: false)
 if dwarf.found()
     args += '-DBACKWARD_HAS_DWARF=1'
     deps += dwarf
