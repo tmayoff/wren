@@ -27,22 +27,22 @@ auto Application::Create(std::string const &application_name)
     return tl::make_unexpected(window.error());
   }
 
-  ERR_PROP(auto extensions, window->GetRequiredVulkanExtension());
+  TRY_RESULT(auto extensions, window->GetRequiredVulkanExtension());
 
-  ERR_PROP(auto graphics_context,
+  TRY_RESULT(auto graphics_context,
            GraphicsContext::Create(application_name, extensions));
   spdlog::trace("Created graphics context");
 
-  ERR_PROP(auto surface,
+  TRY_RESULT(const auto surface,
            window->CreateSurface(graphics_context->Instance()));
   graphics_context->Surface(surface);
 
-  ERR_PROP_VOID(graphics_context->SetupDevice());
+  TRY_RESULT(graphics_context->SetupDevice());
 
   auto ctx = std::make_shared<Context>(*window, Event::Dispatcher(),
                                        graphics_context);
 
-  ERR_PROP(auto renderer, Renderer::New(ctx));
+  TRY_RESULT(auto renderer, Renderer::New(ctx));
 
   return std::shared_ptr<Application>(new Application(ctx, renderer));
 }

@@ -21,6 +21,7 @@ wren = library(
         wrenm_dep,
         spdlog,
         sdl2,
+        tracy,
     ],
     install: true
 )

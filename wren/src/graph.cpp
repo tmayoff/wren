@@ -30,7 +30,7 @@ auto GraphBuilder::compile() const -> expected<Graph> {
               pass_resources.target_name);
     }
 
-    ERR_PROP(auto pass,
+    TRY_RESULT(auto pass,
              RenderPass::Create(ctx, name, pass_resources, fn));
     node_t n = std::make_shared<Node>(pass);
 

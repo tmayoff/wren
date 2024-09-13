@@ -12,6 +12,9 @@
 
 namespace wren {
 
+DEFINE_ERROR("WindowErrors", WindowErrors, SDL_INIT, SDL_WINDOW,
+             SDL_VULKAN_EXTENSION);
+
 class Window {
  public:
   static auto Create(std::string const &application_name)
@@ -40,6 +43,3 @@ class Window {
 };
 
 }  // namespace wren
-
-ERROR_ENUM(wren, WindowErrors, SDL_INIT, SDL_WINDOW,
-           SDL_VULKAN_EXTENSION)

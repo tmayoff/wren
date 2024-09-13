@@ -4,6 +4,7 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
+#include <boost/preprocessor.hpp>
 #include <optional>
 #include <system_error>
 #include <tl/expected.hpp>
@@ -55,67 +56,69 @@ struct fmt::formatter<wren::Err> : fmt::formatter<std::string> {
       -> decltype(ctx.out());
 };
 
-// NOLINTNEXTLINE
-#define ERROR_CODE(NAMESPACE, ERROR_ENUM)                           \
-  namespace std {                                                   \
-  template <>                                                       \
-  struct is_error_code_enum<NAMESPACE::ERROR_ENUM> : true_type {};  \
-  }                                                                 \
-  namespace detail {                                                \
-  class ERROR_ENUM##_category : public std::error_category {        \
+//! @brief This macro creates the hooks into std::error_code for a
+//! given error enum.
+#define DEFINE_ERROR_IMPL(CAT_NAME, ERROR_ENUM)                     \
+  class ERROR_ENUM##_category_t : public std::error_category {      \
    public:                                                          \
     [[nodiscard]] auto name() const noexcept -> const char* final { \
-      return #ERROR_ENUM;                                           \
+      return CAT_NAME;                                              \
     }                                                               \
     [[nodiscard]] auto message(int32_t c) const                     \
         -> std::string final {                                      \
-      NAMESPACE::ERROR_ENUM e =                                     \
-          static_cast<NAMESPACE::ERROR_ENUM>(c);                    \
-      return enum_to_string(e);                                     \
+      auto e = static_cast<ERROR_ENUM>(c);                          \
+      using namespace boost::describe;                              \
+      return std::string{enum_to_string(e)};                        \
     }                                                               \
   };                                                                \
-  }                                                                 \
   inline auto ERROR_ENUM##_category()                               \
-      -> const detail::ERROR_ENUM##_category& {                     \
-    static detail::ERROR_ENUM##_category c;                         \
-    return c;                                                       \
+      -> const ERROR_ENUM##_category_t& {                           \
+    static const ERROR_ENUM##_category_t kC;                        \
+    return kC;                                                      \
   }                                                                 \
-  inline auto make_error_code(NAMESPACE::ERROR_ENUM ec) {           \
-    return wren::Err(static_cast<int32_t>(ec),                      \
-                     ERROR_ENUM##_category());                      \
+  inline auto make_error_code(ERROR_ENUM ec) -> std::error_code {   \
+    return {static_cast<int32_t>(ec), ERROR_ENUM##_category()};     \
   }
 
-// NOLINTNEXTLINE
-#define ERROR_ENUM(NS, E, ...)   \
-  namespace NS {                 \
-  DESCRIBED_ENUM(E, __VA_ARGS__) \
-  }                              \
-  ERROR_CODE(NS, E)
+//! @brief This macro defines an enum with BOOST_DEFINE_ENUM_CLASS and
+//! hooks into the std::error_code system The NAMSPACE arg can be
+//! skipped if the enum is in the global namespace.
+//! @param cat_name The name to use for the Error's category, should
+//! be something similar to the current namespace
+//! @param name the error enum name
+//! @param ... The enum variants to define
+#define DEFINE_ERROR(cat_name, name, ...)     \
+  BOOST_DEFINE_ENUM_CLASS(name, __VA_ARGS__); \
+  DEFINE_ERROR_IMPL(cat_name, name)
 
-///
-/// @brief A rust-like ? operation that returns on an error
-///
-/// @param out A variable to save the resulting expected's value, on
-/// success
-/// @param err The expression resulting in an expected value
-///
-// NOLINTNEXTLINE
-#define ERR_PROP(out, err)                                      \
-  const auto LINEIZE(res, __LINE__) = err;                      \
-  if (!LINEIZE(res, __LINE__).has_value())                      \
-    return tl::make_unexpected(LINEIZE(res, __LINE__).error()); \
-  out = LINEIZE(res, __LINE__).value();
+#define RESULT_UNIQUE_NAME() BOOST_PP_CAT(__result_tmp, __COUNTER__)
 
-///
-/// @brief A rust-like ? operation that returns on an error
-///
-/// @param err The expression resulting in an expected value
-///
-// NOLINTNEXTLINE
-#define ERR_PROP_VOID(err)                 \
-  const auto LINEIZE(res, __LINE__) = err; \
-  if (!LINEIZE(res, __LINE__).has_value()) \
-    return tl::make_unexpected(LINEIZE(res, __LINE__).error());
+#define TRY_RESULT_IMPL(unique, expr) \
+  auto unique = (expr);               \
+  if (!(unique).has_value())          \
+    return tl::make_unexpected(unique.error());
+
+#define TRY_RESULT_1(unique, expr) TRY_RESULT_IMPL(unique, expr)
+#define TRY_RESULT_2(unique, out, expr) \
+  TRY_RESULT_IMPL(unique, expr)         \
+  out = (unique).value();
+
+#define TRY_RESULT(...)                       \
+  BOOST_PP_OVERLOAD(TRY_RESULT_, __VA_ARGS__) \
+  (RESULT_UNIQUE_NAME(), __VA_ARGS__)
+
+#define TRY_RESULT_VOID_IMPL(unique, expr) \
+  auto unique = (expr);                    \
+  if (!(unique).has_value()) return;
+
+#define TRY_RESULT_VOID_1(unique, expr) \
+  TRY_RESULT_VOID_IMPL(unique, expr)
+#define TRY_RESULT_VOID_2(unique, out, expr) \
+  TRY_RESULT_VOID_IMPL(unique, expr)         \
+  out = (unique).value();
+#define TRY_RESULT_VOID(...)                       \
+  BOOST_PP_OVERLOAD(TRY_RESULT_VOID_, __VA_ARGS__) \
+  (RESULT_UNIQUE_NAME(), __VA_ARGS__)
 
 ///
 /// @brief Checks a tl::expected for error and either sets the out

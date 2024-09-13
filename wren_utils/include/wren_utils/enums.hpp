@@ -5,7 +5,7 @@
 
 template <class E>
 auto enum_to_string(E e) -> std::string {
-  std::string r = "(unnamed)";
+  std::string r = "(unamed)";
   boost::mp11::mp_for_each<boost::describe::describe_enumerators<E>>(
       [&](auto D) {
         if (e == D.value) r = std::string(D.name);

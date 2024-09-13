@@ -4,6 +4,7 @@
   inputs = {
     # nix-mesonlsp.url = "https://flakehub.com/f/tmayoff/nix-mesonlsp/0.1.7.tar.gz";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     nixgl.url = "github:nix-community/nixGL";
   };
@@ -11,9 +12,9 @@
   outputs = {
     self,
     nixpkgs,
+    nixpkgs-unstable,
     nixgl,
     flake-utils,
-    # nix-mesonlsp,
   }:
     flake-utils.lib.eachDefaultSystem (
       system: let
@@ -23,6 +24,10 @@
         ];
 
         pkgs = import nixpkgs {
+          inherit system overlays;
+        };
+
+        unstable = import nixpkgs-unstable {
           inherit system overlays;
         };
 
@@ -156,6 +161,7 @@
 
           buildInputs = with pkgs;
             [
+              unstable.lldb
               vulkan-validation-layers
               binutils
               elfutils

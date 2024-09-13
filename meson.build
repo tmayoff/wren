@@ -17,6 +17,8 @@ boost = dependency('boost')
 boost_test = dependency('boost', modules: ['unit_test_framework'])
 expected = dependency('tl-expected', modules: ['tl::expected'])
 spirv = dependency('SPIRV-Headers')
+# backward = dependency('backward-cpp')
+tracy = dependency('tracy')
 
 add_project_arguments(
     '-DVULKAN_HPP_NAMESPACE=_VK_',

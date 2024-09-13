@@ -55,7 +55,7 @@ auto RenderPass::Create(std::shared_ptr<Context> const& ctx,
   auto size = resources.render_target->size;
 
   for (auto [_, shader] : resources.shaders) {
-    ERR_PROP_VOID(shader->create_graphics_pipeline(device.get(),
+    TRY_RESULT(shader->create_graphics_pipeline(device.get(),
                                                    renderpass, size));
   }
 

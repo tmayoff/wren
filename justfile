@@ -13,7 +13,7 @@ nix_run: build
     nixVulkanIntel ./build/editor/wren_editor
 
 run: build
-    ./build/editor/editor
+    ./build/editor/wren_editor
 
 test: build
     meson test -C build --print-errorlogs

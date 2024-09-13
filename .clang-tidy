@@ -1,4 +1,4 @@
 ---
-Checks: 'cppcoreguidelines-*, modernize-*,-cppcoreguidelines-avoid-do-while,-cppcoreguidelines-avoid-magic-numbers'
+Checks: 'cppcoreguidelines-*, modernize-*,-cppcoreguidelines-avoid-do-while,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-macro-usage'
 FormatStyle: google
 ...

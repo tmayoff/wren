@@ -7,7 +7,6 @@
 #include <wren_reflect/spirv_reflect.h>
 
 #include <shaderc/shaderc.hpp>
-#include <system_error>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <wren_reflect/parser.hpp>
@@ -66,7 +65,7 @@ auto Shader::Create(VK_NS::Device const &device,
                     std::string const &vertex_shader,
                     std::string const &fragment_shader)
     -> expected<std::shared_ptr<Shader>> {
-  auto shader = std::make_shared<Shader>();
+  auto const shader = std::make_shared<Shader>();
 
   auto v_result = compile_shader(
       device, shaderc_shader_kind::shaderc_glsl_vertex_shader,

@@ -6,7 +6,6 @@
 
 #include <memory>
 #include <string>
-#include <system_error>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_enums.hpp>
@@ -15,7 +14,7 @@
 #include <wren_reflect/parser.hpp>
 #include <wren_utils/errors.hpp>
 
-ERROR_CODE(, shaderc_compilation_status)
+DEFINE_ERROR_IMPL("shaderc", shaderc_compilation_status)
 BOOST_DESCRIBE_ENUM(shaderc_compilation_status,
                     shaderc_compilation_status_invalid_stage,
                     shaderc_compilation_status_compilation_error,

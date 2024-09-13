@@ -1,18 +1,47 @@
 #pragma once
 
-#include <string>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_to_string.hpp>
 #include <wren_utils/errors.hpp>
 
-template <>
-auto enum_to_string<::VK_NS::Result>(::VK_NS::Result e)
-    -> std::string;
+namespace VK_NS {
 
-ERROR_CODE(VK_NS, Result)
-ERROR_ENUM(wren, VulkanErrors, NoDevicesFound,
-           QueueFamilyNotSupported)
+BOOST_DESCRIBE_ENUM(
+    Result, eSuccess, eNotReady, eTimeout, eEventSet, eEventReset,
+    eIncomplete, eErrorOutOfHostMemory, eErrorOutOfDeviceMemory,
+    eErrorInitializationFailed, eErrorDeviceLost,
+    eErrorMemoryMapFailed, eErrorLayerNotPresent,
+    eErrorExtensionNotPresent, eErrorFeatureNotPresent,
+    eErrorIncompatibleDriver, eErrorTooManyObjects,
+    eErrorFormatNotSupported, eErrorFragmentedPool, eErrorUnknown,
+    eErrorOutOfPoolMemory, eErrorOutOfPoolMemoryKHR,
+    eErrorInvalidExternalHandle, eErrorInvalidExternalHandleKHR,
+    eErrorFragmentation, eErrorFragmentationEXT,
+    eErrorInvalidOpaqueCaptureAddress, eErrorInvalidDeviceAddressEXT,
+    eErrorInvalidOpaqueCaptureAddressKHR, ePipelineCompileRequired,
+    eErrorPipelineCompileRequiredEXT, ePipelineCompileRequiredEXT,
+    eErrorSurfaceLostKHR, eErrorNativeWindowInUseKHR, eSuboptimalKHR,
+    eErrorOutOfDateKHR, eErrorIncompatibleDisplayKHR,
+    eErrorValidationFailedEXT, eErrorInvalidShaderNV,
+    eErrorImageUsageNotSupportedKHR,
+    eErrorVideoPictureLayoutNotSupportedKHR,
+    eErrorVideoProfileOperationNotSupportedKHR,
+    eErrorVideoProfileFormatNotSupportedKHR,
+    eErrorVideoProfileCodecNotSupportedKHR,
+    eErrorVideoStdVersionNotSupportedKHR,
+    eErrorInvalidDrmFormatModifierPlaneLayoutEXT,
+    eErrorNotPermittedKHR, eErrorNotPermittedEXT, eThreadIdleKHR,
+    eThreadDoneKHR, eOperationDeferredKHR, eOperationNotDeferredKHR,
+    eErrorCompressionExhaustedEXT);
+
+DEFINE_ERROR_IMPL("VulkanError", Result)
+
+}  // namespace VK_NS
+
+namespace wren {
+DEFINE_ERROR("VulkanErrors", VulkanErrors, NoDevicesFound, QueueFamilyNotSupported)
+}
 
 // NOLINTNEXTLINE
 #define VK_ERR_PROP(out, err)                              \

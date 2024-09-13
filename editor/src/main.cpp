@@ -1,13 +1,10 @@
-#include <backward.hpp>
+// #include <backward.hpp>
 #include <memory>
 #include <wren/application.hpp>
 #include <wren/context.hpp>
 #include <wren/graph.hpp>
 #include <wren/shaders/mesh.hpp>
 
-namespace backward {
-backward::SignalHandling sh;  // NOLINT
-}  // namespace backward
 
 class Scene {
  public:
@@ -118,7 +115,7 @@ auto Scene::build_3D_render_graph(
     -> wren::expected<wren::GraphBuilder> {
   wren::GraphBuilder builder(ctx);
 
-  ERR_PROP(auto mesh_shader,
+  TRY_RESULT(auto mesh_shader,
            wren::vk::Shader::Create(
                ctx->graphics_context->Device().get(),
                wren::shaders::MESH_VERT_SHADER.data(),

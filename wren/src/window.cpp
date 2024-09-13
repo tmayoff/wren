@@ -6,7 +6,7 @@
 #include <SDL_error.h>
 #include <SDL_mouse.h>
 
-#include <Tracy/tracy/Tracy.hpp>
+#include <tracy/Tracy.hpp>
 #include <tl/expected.hpp>
 
 #include "keycode.hpp"

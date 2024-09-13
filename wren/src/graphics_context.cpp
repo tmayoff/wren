@@ -1,4 +1,4 @@
-#include "wren/graphics_context.hpp"
+#include "graphics_context.hpp"
 
 #include <spdlog/fmt/ranges.h>
 #include <spdlog/spdlog.h>
@@ -30,7 +30,7 @@ auto GraphicsContext::Create(
 
   {
     spdlog::debug("Creating instance...");
-    ERR_PROP_VOID(graphics_context->CreateInstance(
+    TRY_RESULT(graphics_context->CreateInstance(
         application_name, requested_extensions, requested_layers));
     spdlog::debug("Created instance.");
   }
@@ -131,13 +131,13 @@ auto GraphicsContext::CreateInstance(
 auto GraphicsContext::SetupDevice() -> expected<void> {
   {
     spdlog::debug("Picking physical device...");
-    ERR_PROP_VOID(PickPhysicalDevice());
+    TRY_RESULT(PickPhysicalDevice());
     spdlog::debug("Picked physical device.");
   }
 
   {
     spdlog::debug("Creating logical device...");
-    ERR_PROP_VOID(CreateDevice());
+    TRY_RESULT(CreateDevice());
     spdlog::debug("Created logical device.");
   }
 
@@ -200,8 +200,8 @@ auto GraphicsContext::IsDeviceSuitable(
 }
 
 auto GraphicsContext::CreateDevice() -> expected<void> {
-  ERR_PROP(device, vulkan::Device::Create(instance, physical_device,
-                                          surface));
+  TRY_RESULT(device, vulkan::Device::Create(instance, physical_device,
+                                            surface));
   return {};
 }
 

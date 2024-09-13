@@ -44,7 +44,7 @@ class Buffer {
 
  private:
   _VK_::Buffer buffer{};
-  VmaAllocator allocator;
+  VmaAllocator allocator = nullptr;
   VmaAllocation allocation{};
 };
 
