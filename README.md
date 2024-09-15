@@ -1,6 +1,6 @@
 # wren
 
-[![Build](https://github.com/tmayoff/wren/actions/workflows/build.yml/badge.svg)](https://github.com/tmayoff/wren/actions/workflows/build.yml)
+[![builds.sr.ht status](https://builds.sr.ht/~tmayoff/wren/commits/main/nixos.yml.svg)](https://builds.sr.ht/~tmayoff/wren/commits/main/nixos.yml?)
 
 [docs](https://tmayoff.srht.site)
 
