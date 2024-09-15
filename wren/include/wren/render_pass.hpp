@@ -45,6 +45,8 @@ class RenderPass {
 
   void bind_pipeline(std::string const& pipeline_name);
 
+  [[nodiscard]] auto get() const { return render_pass; }
+
  private:
   RenderPass(std::string name, PassResources resources,
              execute_fn_t fn);

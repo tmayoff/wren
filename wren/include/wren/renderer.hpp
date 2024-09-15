@@ -28,6 +28,7 @@ class Renderer {
   auto set_graph_builder(GraphBuilder const &builder) {
     render_graph = builder.compile().value();
   }
+  auto get_graph() { return render_graph; }
 
   auto swapchain_images_views() { return swapchain_image_views_; }
 

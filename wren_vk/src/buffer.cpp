@@ -29,7 +29,7 @@ auto Buffer::Create(
 
   VkBuffer buf{};
   vmaCreateBuffer(allocator, &create_info, &alloc_info, &buf,
-                  &b->allocation, nullptr);
+                  &b->allocation_, nullptr);
   b->buffer = buf;
 
   return b;
@@ -40,9 +40,17 @@ auto Buffer::set_data_raw(void const* data, std::size_t size)
   if (data == nullptr) {
     return {};
   }
-  VK_ERR_PROP_VOID(
-      static_cast<::VK_NS::Result>(vmaCopyMemoryToAllocation(
-          allocator, data, allocation, 0, size)));
+
+  auto const res =
+      static_cast<VK_NS::Result>(vmaCopyMemoryToAllocation(
+          allocator_, data, allocation_, 0, size));
+  if (res != VK_NS::Result::eSuccess) {
+    throw std::runtime_error(enum_to_string(res));
+  }
+
+  // VK_ERR_PROP_VOID(
+  //     static_cast<::VK_NS::Result>(vmaCopyMemoryToAllocation(
+  //         allocator, data, allocation, 0, size)));
   return {};
 }
 
@@ -77,6 +85,6 @@ auto Buffer::copy_buffer(::VK_NS::Device const& device,
   return {};
 }
 
-Buffer::~Buffer() { vmaFreeMemory(allocator, allocation); }
+Buffer::~Buffer() { vmaFreeMemory(allocator_, allocation_); }
 
 }  // namespace wren::vk

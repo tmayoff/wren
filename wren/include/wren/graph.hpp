@@ -12,6 +12,7 @@
 namespace wren {
 
 struct Node {
+  std::string name;
   std::shared_ptr<RenderPass> render_pass;
 };
 
@@ -21,6 +22,15 @@ using edge_t = std::pair<node_t, node_t>;
 struct Graph {
   auto begin() { return nodes.begin(); }
   auto end() { return nodes.end(); }
+
+  auto node_by_name(std::string const &name) const -> node_t {
+    auto const node = std::ranges::find_if(
+        nodes,
+        [name](node_t const &node) { return name == node->name; });
+    if (node != nodes.end()) return *node;
+
+    return nullptr;
+  }
 
   std::vector<node_t> nodes;
   std::vector<edge_t> edges;

@@ -79,36 +79,36 @@ void Mesh::bind(VK_NS::CommandBuffer const& cmd) const {
           .count();
 
   UBO ubo{};
-  ubo.model = wren::math::rotate(wren::math::mat4f{},
-                                 time * wren::math::radians(90.0f),
-                                 wren::math::vec3f(0.0f, 0.0f, 1.0f));
+  // ubo.model = wren::math::rotate(wren::math::mat4f{},
+  //                                time * wren::math::radians(90.0f),
+  //                                wren::math::vec3f(0.0f, 0.0f, 1.0f));
 
-  ubo.view = wren::math::look_at(wren::math::vec3f(2.0f, 2.0f, 2.0f),
-                                 wren::math::vec3f(0.0f, 0.0f, 0.0f),
-                                 wren::math::vec3f::UnitZ());
+  // ubo.view = wren::math::look_at(wren::math::vec3f(2.0f, 2.0f, 2.0f),
+  //                                wren::math::vec3f(0.0f, 0.0f, 0.0f),
+  //                                wren::math::vec3f::UnitZ());
 
-  ubo.proj = wren::math::perspective(
-      wren::math::radians(45.0f), 2226.0f / 1415.0f, 0.01f, 1000.0f);
+  // ubo.proj = wren::math::perspective(
+  //     wren::math::radians(45.0f), 2226.0f / 1415.0f, 0.01f, 1000.0f);
 
   uniform_buffer->set_data_raw(&ubo, sizeof(ubo));
 
-  VK_NS::DescriptorBufferInfo buffer_info(uniform_buffer->get(), 0,
-                                          sizeof(UBO));
-  std::array writes = {
-      VK_NS::WriteDescriptorSet{{},
-                                0,
-                                0,
-                                VK_NS::DescriptorType::eUniformBuffer,
-                                {},
-                                buffer_info}};
+  // VK_NS::DescriptorBufferInfo buffer_info(uniform_buffer->get(), 0,
+  //                                         sizeof(UBO));
+  // std::array writes = {
+  //     VK_NS::WriteDescriptorSet{{},
+  //                               0,
+  //                               0,
+  //                               VK_NS::DescriptorType::eUniformBuffer,
+  //                               {},
+  //                               buffer_info}};
 
-  cmd.pushDescriptorSetKHR(VK_NS::PipelineBindPoint::eGraphics,
-                           shader_->pipeline_layout(), 0, writes);
+  // cmd.pushDescriptorSetKHR(VK_NS::PipelineBindPoint::eGraphics,
+  //                          shader_->pipeline_layout(), 0, writes);
 
-  cmd.bindIndexBuffer(index_buffer->get(), 0,
-                      VK_NS::IndexType::eUint16);
-  cmd.bindVertexBuffers(0, vertex_buffer->get(),
-                        VK_NS::DeviceSize{0});
+  // cmd.bindIndexBuffer(index_buffer->get(), 0,
+  //                     VK_NS::IndexType::eUint16);
+  // cmd.bindVertexBuffers(0, vertex_buffer->get(),
+  //                       VK_NS::DeviceSize{0});
 }
 
 }  // namespace wren

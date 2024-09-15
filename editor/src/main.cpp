@@ -1,10 +1,15 @@
-// #include <backward.hpp>
+#include <imgui.h>
+
+#include <backward.hpp>
 #include <memory>
 #include <wren/application.hpp>
 #include <wren/context.hpp>
 #include <wren/graph.hpp>
 #include <wren/shaders/mesh.hpp>
 
+#include "ui.hpp"
+
+backward::SignalHandling sh;
 
 class Scene {
  public:
@@ -83,6 +88,8 @@ auto main() -> int {
 
   app->context()->renderer->set_graph_builder(g_err.value());
 
+  editor::ui::init(app->context());
+
   app->add_callback_to_phase(wren::CallbackPhase::Update,
                              [&s]() { s.on_update(); });
 
@@ -100,7 +107,9 @@ void Scene::on_update() {
   //              gui_instance->IO().left_mouse);
 
   // gui_instance->Begin();
+  editor::ui::begin();
 
+  ImGui::ShowDemoWindow();
   // gui_instance->BeginWindow("Main", {400, 400});
 
   // TODO Render text
@@ -108,6 +117,7 @@ void Scene::on_update() {
   // gui_instance->EndWindow();
 
   // gui_instance->End();
+  editor::ui::end();
 }
 
 auto Scene::build_3D_render_graph(
@@ -116,26 +126,16 @@ auto Scene::build_3D_render_graph(
   wren::GraphBuilder builder(ctx);
 
   TRY_RESULT(auto mesh_shader,
-           wren::vk::Shader::Create(
-               ctx->graphics_context->Device().get(),
-               wren::shaders::MESH_VERT_SHADER.data(),
-               wren::shaders::MESH_FRAG_SHADER.data()));
+             wren::vk::Shader::Create(
+                 ctx->graphics_context->Device().get(),
+                 wren::shaders::MESH_VERT_SHADER.data(),
+                 wren::shaders::MESH_FRAG_SHADER.data()));
 
   mesh.shader(mesh_shader);
   builder.add_pass(
-      "scene",
-      {{
-           {"mesh", mesh_shader},
-       },
-       "swapchain_target"},
-      [this](wren::RenderPass &pass, VK_NS::CommandBuffer &cmd) {
-        pass.bind_pipeline("mesh");
-        mesh.bind(cmd);
-        // mesh.draw(cmd);
-
-        // pass.bind_pipeline("ui");
-        // gui_instance->resize_viewport(pass.current_target_size());
-        // gui_instance->flush(cmd);
+      "ui", {{}, "swapchain_target"},
+      [](wren::RenderPass &pass, VK_NS::CommandBuffer &cmd) {
+        editor::ui::flush(cmd);
       });
 
   return builder;

@@ -112,6 +112,10 @@
           shaderc
           spirv-headers
           fontconfig
+          binutils
+          elfutils
+          libdwarf
+          backward-cpp
         ];
       in rec {
         vulkan_layer_path = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d:${pkgs.renderdoc}/share/vulkan/implicit_layer.d";
@@ -163,10 +167,6 @@
             [
               unstable.lldb
               vulkan-validation-layers
-              binutils
-              elfutils
-              libdwarf
-              backward-cpp
             ]
             ++ rawBuildInputs;
 

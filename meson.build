@@ -17,8 +17,8 @@ boost = dependency('boost')
 boost_test = dependency('boost', modules: ['unit_test_framework'])
 expected = dependency('tl-expected', modules: ['tl::expected'])
 spirv = dependency('SPIRV-Headers')
-# backward = dependency('backward-cpp')
 tracy = dependency('tracy')
+imgui = dependency('imgui')
 
 add_project_arguments(
     '-DVULKAN_HPP_NAMESPACE=_VK_',
@@ -40,6 +40,8 @@ endif
 if get_option('build_profiling')
     add_project_arguments('-ftime-trace', language: 'cpp')
 endif
+
+subdir('external')
 
 subdir('wren_utils')
 subdir('wren_math')

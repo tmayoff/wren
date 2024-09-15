@@ -36,6 +36,8 @@ class Window {
     return {w, h};
   }
 
+  auto NativeHandle() const { return window; }
+
  private:
   explicit Window(SDL_Window *window) : window(window) {}
 

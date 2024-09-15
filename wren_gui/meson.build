@@ -1,5 +1,3 @@
-imgui = dependency('imgui')
-
 wren_gui = library(
     'wren_gui',
     'src/instance.cpp',
