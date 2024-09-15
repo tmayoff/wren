@@ -159,6 +159,9 @@
               # mesonlsp
               muon
 
+              unstable.tracy-x11 # for the profiler
+              wayland
+
               pkgs.nixgl.nixVulkanIntel
             ]
             ++ rawNativeBuildInputs;

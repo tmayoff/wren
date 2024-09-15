@@ -10,10 +10,48 @@
 
 namespace editor::ui {
 
+auto mouse_code_to_imgui(wren::MouseCode code) {
+  switch (code) {
+    case wren::MouseCode::Left:
+      return ImGuiMouseButton_Left;
+    case wren::MouseCode::Right:
+      return ImGuiMouseButton_Right;
+    case wren::MouseCode::Middle:
+      return ImGuiMouseButton_Middle;
+  }
+}
+
 auto init(std::shared_ptr<wren::Context> const& context)
     -> wren::expected<void> {
   ImGui::CreateContext();
-  // ImGuiIO& io = ImGui::GetIO();
+  ImGuiIO& io = ImGui::GetIO();
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+  // Setup events
+  context->event_dispatcher.on<wren::Event::MouseMoved>(
+      [&io](auto const& e) {
+        if (!e.relative) {
+          io.AddMousePosEvent(e.x, e.y);
+        } else {
+          io.MouseDelta = {e.x, e.y};
+        }
+      });
+
+  context->event_dispatcher.on<wren::Event::MouseButtonDown>(
+      [&io](auto const& e) {
+        io.AddMouseButtonEvent(mouse_code_to_imgui(e.button), true);
+      });
+
+  context->event_dispatcher.on<wren::Event::MouseButtonUp>(
+      [&io](auto const& e) {
+        io.AddMouseButtonEvent(mouse_code_to_imgui(e.button), false);
+      });
+
+  // context->event_dispatcher.on<wren::Event::MouseButtonUp>(
+  //     [&io](auto const& e) {
+  //       io.AddMouseButtonEvent(mouse_code_to_imgui(e.button),
+  //       false);
+  //     });
 
   ImGui_ImplSDL2_InitForVulkan(context->window.NativeHandle());
 

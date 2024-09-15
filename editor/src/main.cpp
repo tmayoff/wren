@@ -1,7 +1,9 @@
 #include <imgui.h>
+#include <imgui_internal.h>
 
 #include <backward.hpp>
 #include <memory>
+#include <tracy/Tracy.hpp>
 #include <wren/application.hpp>
 #include <wren/context.hpp>
 #include <wren/graph.hpp>
@@ -9,49 +11,11 @@
 
 #include "ui.hpp"
 
-backward::SignalHandling sh;
+const backward::SignalHandling sh;
 
 class Scene {
  public:
-  Scene(std::shared_ptr<wren::Context> const &ctx) : ctx(ctx) {
-    // auto ui_shader_res = wren::vk::Shader::Create(
-    //     ctx->graphics_context->Device().get(),
-    //     wren::gui::VERTEX_SHADER.data(),
-    //     wren::gui::FRAGMENT_SHADER.data());
-    // if (!ui_shader_res.has_value()) {
-    //   spdlog::error("failed to create UI shader {}",
-    //                 ui_shader_res.error());
-    //   throw std::runtime_error(
-    //       fmt::format("{}", ui_shader_res.error()));
-    // }
-
-    // ctx->event_dispatcher.on<wren::Event::MouseMoved>(
-    //     [this](auto &e) {
-    //       if (e.relative)
-    //         gui_instance->IO().mouse_position_rel = {e.x, e.y};
-    //       else
-    //         gui_instance->IO().mouse_position = {e.x, e.y};
-    //     });
-
-    // ctx->event_dispatcher.on<wren::Event::MouseButtonUp>(
-    //     [this](auto const &e) {
-    //       if (e.button == wren::MouseCode::Left)
-    //         gui_instance->IO().left_mouse = false;
-    //     });
-
-    // ctx->event_dispatcher.on<wren::Event::MouseButtonDown>(
-    //     [this](auto const &e) {
-    //       if (e.button == wren::MouseCode::Left)
-    //         gui_instance->IO().left_mouse = true;
-    //     });
-
-    // gui_instance = std::make_shared<wren::gui::Instance>(
-    //     ui_shader_res.value(),
-    //     ctx->graphics_context->Device().get(),
-    //     ctx->graphics_context->allocator(),
-    //     ctx->graphics_context->Device().command_pool(),
-    //     ctx->graphics_context->Device().get_graphics_queue());
-  }
+  Scene(std::shared_ptr<wren::Context> const &ctx) : ctx(ctx) {}
 
   auto build_3D_render_graph(
       std::shared_ptr<wren::Context> const &ctx)
@@ -60,7 +24,6 @@ class Scene {
   void on_update();
 
  private:
-  // std::shared_ptr<wren::gui::Instance> gui_instance;
   std::shared_ptr<wren::Context> ctx;
   wren::Mesh mesh;
 };
@@ -99,24 +62,59 @@ auto main() -> int {
 }
 
 void Scene::on_update() {
-  // spdlog::info("Position: ({} {}), Moved ({}, {}), Mouse down: {}",
-  //              gui_instance->IO().mouse_position.x(),
-  //              gui_instance->IO().mouse_position.y(),
-  //              gui_instance->IO().mouse_position_rel.x(),
-  //              gui_instance->IO().mouse_position_rel.y(),
-  //              gui_instance->IO().left_mouse);
-
-  // gui_instance->Begin();
+  ZoneScoped;  // NOLINT
   editor::ui::begin();
 
-  ImGui::ShowDemoWindow();
-  // gui_instance->BeginWindow("Main", {400, 400});
+  static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+  ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
 
-  // TODO Render text
+  ImGuiViewport const *viewport = ImGui::GetMainViewport();
+  ImGui::SetNextWindowPos(viewport->WorkPos);
+  ImGui::SetNextWindowSize(viewport->WorkSize);
+  ImGui::SetNextWindowViewport(viewport->ID);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0F);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0F);
 
-  // gui_instance->EndWindow();
+  window_flags |=
+      ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+      ImGuiWindowFlags_NoBringToFrontOnFocus |
+      ImGuiWindowFlags_NoNavFocus;
 
-  // gui_instance->End();
+  ImGui::Begin("Editor", nullptr, window_flags);
+  ImGui::PopStyleVar(2);
+
+  ImGuiIO &io = ImGui::GetIO();
+  if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+    ImGuiID dockspace_id = ImGui::GetID("Editor");
+    ImGui::DockSpace(dockspace_id, ImVec2{0.0F, 0.0F},
+                     dockspace_flags);
+
+    static bool first_time = true;
+    if (first_time) {
+      first_time = false;
+
+      ImGui::DockBuilderRemoveNode(dockspace_id);
+      ImGui::DockBuilderAddNode(
+          dockspace_id,
+          dockspace_flags | ImGuiDockNodeFlags_DockSpace);
+
+      ImGui::DockBuilderFinish(dockspace_id);
+    }
+  }
+
+  ImGui::Begin("Scene");
+
+  ImGui::End();
+
+  ImGui::Begin("Inspector");
+  ImGui::End();
+
+  ImGui::Begin("Filesystem");
+  ImGui::End();
+
+  ImGui::End();
+
   editor::ui::end();
 }
 
@@ -137,6 +135,8 @@ auto Scene::build_3D_render_graph(
       [](wren::RenderPass &pass, VK_NS::CommandBuffer &cmd) {
         editor::ui::flush(cmd);
       });
+
+  // builder.add_pass("mesh", {{}, "scene"}, []() {});
 
   return builder;
 }

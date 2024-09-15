@@ -28,4 +28,3 @@ clean:
     ninja -C build clean
 
 everything: configure build
-
