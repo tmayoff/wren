@@ -16,7 +16,7 @@ tasks:
       tar -C site -czf ../site.tar.gz .
   
   - upload: |
-      hut pages publish -d $site site.tar.gz
+      hut pages publish -d $site -s wren site.tar.gz
 
 triggers:
   - action: email
