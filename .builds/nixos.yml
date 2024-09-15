@@ -7,4 +7,6 @@ environment:
 tasks:
     - build: |
         cd wren
-        nix build
+        nix develop --command meson setup build
+        nix develop --command meson compile -C build
+        nix develop --command meosn test -C build
