@@ -9,4 +9,4 @@ tasks:
         cd wren
         nix develop --command meson setup build
         nix develop --command meson compile -C build
-        nix develop --command meosn test -C build
+        nix develop --command meson test -C build
