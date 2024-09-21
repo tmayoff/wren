@@ -94,7 +94,7 @@
 
         rawNativeBuildInputs = with pkgs; [
           pkg-config
-          meson
+          unstable.meson
           cmake
           ninja
         ];

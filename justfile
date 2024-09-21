@@ -27,4 +27,5 @@ gdb: build
 clean:
     ninja -C build clean
 
-everything: configure build
+build_docs:
+	doxygen

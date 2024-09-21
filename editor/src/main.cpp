@@ -11,7 +11,7 @@
 
 #include "ui.hpp"
 
-const backward::SignalHandling sh;
+backward::SignalHandling const sh;
 
 class Scene {
  public:
@@ -26,6 +26,8 @@ class Scene {
  private:
   std::shared_ptr<wren::Context> ctx;
   wren::Mesh mesh;
+
+  // Image image
 };
 
 auto main() -> int {
@@ -98,13 +100,32 @@ void Scene::on_update() {
       ImGui::DockBuilderAddNode(
           dockspace_id,
           dockspace_flags | ImGuiDockNodeFlags_DockSpace);
+      ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
 
-      ImGui::DockBuilderFinish(dockspace_id);
+      auto const dockspace_id_bottom = ImGui::DockBuilderSplitNode(
+          dockspace_id, ImGuiDir_Down, 0.25, nullptr, &dockspace_id);
+
+      auto const dockspace_id_right =
+          ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Right,
+                                      0.25F, nullptr, &dockspace_id);
+      auto const dockspace_id_left = ImGui::DockBuilderSplitNode(
+          dockspace_id, ImGuiDir_Left, 0.25F, nullptr, &dockspace_id);
+
+      ImGui::DockBuilderDockWindow("Inspector", dockspace_id_right);
+      ImGui::DockBuilderDockWindow("Viewer", dockspace_id);
+      ImGui::DockBuilderDockWindow("Scene", dockspace_id_left);
+      ImGui::DockBuilderDockWindow("Filesystem", dockspace_id_bottom);
+
+      ImGui::DockBuilderFinish(dockspace_id_bottom);
     }
   }
 
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{500, 100});
   ImGui::Begin("Scene");
+  ImGui::End();
 
+  ImGui::Begin("Viewer");
+  ImGui::Text("%s", "Scene go here");
   ImGui::End();
 
   ImGui::Begin("Inspector");
@@ -114,6 +135,7 @@ void Scene::on_update() {
   ImGui::End();
 
   ImGui::End();
+  ImGui::PopStyleVar();
 
   editor::ui::end();
 }
@@ -136,7 +158,21 @@ auto Scene::build_3D_render_graph(
         editor::ui::flush(cmd);
       });
 
-  // builder.add_pass("mesh", {{}, "scene"}, []() {});
+  auto target = std::make_shared<wren::RenderTarget>();
+
+  mesh.shader(mesh_shader);
+  builder.add_pass(
+      "mesh",
+      {{
+           {"mesh", mesh_shader},
+       },
+       "scene_viewer",
+       target},
+      [this](wren::RenderPass &pass, VK_NS::CommandBuffer &cmd) {
+        pass.bind_pipeline("mesh");
+        mesh.bind(cmd);
+        // mesh.draw(cmd);
+      });
 
   return builder;
 }

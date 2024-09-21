@@ -1,25 +1,14 @@
 image: nixos/unstable
-oauth: pages.sr.ht/PAGES:RW
-packages:
-  - nixos.hut
-  - nixos.python3
 environment:
   site: tmayoff.srht.site
+  NIX_CONFIG: "experimental-features = nix-command flakes"
+oauth: pages.sr.ht/PAGES:RW
 tasks:
-  - pacakge: |
-      python3 -m venv mkdocs
-      . mkdocs/bin/activate
-      python3 -m pip install --upgrade pip
-      pip install mkdocs mkdocs-material mkdocs-mermaid2-plugin
+  - setup: mkdir -p wren/build/docs
+  - build_docs: |
       cd wren
-      mkdocs build -d site
-      tar -C site -czf ../site.tar.gz .
-  
+      nix develop --command just build_docs
   - upload: |
-      hut pages publish -d $site -s wren site.tar.gz
-
-triggers:
-  - action: email
-    condition: failure
-    to: Tyler Mayoff tyler@tylermayoff.com
-    
+      cd wren
+      tar -cvzf site.tar.gz -C build/docs/html .
+      nix run nixpkgs#hut -- pages publish -d tmayoff.srht.site -s wren site.tar.gz
