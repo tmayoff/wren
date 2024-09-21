@@ -1,4 +1,4 @@
-project('wren', 'cpp', version: '0.0.1', default_options: 'cpp_std=c++23')
+project('wren', 'cpp', version: '0.0.1', default_options: 'cpp_std=c++26')
 
 cpp = meson.get_compiler('cpp')
 
