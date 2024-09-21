@@ -100,6 +100,8 @@
         ];
 
         rawBuildInputs = with pkgs; [
+          doxygen
+        
           boost185
 
           SDL2

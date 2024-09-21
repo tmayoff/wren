@@ -169,8 +169,8 @@ auto Scene::build_3D_render_graph(
        "scene_viewer",
        target},
       [this](wren::RenderPass &pass, VK_NS::CommandBuffer &cmd) {
-        pass.bind_pipeline("mesh");
-        mesh.bind(cmd);
+        // pass.bind_pipeline("mesh");
+        // mesh.bind(cmd);
         // mesh.draw(cmd);
       });
 
