@@ -949,10 +949,20 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = staxlib/src \
-                         staxlib/include \
-						 staxrepl/src \
-						 staxcompiler/src
+INPUT                  = wren/src \
+                         wren/include \
+						 wren_gui/include \
+						 wren_gui/src \
+						 wren_math/include \
+						 wren_math/src \
+						 wren_reflect/include \
+						 wren_reflect/src \
+						 wren_text/include \
+						 wren_text/src \
+						 wren_utils/include \
+						 wren_utils/src \
+						 wren_vk/include \
+						 wren_vk/src \
                          README.md
 
 # This tag can be used to specify the character encoding of the source files
