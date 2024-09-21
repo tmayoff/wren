@@ -156,8 +156,9 @@
               vulkan-tools
               clang-tools
               ccache
-              # mesonlsp
               muon
+
+              just
 
               unstable.tracy-x11 # for the profiler
               wayland
