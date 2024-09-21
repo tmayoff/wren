@@ -101,6 +101,7 @@
 
         rawBuildInputs = with pkgs; [
           doxygen
+          graphviz
         
           boost185
 

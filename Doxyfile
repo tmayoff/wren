@@ -949,7 +949,8 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = wren/src \
+INPUT                  = editor/src \
+						 wren/src \
                          wren/include \
 						 wren_gui/include \
 						 wren_gui/src \
@@ -1618,7 +1619,7 @@ TOC_EXPAND             = NO
 # protocol see https://www.sitemaps.org
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-SITEMAP_URL            = https://tmayoff.srht.site/stax
+SITEMAP_URL            = https://tmayoff.srht.site/wren
 
 # If the GENERATE_QHP tag is set to YES and both QHP_NAMESPACE and
 # QHP_VIRTUAL_FOLDER are set, an additional index file will be generated that
