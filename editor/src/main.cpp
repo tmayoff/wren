@@ -155,11 +155,25 @@ auto Scene::build_ui_render_graph(
                  wren::shaders::MESH_VERT_SHADER.data(),
                  wren::shaders::MESH_FRAG_SHADER.data()));
 
-  VK_NS::ImageView image_view;
-
   auto target = std::make_shared<wren::RenderTarget>(
       VK_NS::Extent2D{245, 256}, VK_NS::Format::eB8G8R8A8Srgb,
-      VK_NS::SampleCountFlagBits::e1, image_view);
+      VK_NS::SampleCountFlagBits::e1, nullptr);
+
+  VK_NS::ImageCreateInfo image_info(
+      {}, VK_NS::ImageType::e2D, target->format,
+      VK_NS::Extent3D(target->size.width, target->size.height, 1));
+
+  VK_TRY_RESULT(
+      image,
+      ctx->graphics_context->Device().get().createImage(image_info));
+
+  VK_NS::ImageViewCreateInfo image_view_info(
+      {}, image, VK_NS::ImageViewType::e2D);
+
+  VK_TRY_RESULT(image_view,
+                ctx->graphics_context->Device().get().createImageView(
+                    image_view_info));
+
   mesh.shader(mesh_shader);
 
   builder
@@ -185,39 +199,3 @@ auto Scene::build_ui_render_graph(
 
   return builder;
 }
-// auto Scene::build_3D_render_graph(
-//     std::shared_ptr<wren::Context> const &ctx)
-//     -> wren::expected<wren::GraphBuilder> {
-//   wren::GraphBuilder builder(ctx);
-
-//   TRY_RESULT(auto mesh_shader,
-//              wren::vk::Shader::Create(
-//                  ctx->graphics_context->Device().get(),
-//                  wren::shaders::MESH_VERT_SHADER.data(),
-//                  wren::shaders::MESH_FRAG_SHADER.data()));
-
-//   mesh.shader(mesh_shader);
-//   builder.add_pass(
-//       "ui", {{}, "swapchain_target"},
-//       [](wren::RenderPass &pass, VK_NS::CommandBuffer &cmd) {
-//         editor::ui::flush(cmd);
-//       });
-
-//   auto target = std::make_shared<wren::RenderTarget>();
-
-//   mesh.shader(mesh_shader);
-//   builder.add_pass(
-//       "mesh",
-//       {{
-//            {"mesh", mesh_shader},
-//        },
-//        "scene_viewer",
-//        target},
-//       [this](wren::RenderPass &pass, VK_NS::CommandBuffer &cmd) {
-//         // pass.bind_pipeline("mesh");
-//         // mesh.bind(cmd);
-//         // mesh.draw(cmd);
-//       });
-
-//   return builder;
-// }
