@@ -45,16 +45,16 @@ struct Inputs {
 class Instance {
  public:
   Instance(std::shared_ptr<vk::Shader> const& shader,
-           VK_NS::Device const& device, VmaAllocator const& allocator,
-           VK_NS::CommandPool const& command_pool,
-           VK_NS::Queue const& graphics_queue);
+           ::vk::Device const& device, VmaAllocator const& allocator,
+           ::vk::CommandPool const& command_pool,
+           ::vk::Queue const& graphics_queue);
 
   [[nodiscard]] auto shader() const { return shader_; }
 
-  void bind(VK_NS::CommandBuffer const& cmd);
-  void flush(VK_NS::CommandBuffer const& cmd);
+  void bind(::vk::CommandBuffer const& cmd);
+  void flush(::vk::CommandBuffer const& cmd);
 
-  void resize_viewport(VK_NS::Extent2D const& size) {
+  void resize_viewport(::vk::Extent2D const& size) {
     this->output_size = size;
   }
 
@@ -79,11 +79,11 @@ class Instance {
   std::shared_ptr<wren::vk::Buffer> vertex_buffer;
   std::shared_ptr<vk::Buffer> uniform_buffer;
 
-  VK_NS::Device device;
-  VK_NS::Queue graphics_queue;
-  VK_NS::CommandPool command_pool;
+  ::vk::Device device;
+  ::vk::Queue graphics_queue;
+  ::vk::CommandPool command_pool;
 
-  VK_NS::Extent2D output_size;
+  ::vk::Extent2D output_size;
 
   VmaAllocator allocator;
   std::vector<Vertex> vertices;

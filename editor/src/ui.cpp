@@ -74,12 +74,12 @@ auto init(std::shared_ptr<wren::Context> const& context)
 
   {
     std::array pool_sizes = {
-        VK_NS::DescriptorPoolSize{
-            VK_NS::DescriptorType::eCombinedImageSampler, 1},
+        ::vk::DescriptorPoolSize{
+            ::vk::DescriptorType::eCombinedImageSampler, 1},
     };
 
-    VK_NS::DescriptorPoolCreateInfo pool_info{
-        VK_NS::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, 1,
+    ::vk::DescriptorPoolCreateInfo pool_info{
+        ::vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, 1,
         pool_sizes};
 
     VK_TRY_RESULT(
@@ -105,7 +105,7 @@ auto begin() -> void {
 
 auto end() -> void {}
 
-void flush(VK_NS::CommandBuffer const& cmd) {
+void flush(::vk::CommandBuffer const& cmd) {
   ImGui::Render();
   ImDrawData* draw_data = ImGui::GetDrawData();
 

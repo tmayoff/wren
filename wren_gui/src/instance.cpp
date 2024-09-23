@@ -2,18 +2,18 @@
 
 #include <spdlog/spdlog.h>
 
-#include <wren_text/font.hpp>
-#include <wren_vk/buffer.hpp>
 #include <wren_math/geometry.hpp>
 #include <wren_math/vector.hpp>
+#include <wren_text/font.hpp>
+#include <wren_vk/buffer.hpp>
 
 namespace wren::gui {
 
 Instance::Instance(std::shared_ptr<vk::Shader> const& shader,
-                   VK_NS::Device const& device,
+                   ::vk::Device const& device,
                    VmaAllocator const& allocator,
-                   VK_NS::CommandPool const& command_pool,
-                   VK_NS::Queue const& graphics_queue)
+                   ::vk::CommandPool const& command_pool,
+                   ::vk::Queue const& graphics_queue)
     : shader_(shader),
       device(device),
       graphics_queue(graphics_queue),
@@ -56,7 +56,7 @@ void Instance::Begin() {
 
 void Instance::End() { previous_io = io; }
 
-void Instance::flush(VK_NS::CommandBuffer const& cmd) {
+void Instance::flush(::vk::CommandBuffer const& cmd) {
   if (vertices.empty() || indices.empty()) return;
 
   {
@@ -97,25 +97,25 @@ void Instance::flush(VK_NS::CommandBuffer const& cmd) {
                              static_cast<float>(output_size.height);
   UBO ubo{};
   ubo.proj =
-      wren::math::ortho(0.0f, static_cast<float>(output_size.width), 0.0f,
-                   static_cast<float>(output_size.height));
+      wren::math::ortho(0.0f, static_cast<float>(output_size.width),
+                        0.0f, static_cast<float>(output_size.height));
   uniform_buffer->set_data_raw(&ubo, sizeof(UBO));
 
-  VK_NS::DescriptorBufferInfo buffer_info{uniform_buffer->get(), 0,
-                                          sizeof(UBO)};
+  ::vk::DescriptorBufferInfo buffer_info{uniform_buffer->get(), 0,
+                                         sizeof(UBO)};
   std::array writes{
-      VK_NS::WriteDescriptorSet{{},
-                                0,
-                                0,
-                                VK_NS::DescriptorType::eUniformBuffer,
-                                {},
-                                buffer_info}};
+      ::vk::WriteDescriptorSet{{},
+                               0,
+                               0,
+                               ::vk::DescriptorType::eUniformBuffer,
+                               {},
+                               buffer_info}};
 
-  cmd.pushDescriptorSetKHR(VK_NS::PipelineBindPoint::eGraphics,
+  cmd.pushDescriptorSetKHR(::vk::PipelineBindPoint::eGraphics,
                            shader_->pipeline_layout(), 0, writes);
 
   cmd.bindIndexBuffer(index_buffer->get(), 0,
-                      VK_NS::IndexType::eUint16);
+                      ::vk::IndexType::eUint16);
   cmd.bindVertexBuffers(0, vertex_buffer->get(), {0});
   cmd.drawIndexed(indices.size(), 1, 0, 0, 0);
 
@@ -160,8 +160,9 @@ void Instance::EndWindow() {
   if (windows_.contains(window_name)) {
     auto& window = windows_.at(window_name);
     draw_quad(window.pos, window.size,
-              window.hovered ? wren::math::vec4f{1.0, 1.0, 1.0, 1.0}
-                             : wren::math::vec4f{0.5f, 0.5f, 0.5f, 1.0f});
+              window.hovered
+                  ? wren::math::vec4f{1.0, 1.0, 1.0, 1.0}
+                  : wren::math::vec4f{0.5f, 0.5f, 0.5f, 1.0f});
 
     if (window.selected) {
       // Move window
@@ -190,9 +191,9 @@ void Instance::draw_quad(wren::math::vec2f const& pos,
                  quad_indices.end());
 }
 
-auto Instance::point_in_bounds(wren::math::vec2f const& p,
-                               wren::math::vec2f const& pos,
-                               wren::math::vec2f const& size) -> bool {
+auto Instance::point_in_bounds(
+    wren::math::vec2f const& p, wren::math::vec2f const& pos,
+    wren::math::vec2f const& size) -> bool {
   wren::math::vec2f const top_left = pos;
   wren::math::vec2f const bottom_right = pos + size;
 

@@ -16,8 +16,8 @@ struct QueueFamilyIndices {
 class Queue {
  public:
   static auto FindQueueFamilyIndices(
-      const VK_NS::PhysicalDevice &physical_device,
-      std::optional<VK_NS::SurfaceKHR> const &surface = {})
+      const ::vk::PhysicalDevice &physical_device,
+      std::optional<::vk::SurfaceKHR> const &surface = {})
       -> expected<QueueFamilyIndices>;
 };
 

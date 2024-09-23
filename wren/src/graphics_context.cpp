@@ -54,7 +54,7 @@ auto GraphicsContext::CreateInstance(
     std::vector<std::string_view> const &requested_extensions,
     std::vector<std::string_view> const &requested_layers)
     -> expected<void> {
-  auto const appInfo = VK_NS::ApplicationInfo(
+  auto const appInfo = ::vk::ApplicationInfo(
       application_name.c_str(), 1, "wren", 1, VK_API_VERSION_1_2);
 
   spdlog::debug("Requesting extensions:");
@@ -100,28 +100,28 @@ auto GraphicsContext::CreateInstance(
     extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
   }
 
-  VK_NS::DebugUtilsMessageSeverityFlagsEXT severity_flags(
-      // VK_NS::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
-      VK_NS::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
-      VK_NS::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
-      VK_NS::DebugUtilsMessageSeverityFlagBitsEXT::eError);
+  ::vk::DebugUtilsMessageSeverityFlagsEXT severity_flags(
+      // ::vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
+      ::vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
+      ::vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+      ::vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
 
-  VK_NS::DebugUtilsMessageTypeFlagsEXT message_type_flags(
-      // VK_NS::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
-      VK_NS::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
-      VK_NS::DebugUtilsMessageTypeFlagBitsEXT::ePerformance);
+  ::vk::DebugUtilsMessageTypeFlagsEXT message_type_flags(
+      // ::vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+      ::vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
+      ::vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance);
 
-  VK_NS::DebugUtilsMessengerCreateInfoEXT debugMessengerCreateInfo(
+  ::vk::DebugUtilsMessengerCreateInfoEXT debugMessengerCreateInfo(
       {}, severity_flags, message_type_flags, &vulkan::DebugCallback);
 #endif
 
-  VK_NS::InstanceCreateInfo createInfo({}, &appInfo, layers,
-                                       extensions);
+  ::vk::InstanceCreateInfo createInfo({}, &appInfo, layers,
+                                      extensions);
 #ifdef WREN_DEBUG
   createInfo.setPNext(&debugMessengerCreateInfo);
 #endif
 
-  VK_TIE_ERR_PROP(this->instance, VK_NS::createInstance(createInfo));
+  VK_TIE_ERR_PROP(this->instance, ::vk::createInstance(createInfo));
 
   VULKAN_HPP_DEFAULT_DISPATCHER.init(instance);
 
@@ -175,7 +175,7 @@ auto GraphicsContext::PickPhysicalDevice() -> expected<void> {
 }
 
 auto GraphicsContext::IsDeviceSuitable(
-    VK_NS::PhysicalDevice const &device) -> bool {
+    ::vk::PhysicalDevice const &device) -> bool {
   auto res = vulkan::Queue::FindQueueFamilyIndices(device);
   if (!res.has_value()) {
     spdlog::error("{}", res.error().message());
@@ -207,18 +207,18 @@ auto GraphicsContext::CreateDevice() -> expected<void> {
 
 #ifdef WREN_DEBUG
 auto GraphicsContext::CreateDebugMessenger() -> expected<void> {
-  VK_NS::DebugUtilsMessageSeverityFlagsEXT severity_flags(
-      VK_NS::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
-      VK_NS::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
-      VK_NS::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
-      VK_NS::DebugUtilsMessageSeverityFlagBitsEXT::eError);
+  ::vk::DebugUtilsMessageSeverityFlagsEXT severity_flags(
+      ::vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
+      ::vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
+      ::vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+      ::vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
 
-  VK_NS::DebugUtilsMessageTypeFlagsEXT message_type_flags(
-      // VK_NS::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
-      VK_NS::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
-      VK_NS::DebugUtilsMessageTypeFlagBitsEXT::ePerformance);
+  ::vk::DebugUtilsMessageTypeFlagsEXT message_type_flags(
+      // ::vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+      ::vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
+      ::vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance);
 
-  VK_NS::DebugUtilsMessengerCreateInfoEXT createInfo(
+  ::vk::DebugUtilsMessengerCreateInfoEXT createInfo(
       {}, severity_flags, message_type_flags, &vulkan::DebugCallback);
 
   VK_TIE_ERR_PROP(

@@ -25,16 +25,16 @@
 
 namespace wren::vulkan {
 struct SwapchainSupportDetails {
-  VK_NS::SurfaceCapabilitiesKHR surface_capabilites;
-  std::vector<VK_NS::SurfaceFormatKHR> surface_formats;
-  std::vector<VK_NS::PresentModeKHR> present_modes;
+  ::vk::SurfaceCapabilitiesKHR surface_capabilites;
+  std::vector<::vk::SurfaceFormatKHR> surface_formats;
+  std::vector<::vk::PresentModeKHR> present_modes;
 };
 
-auto LoadFunctions(VK_NS::Instance const &instance) -> expected<void>;
+auto LoadFunctions(::vk::Instance const &instance) -> expected<void>;
 
 auto GetSwapchainSupportDetails(
-    VK_NS::PhysicalDevice const &physical_device,
-    VK_NS::SurfaceKHR const &surface)
+    ::vk::PhysicalDevice const &physical_device,
+    ::vk::SurfaceKHR const &surface)
     -> expected<SwapchainSupportDetails>;
 
 VKAPI_ATTR auto VKAPI_CALL DebugCallback(
@@ -44,7 +44,7 @@ VKAPI_ATTR auto VKAPI_CALL DebugCallback(
     void *pUserData) -> VkBool32;
 
 inline auto IsExtensionSupport(std::string_view const &name) -> bool {
-  auto res = VK_NS::enumerateInstanceExtensionProperties();
+  auto res = ::vk::enumerateInstanceExtensionProperties();
 
   bool found = false;
   for (auto const &ext : res.value) {
@@ -58,7 +58,7 @@ inline auto IsExtensionSupport(std::string_view const &name) -> bool {
 }
 
 inline auto IsLayerSupported(std::string_view const &name) -> bool {
-  auto res = VK_NS::enumerateInstanceLayerProperties();
+  auto res = ::vk::enumerateInstanceLayerProperties();
 
   bool found = false;
   for (auto const &ext : res.value) {
@@ -73,7 +73,7 @@ inline auto IsLayerSupported(std::string_view const &name) -> bool {
 
 inline auto IsDeviceExtensionSupported(
     std::string_view const &name,
-    VK_NS::PhysicalDevice const &device) {
+    ::vk::PhysicalDevice const &device) {
   auto res = device.enumerateDeviceExtensionProperties();
 
   bool found = false;

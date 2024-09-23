@@ -19,9 +19,9 @@ class Buffer {
       std::optional<VmaAllocationCreateFlags> const& flags = {})
       -> std::shared_ptr<Buffer>;
 
-  static auto copy_buffer(VK_NS::Device const& device,
-                          VK_NS::Queue const& submit_queue,
-                          VK_NS::CommandPool const& command_pool,
+  static auto copy_buffer(::vk::Device const& device,
+                          ::vk::Queue const& submit_queue,
+                          ::vk::CommandPool const& command_pool,
                           std::shared_ptr<Buffer> const& src,
                           std::shared_ptr<Buffer> const& dst,
                           size_t size) -> expected<void>;
@@ -43,14 +43,14 @@ class Buffer {
   [[nodiscard]] auto get() const { return buffer; }
 
  private:
-  _VK_::Buffer buffer{};
+  ::vk::Buffer buffer{};
   VmaAllocator allocator_ = nullptr;
   VmaAllocation allocation_{};
 };
 
 template <typename T>
 auto Buffer::set_data_raw(std::span<T const> data) -> expected<void> {
-  VK_ERR_PROP_VOID(static_cast<VK_NS::Result>(
+  VK_ERR_PROP_VOID(static_cast<::vk::Result>(
       vmaCopyMemoryToAllocation(allocator_, data.data(), allocation_,
                                 {0}, {data.size_bytes()})));
   return {};

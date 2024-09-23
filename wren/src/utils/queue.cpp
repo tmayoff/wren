@@ -11,8 +11,8 @@
 namespace wren::vulkan {
 
 auto Queue::FindQueueFamilyIndices(
-    VK_NS::PhysicalDevice const &physical_device,
-    std::optional<VK_NS::SurfaceKHR> const &surface)
+    ::vk::PhysicalDevice const &physical_device,
+    std::optional<::vk::SurfaceKHR> const &surface)
     -> expected<QueueFamilyIndices> {
   auto const &queue_families =
       physical_device.getQueueFamilyProperties();
@@ -21,13 +21,13 @@ auto Queue::FindQueueFamilyIndices(
   std::optional<uint32_t> present_family;
   uint32_t i = 0;
   for (auto const &f : queue_families) {
-    if (f.queueFlags & VK_NS::QueueFlagBits::eGraphics)
+    if (f.queueFlags & ::vk::QueueFlagBits::eGraphics)
       graphics_family = i;
 
     if (surface.has_value()) {
       auto res =
           physical_device.getSurfaceSupportKHR(i, surface.value());
-      if (res.result != VK_NS::Result::eSuccess)
+      if (res.result != ::vk::Result::eSuccess)
         return tl::make_unexpected(make_error_code(res.result));
 
       if (res.value) {

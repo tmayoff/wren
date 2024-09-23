@@ -6,7 +6,7 @@
 #include <vulkan/vulkan_to_string.hpp>
 #include <wren_utils/errors.hpp>
 
-namespace VK_NS {
+namespace vk {
 
 BOOST_DESCRIBE_ENUM(
     Result, eSuccess, eNotReady, eTimeout, eEventSet, eEventReset,
@@ -38,7 +38,7 @@ BOOST_DESCRIBE_ENUM(
 
 DEFINE_ERROR_IMPL("VulkanError", Result)
 
-}  // namespace VK_NS
+}  // namespace vk
 
 namespace wren {
 DEFINE_ERROR("VulkanErrors", VulkanErrors, NoDevicesFound,
@@ -47,22 +47,22 @@ DEFINE_ERROR("VulkanErrors", VulkanErrors, NoDevicesFound,
 
 #define VK_TRY_RESULT_1(unique, expr)               \
   auto [unique, BOOST_PP_CAT(unique, _out)] = expr; \
-  if (unique != ::VK_NS::Result::eSuccess)          \
+  if (unique != ::vk::Result::eSuccess)             \
     return tl::make_unexpected(make_error_code(unique));
 
 #define VK_TRY_RESULT_2(unique, out, expr) \
   auto [unique, out] = expr;               \
-  if (unique != ::VK_NS::Result::eSuccess) \
+  if (unique != ::vk::Result::eSuccess)    \
     return tl::make_unexpected(make_error_code(unique));
 
 #define VK_TRY_RESULT(...)                       \
   BOOST_PP_OVERLOAD(VK_TRY_RESULT_, __VA_ARGS__) \
   (RESULT_UNIQUE_NAME(), __VA_ARGS__)
 
-#define VK_TIE_RESULT_IMPL(unique, out, expr)         \
-  ::VK_NS::Result unique = ::VK_NS::Result::eSuccess; \
-  std::tie(unique, out) = expr;                       \
-  if (unique != ::VK_NS::Result::eSuccess)            \
+#define VK_TIE_RESULT_IMPL(unique, out, expr) \
+  vk::Result unique = ::vk::Result::eSuccess; \
+  std::tie(unique, out) = expr;               \
+  if (unique != vk::Result::eSuccess)         \
     return tl::make_unexpected(make_error_code(unique));
 
 #define VK_TIE_RESULT(...)                       \
@@ -72,23 +72,23 @@ DEFINE_ERROR("VulkanErrors", VulkanErrors, NoDevicesFound,
 // TODO Decprecate
 
 // NOLINTNEXTLINE
-#define VK_ERR_PROP(out, err)                              \
-  auto [LINEIZE(res, __LINE__), out] = err;                \
-  if (LINEIZE(res, __LINE__) != ::VK_NS::Result::eSuccess) \
-    return tl::make_unexpected(                            \
+#define VK_ERR_PROP(out, err)                           \
+  auto [LINEIZE(res, __LINE__), out] = err;             \
+  if (LINEIZE(res, __LINE__) != ::vk::Result::eSuccess) \
+    return tl::make_unexpected(                         \
         make_error_code(LINEIZE(res, __LINE__)));
 
 // NOLINTNEXTLINE
-#define VK_ERR_PROP_VOID(err)                              \
-  VK_NS::Result LINEIZE(res, __LINE__) = err;              \
-  if (LINEIZE(res, __LINE__) != ::VK_NS::Result::eSuccess) \
-    return tl::make_unexpected(                            \
+#define VK_ERR_PROP_VOID(err)                           \
+  ::vk::Result LINEIZE(res, __LINE__) = err;            \
+  if (LINEIZE(res, __LINE__) != ::vk::Result::eSuccess) \
+    return tl::make_unexpected(                         \
         make_error_code(LINEIZE(res, __LINE__)));
 
 // NOLINTNEXTLINE
-#define VK_TIE_ERR_PROP(out, err)                                   \
-  ::VK_NS::Result LINEIZE(res, __LINE__) = VK_NS::Result::eSuccess; \
-  std::tie(LINEIZE(res, __LINE__), out) = err;                      \
-  if (LINEIZE(res, __LINE__) != ::VK_NS::Result::eSuccess)          \
-    return tl::make_unexpected(                                     \
+#define VK_TIE_ERR_PROP(out, err)                               \
+  ::vk::Result LINEIZE(res, __LINE__) = ::vk::Result::eSuccess; \
+  std::tie(LINEIZE(res, __LINE__), out) = err;                  \
+  if (LINEIZE(res, __LINE__) != ::vk::Result::eSuccess)         \
+    return tl::make_unexpected(                                 \
         make_error_code(LINEIZE(res, __LINE__)));

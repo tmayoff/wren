@@ -2,7 +2,6 @@
 
 #include <vk_mem_alloc.h>
 
-#include <system_error>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_handles.hpp>
@@ -30,14 +29,14 @@ class GraphicsContext {
   auto InitializeSurface() -> expected<void>;
 
   [[nodiscard]] auto Instance() const { return instance; }
-  void Surface(VK_NS::SurfaceKHR const &surface) {
+  void Surface(::vk::SurfaceKHR const &surface) {
     this->surface = surface;
   }
-  [[nodiscard]] auto Surface() const -> VK_NS::SurfaceKHR {
+  [[nodiscard]] auto Surface() const -> ::vk::SurfaceKHR {
     return surface;
   }
 
-  [[nodiscard]] auto PhysicalDevice() const -> VK_NS::PhysicalDevice {
+  [[nodiscard]] auto PhysicalDevice() const -> ::vk::PhysicalDevice {
     return physical_device;
   }
 
@@ -72,20 +71,20 @@ class GraphicsContext {
 
   auto CreateDevice() -> expected<void>;
   auto PickPhysicalDevice() -> expected<void>;
-  auto IsDeviceSuitable(VK_NS::PhysicalDevice const &device) -> bool;
+  auto IsDeviceSuitable(::vk::PhysicalDevice const &device) -> bool;
 
-  VK_NS::Instance instance;
-  VK_NS::PhysicalDevice physical_device;
+  ::vk::Instance instance;
+  ::vk::PhysicalDevice physical_device;
 
   vulkan::Device device;
 
-  VK_NS::SurfaceKHR surface;
+  ::vk::SurfaceKHR surface;
 
   VmaAllocator allocator_{};
 
 #ifdef WREN_DEBUG
   auto CreateDebugMessenger() -> expected<void>;
-  VK_NS::DebugUtilsMessengerEXT debug_messenger;
+  ::vk::DebugUtilsMessengerEXT debug_messenger;
 #endif
 };
 

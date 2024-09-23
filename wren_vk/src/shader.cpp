@@ -17,14 +17,14 @@
 namespace wren::vk {
 
 ShaderModule::ShaderModule(reflect::spirv_t spirv,
-                           VK_NS::ShaderModule const &module)
+                           ::vk::ShaderModule const &module)
     : spirv(std::move(spirv)),
       module(module),
       reflection(
           std::make_shared<spv_reflect::ShaderModule>(this->spirv)) {}
 
 auto ShaderModule::get_vertex_input_bindings() const
-    -> std::vector<VK_NS::VertexInputBindingDescription> {
+    -> std::vector<::vk::VertexInputBindingDescription> {
   uint32_t count = 0;
   reflection->EnumerateInputVariables(&count, nullptr);
   std::vector<SpvReflectInterfaceVariable *> input_variables(count);
@@ -41,18 +41,18 @@ auto ShaderModule::get_vertex_input_bindings() const
 }
 
 auto ShaderModule::get_vertex_input_attributes() const
-    -> std::vector<VK_NS::VertexInputAttributeDescription> {
+    -> std::vector<::vk::VertexInputAttributeDescription> {
   uint32_t count = 0;
   reflection->EnumerateInputVariables(&count, nullptr);
   std::vector<SpvReflectInterfaceVariable *> input_variables(count);
   reflection->EnumerateInputVariables(&count, input_variables.data());
 
   uint32_t offset = 0;
-  std::vector<VK_NS::VertexInputAttributeDescription> attrs;
+  std::vector<::vk::VertexInputAttributeDescription> attrs;
   for (auto const &input : input_variables) {
     if (input->location == UINT32_MAX) continue;
     attrs.emplace_back(input->location, 0,
-                       static_cast<VK_NS::Format>(input->format),
+                       static_cast<::vk::Format>(input->format),
                        offset);
     offset += (input->numeric.scalar.width / 8) *
               input->numeric.vector.component_count;
@@ -61,7 +61,7 @@ auto ShaderModule::get_vertex_input_attributes() const
   return attrs;
 }
 
-auto Shader::Create(VK_NS::Device const &device,
+auto Shader::Create(::vk::Device const &device,
                     std::string const &vertex_shader,
                     std::string const &fragment_shader)
     -> expected<std::shared_ptr<Shader>> {
@@ -87,7 +87,7 @@ auto Shader::Create(VK_NS::Device const &device,
   return shader;
 }
 
-auto Shader::compile_shader(VK_NS::Device const &device,
+auto Shader::compile_shader(::vk::Device const &device,
                             shaderc_shader_kind const &shader_kind,
                             std::string const &filename,
                             std::string const &shader_source)
@@ -107,10 +107,10 @@ auto Shader::compile_shader(VK_NS::Device const &device,
 
   std::span spirv(compilation_result.cbegin(),
                   compilation_result.cend());
-  VK_NS::ShaderModuleCreateInfo create_info({}, spirv);
+  ::vk::ShaderModuleCreateInfo create_info({}, spirv);
 
   auto [res, module] = device.createShaderModule(create_info);
-  if (res != VK_NS::Result::eSuccess) {
+  if (res != ::vk::Result::eSuccess) {
     return tl::make_unexpected(make_error_code(res));
   }
 
@@ -118,94 +118,94 @@ auto Shader::compile_shader(VK_NS::Device const &device,
 }
 
 auto Shader::create_graphics_pipeline(
-    VK_NS::Device const &device, VK_NS::RenderPass const &render_pass,
-    VK_NS::Extent2D const &size) -> expected<void> {
-  VK_NS::Result res = VK_NS::Result::eSuccess;
+    ::vk::Device const &device, ::vk::RenderPass const &render_pass,
+    ::vk::Extent2D const &size) -> expected<void> {
+  ::vk::Result res = ::vk::Result::eSuccess;
 
-  VK_NS::DescriptorSetLayoutBinding ubo_layout_bindings(
-      0, VK_NS::DescriptorType::eUniformBuffer, 1,
-      VK_NS::ShaderStageFlagBits::eVertex);
-  VK_NS::DescriptorSetLayoutCreateInfo dl_create_info(
-      VK_NS::DescriptorSetLayoutCreateFlagBits::ePushDescriptorKHR,
+  ::vk::DescriptorSetLayoutBinding ubo_layout_bindings(
+      0, ::vk::DescriptorType::eUniformBuffer, 1,
+      ::vk::ShaderStageFlagBits::eVertex);
+  ::vk::DescriptorSetLayoutCreateInfo dl_create_info(
+      ::vk::DescriptorSetLayoutCreateFlagBits::ePushDescriptorKHR,
       ubo_layout_bindings);
 
   VK_TIE_ERR_PROP(descriptor_layout_,
                   device.createDescriptorSetLayout(dl_create_info));
 
-  VK_NS::PipelineLayoutCreateInfo layout_create({},
+  ::vk::PipelineLayoutCreateInfo layout_create({},
                                                 descriptor_layout_);
   std::tie(res, pipeline_layout_) =
       device.createPipelineLayout(layout_create);
-  if (res != VK_NS::Result::eSuccess)
+  if (res != ::vk::Result::eSuccess)
     return tl::make_unexpected(make_error_code(res));
 
-  std::array dynamic_states = {VK_NS::DynamicState::eViewport,
-                               VK_NS::DynamicState::eScissor};
-  VK_NS::PipelineDynamicStateCreateInfo dynamic_state({},
+  std::array dynamic_states = {::vk::DynamicState::eViewport,
+                               ::vk::DynamicState::eScissor};
+  ::vk::PipelineDynamicStateCreateInfo dynamic_state({},
                                                       dynamic_states);
   auto const input_bindings =
       vertex_shader_module.get_vertex_input_bindings();
   auto const input_attributes =
       vertex_shader_module.get_vertex_input_attributes();
 
-  VK_NS::PipelineVertexInputStateCreateInfo vertex_input_info{
+  ::vk::PipelineVertexInputStateCreateInfo vertex_input_info{
       {}, input_bindings, input_attributes};
 
-  VK_NS::PipelineInputAssemblyStateCreateInfo input_assembly(
-      {}, VK_NS::PrimitiveTopology::eTriangleList, false);
+  ::vk::PipelineInputAssemblyStateCreateInfo input_assembly(
+      {}, ::vk::PrimitiveTopology::eTriangleList, false);
 
-  VK_NS::Viewport viewport{0,
+  ::vk::Viewport viewport{0,
                            0,
                            static_cast<float>(size.width),
                            static_cast<float>(size.height),
                            0,
                            1};
-  VK_NS::Rect2D scissor{{0, 0}, size};
-  VK_NS::PipelineViewportStateCreateInfo viewport_state{
+  ::vk::Rect2D scissor{{0, 0}, size};
+  ::vk::PipelineViewportStateCreateInfo viewport_state{
       {}, viewport, scissor};
 
-  VK_NS::PipelineRasterizationStateCreateInfo rasterization(
-      {}, false, false, VK_NS::PolygonMode::eFill,
-      VK_NS::CullModeFlagBits::eNone,
-      VK_NS::FrontFace::eCounterClockwise, false, {}, {}, {}, 1.0f);
+  ::vk::PipelineRasterizationStateCreateInfo rasterization(
+      {}, false, false, ::vk::PolygonMode::eFill,
+      ::vk::CullModeFlagBits::eNone,
+      ::vk::FrontFace::eCounterClockwise, false, {}, {}, {}, 1.0f);
 
-  VK_NS::PipelineMultisampleStateCreateInfo multisample{
-      {}, VK_NS::SampleCountFlagBits::e1, false};
+  ::vk::PipelineMultisampleStateCreateInfo multisample{
+      {}, ::vk::SampleCountFlagBits::e1, false};
 
-  VK_NS::PipelineColorBlendAttachmentState colour_blend_attachment{
+  ::vk::PipelineColorBlendAttachmentState colour_blend_attachment{
       false,
-      VK_NS::BlendFactor::eSrcAlpha,
-      VK_NS::BlendFactor::eOneMinusSrcAlpha,
-      VK_NS::BlendOp::eAdd,
-      VK_NS::BlendFactor::eOne,
-      VK_NS::BlendFactor::eZero,
-      VK_NS::BlendOp::eAdd};
+      ::vk::BlendFactor::eSrcAlpha,
+      ::vk::BlendFactor::eOneMinusSrcAlpha,
+      ::vk::BlendOp::eAdd,
+      ::vk::BlendFactor::eOne,
+      ::vk::BlendFactor::eZero,
+      ::vk::BlendOp::eAdd};
   colour_blend_attachment.setColorWriteMask(
-      VK_NS::ColorComponentFlagBits::eR |
-      VK_NS::ColorComponentFlagBits::eG |
-      VK_NS::ColorComponentFlagBits::eB |
-      VK_NS::ColorComponentFlagBits::eA);
-  VK_NS::PipelineColorBlendStateCreateInfo colour_blend(
-      {}, false, VK_NS::LogicOp::eCopy, colour_blend_attachment,
+      ::vk::ColorComponentFlagBits::eR |
+      ::vk::ColorComponentFlagBits::eG |
+      ::vk::ColorComponentFlagBits::eB |
+      ::vk::ColorComponentFlagBits::eA);
+  ::vk::PipelineColorBlendStateCreateInfo colour_blend(
+      {}, false, ::vk::LogicOp::eCopy, colour_blend_attachment,
       {0.0, 0.0, 0.0, 0.0});
 
-  auto v_stage_create_info = VK_NS::PipelineShaderStageCreateInfo(
-      {}, VK_NS::ShaderStageFlagBits::eVertex,
+  auto v_stage_create_info = ::vk::PipelineShaderStageCreateInfo(
+      {}, ::vk::ShaderStageFlagBits::eVertex,
       vertex_shader_module.module, "main");
-  auto f_stage_create_info = VK_NS::PipelineShaderStageCreateInfo(
-      {}, VK_NS::ShaderStageFlagBits::eFragment,
+  auto f_stage_create_info = ::vk::PipelineShaderStageCreateInfo(
+      {}, ::vk::ShaderStageFlagBits::eFragment,
       fragment_shader_module.module, "main");
   std::array shader_stages = {v_stage_create_info,
                               f_stage_create_info};
 
-  auto create_info = VK_NS::GraphicsPipelineCreateInfo(
+  auto create_info = ::vk::GraphicsPipelineCreateInfo(
       {}, shader_stages, &vertex_input_info, &input_assembly, {},
       &viewport_state, &rasterization, &multisample, {},
       &colour_blend, &dynamic_state, pipeline_layout_, render_pass);
 
   std::tie(res, pipeline) =
       device.createGraphicsPipeline({}, create_info);
-  if (res != VK_NS::Result::eSuccess)
+  if (res != ::vk::Result::eSuccess)
     return tl::make_unexpected(make_error_code(res));
 
   return {};

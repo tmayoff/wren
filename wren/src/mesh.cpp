@@ -66,11 +66,11 @@ Mesh::Mesh(vulkan::Device const& device, VmaAllocator allocator)
   }
 }
 
-void Mesh::draw(VK_NS::CommandBuffer const& cmd) const {
+void Mesh::draw(::vk::CommandBuffer const& cmd) const {
   cmd.drawIndexed(indices.size(), 1, 0, 0, 0);
 }
 
-void Mesh::bind(VK_NS::CommandBuffer const& cmd) const {
+void Mesh::bind(::vk::CommandBuffer const& cmd) const {
   static auto start_time = std::chrono::high_resolution_clock::now();
   auto current_time = std::chrono::high_resolution_clock::now();
   float time =
@@ -92,23 +92,23 @@ void Mesh::bind(VK_NS::CommandBuffer const& cmd) const {
 
   uniform_buffer->set_data_raw(&ubo, sizeof(ubo));
 
-  // VK_NS::DescriptorBufferInfo buffer_info(uniform_buffer->get(), 0,
+  // ::vk::DescriptorBufferInfo buffer_info(uniform_buffer->get(), 0,
   //                                         sizeof(UBO));
   // std::array writes = {
-  //     VK_NS::WriteDescriptorSet{{},
+  //     ::vk::WriteDescriptorSet{{},
   //                               0,
   //                               0,
-  //                               VK_NS::DescriptorType::eUniformBuffer,
+  //                               ::vk::DescriptorType::eUniformBuffer,
   //                               {},
   //                               buffer_info}};
 
-  // cmd.pushDescriptorSetKHR(VK_NS::PipelineBindPoint::eGraphics,
+  // cmd.pushDescriptorSetKHR(::vk::PipelineBindPoint::eGraphics,
   //                          shader_->pipeline_layout(), 0, writes);
 
   // cmd.bindIndexBuffer(index_buffer->get(), 0,
-  //                     VK_NS::IndexType::eUint16);
+  //                     ::vk::IndexType::eUint16);
   // cmd.bindVertexBuffers(0, vertex_buffer->get(),
-  //                       VK_NS::DeviceSize{0});
+  //                       ::vk::DeviceSize{0});
 }
 
 }  // namespace wren

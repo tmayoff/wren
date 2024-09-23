@@ -46,8 +46,8 @@ class Mesh {
   void shader(std::shared_ptr<vk::Shader> const& shader_) {
     this->shader_ = shader_;
   }
-  void draw(VK_NS::CommandBuffer const& cmd) const;
-  void bind(VK_NS::CommandBuffer const& cmd) const;
+  void draw(::vk::CommandBuffer const& cmd) const;
+  void bind(::vk::CommandBuffer const& cmd) const;
 
  private:
   std::shared_ptr<vk::Shader> shader_;

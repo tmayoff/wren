@@ -24,4 +24,4 @@ endif
 
 backward = static_library('backward', 'backward.cpp', dependencies: deps)
 
-backward_dep = declare_dependency(link_with: backward)
+backward_dep = declare_dependency(include_directories: '.', link_with: backward)

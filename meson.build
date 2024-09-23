@@ -21,11 +21,11 @@ tracy = dependency('tracy')
 imgui = dependency('imgui_docking')
 
 add_project_arguments(
-    '-DVULKAN_HPP_NAMESPACE=_VK_',
+    # '-DVULKAN_HPP_NAMESPACE=_VK_',
     '-DVULKAN_HPP_NO_EXCEPTIONS',
     '-DVUKLAN_HPP_ASSERT_ON_RESULT(x)',
     '-DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1',
-    '-DVK_NS=_VK_',
+    # '-DVK_NS=_VK_',
     language: 'cpp',
 )
 

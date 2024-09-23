@@ -28,28 +28,28 @@ namespace wren::vk {
 
 struct ShaderModule {
   reflect::spirv_t spirv;
-  VK_NS::ShaderModule module;
+  ::vk::ShaderModule module;
   std::shared_ptr<spv_reflect::ShaderModule> reflection;
 
   ShaderModule() = default;
   ShaderModule(reflect::spirv_t spirv,
-               VK_NS::ShaderModule const &module);
+               ::vk::ShaderModule const &module);
 
   [[nodiscard]] auto get_vertex_input_bindings() const
-      -> std::vector<VK_NS::VertexInputBindingDescription>;
+      -> std::vector<::vk::VertexInputBindingDescription>;
 
   [[nodiscard]] auto get_vertex_input_attributes() const
-      -> std::vector<VK_NS::VertexInputAttributeDescription>;
+      -> std::vector<::vk::VertexInputAttributeDescription>;
 };
 
 class Shader {
  public:
-  static auto Create(VK_NS::Device const &device,
+  static auto Create(::vk::Device const &device,
                      std::string const &vertex_shader,
                      std::string const &fragment_shader)
       -> expected<std::shared_ptr<Shader>>;
 
-  static auto compile_shader(VK_NS::Device const &device,
+  static auto compile_shader(::vk::Device const &device,
                              shaderc_shader_kind const &shader_kind,
                              std::string const &filename,
                              std::string const &shader_source)
@@ -71,15 +71,15 @@ class Shader {
     vertex_shader_module = vertex;
   }
 
-  auto create_graphics_pipeline(VK_NS::Device const &device,
-                                VK_NS::RenderPass const &render_pass,
-                                VK_NS::Extent2D const &size)
+  auto create_graphics_pipeline(::vk::Device const &device,
+                                ::vk::RenderPass const &render_pass,
+                                ::vk::Extent2D const &size)
       -> expected<void>;
 
  private:
-  VK_NS::DescriptorSetLayout descriptor_layout_;
-  VK_NS::PipelineLayout pipeline_layout_;
-  VK_NS::Pipeline pipeline;
+  ::vk::DescriptorSetLayout descriptor_layout_;
+  ::vk::PipelineLayout pipeline_layout_;
+  ::vk::Pipeline pipeline;
 
   ShaderModule vertex_shader_module;
   ShaderModule fragment_shader_module;

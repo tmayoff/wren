@@ -31,7 +31,8 @@ class Scene {
   std::shared_ptr<wren::Context> ctx;
   wren::Mesh mesh;
 
-  // Image image
+  ::vk::Image scene_image;
+  wren::RenderTarget scene_target;
 };
 
 auto main() -> int {
@@ -156,30 +157,35 @@ auto Scene::build_ui_render_graph(
                  wren::shaders::MESH_FRAG_SHADER.data()));
 
   auto target = std::make_shared<wren::RenderTarget>(
-      VK_NS::Extent2D{245, 256}, VK_NS::Format::eB8G8R8A8Srgb,
-      VK_NS::SampleCountFlagBits::e1, nullptr);
+      ::vk::Extent2D{245, 256}, ::vk::Format::eB8G8R8A8Srgb,
+      ::vk::SampleCountFlagBits::e1, nullptr);
 
-  VK_NS::ImageCreateInfo image_info(
-      {}, VK_NS::ImageType::e2D, target->format,
-      VK_NS::Extent3D(target->size.width, target->size.height, 1));
+  ::vk::ImageCreateInfo image_info(
+      {}, ::vk::ImageType::e2D, target->format,
+      ::vk::Extent3D(target->size.width, target->size.height, 1), 1,
+      1);
+  image_info.setUsage(::vk::ImageUsageFlagBits::eTransferDst |
+                      ::vk::ImageUsageFlagBits::eSampled);
+  image_info.setSharingMode(::vk::SharingMode::eExclusive);
 
   VK_TRY_RESULT(
       image,
       ctx->graphics_context->Device().get().createImage(image_info));
 
-  VK_NS::ImageViewCreateInfo image_view_info(
-      {}, image, VK_NS::ImageViewType::e2D);
+  ::vk::ImageViewCreateInfo image_view_info(
+      {}, image, ::vk::ImageViewType::e2D);
 
   VK_TRY_RESULT(image_view,
                 ctx->graphics_context->Device().get().createImageView(
                     image_view_info));
+  target->image_view = image_view;
 
   mesh.shader(mesh_shader);
 
   builder
       .add_pass(
           "ui", {{}, "swapchain_target"},
-          [](wren::RenderPass &pass, VK_NS::CommandBuffer &cmd) {
+          [](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
             editor::ui::flush(cmd);
           })
       .add_pass(
@@ -191,7 +197,7 @@ auto Scene::build_ui_render_graph(
               "scene_viewer",
               target,
           },
-          [this](wren::RenderPass &pass, VK_NS::CommandBuffer &cmd) {
+          [this](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
             // pass.bind_pipeline("mesh");
             // mesh.bind(cmd);
             // mesh.draw(cmd);

@@ -10,6 +10,6 @@ auto init(std::shared_ptr<wren::Context> const& context)
 auto begin() -> void;
 auto end() -> void;
 
-void flush(VK_NS::CommandBuffer const& cmd);
+void flush(::vk::CommandBuffer const& cmd);
 
 }  // namespace editor::ui

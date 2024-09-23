@@ -1,2 +1,2 @@
-option('profiling', type: 'boolean', value: 'false', description: 'Enable tracy profiling')
-option('build_profiling', type: 'boolean', value: 'false', description: 'Enable build-time profiling')
+option('profiling', type: 'boolean', value: false, description: 'Enable tracy profiling')
+option('build_profiling', type: 'boolean', value: false, description: 'Enable build-time profiling')
