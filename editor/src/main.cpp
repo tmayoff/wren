@@ -16,6 +16,10 @@ backward::SignalHandling const sh;
 
 class Scene {
  public:
+  std::vector<VkDescriptorSet> dset{};
+  vk::Sampler texture_sampler;
+  ::vk::ImageView scene_view;
+
   Scene(std::shared_ptr<wren::Context> const &ctx) : ctx(ctx) {}
 
   auto build_ui_render_graph(
@@ -29,13 +33,10 @@ class Scene {
   wren::Mesh mesh;
 
   VkImage scene_image{};
-  ::vk::ImageView scene_view;
+
   VmaAllocation scene_alloc_{};
 
   wren::RenderTarget scene_target;
-
-  std::vector<VkDescriptorSet> dset{};
-  vk::Sampler texture_sampler;
 };
 
 auto main() -> int {
@@ -64,6 +65,19 @@ auto main() -> int {
   // FIXME: Render pass needs to exist before this, but the descriptor
   // needs to exist for the render_graph
   editor::ui::init(app->context());
+
+  vk::SamplerCreateInfo sampler_info{};
+
+  auto t =
+      app->context()->graphics_context->Device().get().createSampler(
+          sampler_info);
+  s.texture_sampler = t.value;
+
+  s.dset.resize(1);
+  for (uint32_t i = 0; i < 1; i++)
+    s.dset[i] = ImGui_ImplVulkan_AddTexture(
+        s.texture_sampler, s.scene_view,
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
   app->add_callback_to_phase(wren::CallbackPhase::Update,
                              [&s]() { s.on_update(); });
@@ -213,17 +227,6 @@ auto Scene::build_ui_render_graph(
                 [](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
                   editor::ui::flush(cmd);
                 });
-
-  vk::SamplerCreateInfo sampler_info{};
-  VK_TIE_RESULT(texture_sampler,
-                ctx->graphics_context->Device().get().createSampler(
-                    sampler_info));
-
-  dset.resize(1);
-  for (uint32_t i = 0; i < 1; i++)
-    dset[i] = ImGui_ImplVulkan_AddTexture(
-        texture_sampler, scene_view,
-        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
   return builder;
 }

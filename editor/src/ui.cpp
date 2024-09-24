@@ -10,6 +10,12 @@
 
 namespace editor::ui {
 
+void CheckResult(VkResult res) {
+  if (res != VK_SUCCESS) {
+    throw std::runtime_error("Vulkan error");
+  }
+}
+
 auto mouse_code_to_imgui(wren::MouseCode code) {
   switch (code) {
     case wren::MouseCode::Left:
@@ -61,13 +67,33 @@ auto init(std::shared_ptr<wren::Context> const& context)
 
   {
     std::array pool_sizes = {
+        ::vk::DescriptorPoolSize{::vk::DescriptorType::eSampler,
+                                 1000},
         ::vk::DescriptorPoolSize{
-            ::vk::DescriptorType::eCombinedImageSampler, 1},
+            ::vk::DescriptorType::eCombinedImageSampler, 1000},
+        ::vk::DescriptorPoolSize{::vk::DescriptorType::eSampledImage,
+                                 1000},
+        ::vk::DescriptorPoolSize{::vk::DescriptorType::eStorageImage,
+                                 1000},
+        ::vk::DescriptorPoolSize{
+            ::vk::DescriptorType::eUniformTexelBuffer, 1000},
+        ::vk::DescriptorPoolSize{
+            ::vk::DescriptorType::eStorageTexelBuffer, 1000},
+        ::vk::DescriptorPoolSize{::vk::DescriptorType::eUniformBuffer,
+                                 1000},
+        ::vk::DescriptorPoolSize{::vk::DescriptorType::eStorageBuffer,
+                                 1000},
+        ::vk::DescriptorPoolSize{
+            ::vk::DescriptorType::eUniformBufferDynamic, 1000},
+        ::vk::DescriptorPoolSize{
+            ::vk::DescriptorType::eStorageBufferDynamic, 1000},
+        ::vk::DescriptorPoolSize{
+            ::vk::DescriptorType::eInputAttachment, 1000},
     };
 
     ::vk::DescriptorPoolCreateInfo pool_info{
-        ::vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, 1,
-        pool_sizes};
+        ::vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
+        1000 * pool_sizes.size(), pool_sizes};
 
     VK_TIE_RESULT(
         pool, graphics_context->Device().get().createDescriptorPool(
@@ -89,6 +115,7 @@ auto init(std::shared_ptr<wren::Context> const& context)
                              .node_by_name("ui")
                              ->render_pass->get();
   init_info.DescriptorPool = pool;
+  init_info.CheckVkResultFn = &CheckResult;
 
   if (!ImGui_ImplVulkan_Init(&init_info)) {
     spdlog::error("Failed to initialize vulkan for imgui");
