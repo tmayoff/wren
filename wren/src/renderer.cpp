@@ -94,7 +94,10 @@ void Renderer::end_frame(uint32_t image_index) {
 Renderer::Renderer(std::shared_ptr<Context> const &ctx)
     : ctx(ctx),
       m(ctx->graphics_context->Device(),
-        ctx->graphics_context->allocator()) {}
+        ctx->graphics_context->allocator()) {
+  ctx->event_dispatcher.on<Event::WindowResized>(
+      [this](auto &w) { recreate_swapchain(); });
+}
 
 auto Renderer::New(std::shared_ptr<Context> const &ctx)
     -> expected<std::shared_ptr<Renderer>> {
@@ -141,10 +144,10 @@ auto Renderer::recreate_swapchain() -> expected<void> {
   }
 
   // ============ Destroy previous resources
-  for (auto const &node : render_graph) {
-    // auto const &fbs = node->render_pass->get_framebuffers();
-    // for (auto const &fb : fbs) device.get().destroyFramebuffer(fb);
-  }
+  // for (auto const &node : render_graph) {
+  // auto const &fbs = node->render_pass->get_framebuffers();
+  // for (auto const &fb : fbs) device.get().destroyFramebuffer(fb);
+  // }
 
   if (render_targets_.contains(SWAPCHAIN_RENDERTARGET_NAME.data())) {
     for (auto const &iv : swapchain_image_views_)
@@ -241,7 +244,8 @@ auto Renderer::recreate_swapchain() -> expected<void> {
         std::make_shared<RenderTarget>(
             swapchain_extent, swapchain_image_format,
             ::vk::SampleCountFlagBits::e1,
-            swapchain_image_views_.front()));
+            swapchain_image_views_.front(),
+            ::vk::ImageUsageFlagBits::eColorAttachment));
   } else {
     auto const &target =
         render_targets_.at(SWAPCHAIN_RENDERTARGET_NAME.data());

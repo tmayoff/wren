@@ -11,11 +11,10 @@
 
 namespace wren {
 
-auto RenderPass::Create(std::shared_ptr<Context> const& ctx,
-                        std::string const& name,
-                        PassResources const& resources,
-                        execute_fn_t const& fn)
-    -> expected<std::shared_ptr<RenderPass>> {
+auto RenderPass::Create(
+    std::shared_ptr<Context> const& ctx, std::string const& name,
+    PassResources const& resources,
+    execute_fn_t const& fn) -> expected<std::shared_ptr<RenderPass>> {
   auto pass = std::shared_ptr<RenderPass>(
       new RenderPass(name, resources, fn));
 
@@ -28,8 +27,7 @@ auto RenderPass::Create(std::shared_ptr<Context> const& ctx,
   auto const& rt = resources.render_target;
   ::vk::AttachmentDescription attachment(
       {}, rt->format, rt->sample_count,
-      ::vk::AttachmentLoadOp::eClear,
-      ::vk::AttachmentStoreOp::eStore,
+      ::vk::AttachmentLoadOp::eClear, ::vk::AttachmentStoreOp::eStore,
       ::vk::AttachmentLoadOp::eDontCare,
       ::vk::AttachmentStoreOp::eDontCare,
       ::vk::ImageLayout::eUndefined,
@@ -47,7 +45,7 @@ auto RenderPass::Create(std::shared_ptr<Context> const& ctx,
       ::vk::PipelineStageFlagBits::eColorAttachmentOutput, {},
       ::vk::AccessFlagBits::eColorAttachmentWrite);
   ::vk::RenderPassCreateInfo create_info({}, attachments, subpass,
-                                          dependency);
+                                         dependency);
 
   auto [res, renderpass] = device.get().createRenderPass(create_info);
   pass->render_pass = renderpass;
@@ -56,14 +54,14 @@ auto RenderPass::Create(std::shared_ptr<Context> const& ctx,
 
   for (auto [_, shader] : resources.shaders) {
     TRY_RESULT(shader->create_graphics_pipeline(device.get(),
-                                                   renderpass, size));
+                                                renderpass, size));
   }
 
   ::vk::Viewport viewport(0, 0, static_cast<float>(rt->size.width),
-                           static_cast<float>(rt->size.height));
+                          static_cast<float>(rt->size.height));
   ::vk::Rect2D scissor({}, rt->size);
   ::vk::PipelineViewportStateCreateInfo viewport_state({}, viewport,
-                                                        scissor);
+                                                       scissor);
   pass->recreate_framebuffers(device.get());
 
   {
@@ -102,16 +100,12 @@ void RenderPass::recreate_framebuffers(::vk::Device const& device) {
   auto const& rt = resources.render_target;
 
   ::vk::FramebufferAttachmentImageInfo image_info{
-      {},
-      ::vk::ImageUsageFlagBits::eColorAttachment,
-      rt->size.width,
-      rt->size.height,
-      1,
-      rt->format};
+      {}, target->image_usage, rt->size.width, rt->size.height,
+      1,  rt->format};
   ::vk::FramebufferAttachmentsCreateInfo attachements(image_info);
   ::vk::FramebufferCreateInfo create_info(
-      ::vk::FramebufferCreateFlagBits::eImageless, render_pass, 1,
-      {}, rt->size.width, rt->size.height, 1, &attachements);
+      ::vk::FramebufferCreateFlagBits::eImageless, render_pass, 1, {},
+      rt->size.width, rt->size.height, 1, &attachements);
 
   auto [res, fb] = device.createFramebuffer(create_info);
   if (res != ::vk::Result::eSuccess) {
@@ -134,14 +128,14 @@ void RenderPass::execute() {
   ::vk::RenderPassAttachmentBeginInfo attachment_begin(
       target->image_view);
   ::vk::RenderPassBeginInfo rp_begin(render_pass, framebuffer,
-                                      {{}, extent}, clear_value,
-                                      &attachment_begin);
+                                     {{}, extent}, clear_value,
+                                     &attachment_begin);
 
   cmd.beginRenderPass(rp_begin, ::vk::SubpassContents::eInline);
 
   cmd.setViewport(
       0, ::vk::Viewport{0, 0, static_cast<float>(extent.width),
-                         static_cast<float>(extent.height)});
+                        static_cast<float>(extent.height)});
   cmd.setScissor(0, ::vk::Rect2D{{0, 0}, extent});
 
   if (execute_fn) execute_fn(*this, cmd);

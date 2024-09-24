@@ -14,6 +14,8 @@ class RenderTarget {
   // ::vk::Image image;
   ::vk::ImageView image_view;
 
+  ::vk::ImageUsageFlags image_usage;
+
   auto is_colour() { return true; }
 };
 

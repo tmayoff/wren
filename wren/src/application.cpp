@@ -30,11 +30,11 @@ auto Application::Create(std::string const &application_name)
   TRY_RESULT(auto extensions, window->GetRequiredVulkanExtension());
 
   TRY_RESULT(auto graphics_context,
-           GraphicsContext::Create(application_name, extensions));
+             GraphicsContext::Create(application_name, extensions));
   spdlog::trace("Created graphics context");
 
-  TRY_RESULT(const auto surface,
-           window->CreateSurface(graphics_context->Instance()));
+  TRY_RESULT(auto const surface,
+             window->CreateSurface(graphics_context->Instance()));
   graphics_context->Surface(surface);
 
   TRY_RESULT(graphics_context->SetupDevice());

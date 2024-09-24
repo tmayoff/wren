@@ -1,4 +1,5 @@
 #include <imgui.h>
+#include <imgui_impl_vulkan.h>
 #include <imgui_internal.h>
 
 #include <backward.hpp>
@@ -21,18 +22,20 @@ class Scene {
       std::shared_ptr<wren::Context> const &ctx)
       -> wren::expected<wren::GraphBuilder>;
 
-  // auto build_3D_render_graph(
-  //     std::shared_ptr<wren::Context> const &ctx)
-  //     -> wren::expected<wren::GraphBuilder>;
-
   void on_update();
 
  private:
   std::shared_ptr<wren::Context> ctx;
   wren::Mesh mesh;
 
-  ::vk::Image scene_image;
+  VkImage scene_image{};
+  ::vk::ImageView scene_view;
+  VmaAllocation scene_alloc_{};
+
   wren::RenderTarget scene_target;
+
+  std::vector<VkDescriptorSet> dset{};
+  vk::Sampler texture_sampler;
 };
 
 auto main() -> int {
@@ -130,7 +133,8 @@ void Scene::on_update() {
   ImGui::End();
 
   ImGui::Begin("Viewer");
-  ImGui::Text("%s", "Scene go here");
+
+  ImGui::Image(dset[0], ImGui::GetContentRegionAvail());
   ImGui::End();
 
   ImGui::Begin("Inspector");
@@ -158,36 +162,37 @@ auto Scene::build_ui_render_graph(
 
   auto target = std::make_shared<wren::RenderTarget>(
       ::vk::Extent2D{245, 256}, ::vk::Format::eB8G8R8A8Srgb,
-      ::vk::SampleCountFlagBits::e1, nullptr);
+      ::vk::SampleCountFlagBits::e1, nullptr,
+      ::vk::ImageUsageFlagBits::eColorAttachment |
+          ::vk::ImageUsageFlagBits::eSampled);
 
   ::vk::ImageCreateInfo image_info(
       {}, ::vk::ImageType::e2D, target->format,
       ::vk::Extent3D(target->size.width, target->size.height, 1), 1,
       1);
-  image_info.setUsage(::vk::ImageUsageFlagBits::eTransferDst |
-                      ::vk::ImageUsageFlagBits::eSampled);
+  image_info.setUsage(target->image_usage);
   image_info.setSharingMode(::vk::SharingMode::eExclusive);
 
-  VK_TRY_RESULT(
-      image,
-      ctx->graphics_context->Device().get().createImage(image_info));
+  VmaAllocationCreateInfo alloc_info{};
+  alloc_info.usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
+  auto const &allocator = ctx->graphics_context->allocator();
+  auto info = static_cast<VkImageCreateInfo>(image_info);
+  vmaCreateImage(allocator, &info, &alloc_info, &scene_image,
+                 &scene_alloc_, nullptr);
 
   ::vk::ImageViewCreateInfo image_view_info(
-      {}, image, ::vk::ImageViewType::e2D);
+      {}, scene_image, ::vk::ImageViewType::e2D, target->format, {},
+      ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor,
+                                  0, 1, 0, 1));
 
-  VK_TRY_RESULT(image_view,
+  VK_TIE_RESULT(scene_view,
                 ctx->graphics_context->Device().get().createImageView(
                     image_view_info));
-  target->image_view = image_view;
+  target->image_view = scene_view;
 
   mesh.shader(mesh_shader);
 
   builder
-      .add_pass(
-          "ui", {{}, "swapchain_target"},
-          [](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
-            editor::ui::flush(cmd);
-          })
       .add_pass(
           "mesh",
           {
@@ -201,7 +206,22 @@ auto Scene::build_ui_render_graph(
             // pass.bind_pipeline("mesh");
             // mesh.bind(cmd);
             // mesh.draw(cmd);
-          });
+          })
+      .add_pass("ui", {{}, "swapchain_target"},
+                [](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
+                  editor::ui::flush(cmd);
+                });
+
+  vk::SamplerCreateInfo sampler_info{};
+  VK_TIE_RESULT(texture_sampler,
+                ctx->graphics_context->Device().get().createSampler(
+                    sampler_info));
+
+  dset.resize(1);
+  for (uint32_t i = 0; i < 1; i++)
+    dset[i] = ImGui_ImplVulkan_AddTexture(
+        texture_sampler, scene_view,
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
   return builder;
 }

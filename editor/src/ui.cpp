@@ -57,6 +57,23 @@ auto init(std::shared_ptr<wren::Context> const& context)
 
   auto const& graphics_context = context->graphics_context;
 
+  ::vk::DescriptorPool pool;
+
+  {
+    std::array pool_sizes = {
+        ::vk::DescriptorPoolSize{
+            ::vk::DescriptorType::eCombinedImageSampler, 1},
+    };
+
+    ::vk::DescriptorPoolCreateInfo pool_info{
+        ::vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, 1,
+        pool_sizes};
+
+    VK_TIE_RESULT(
+        pool, graphics_context->Device().get().createDescriptorPool(
+                  pool_info));
+  }
+
   ImGui_ImplVulkan_InitInfo init_info{};
   init_info.Instance = graphics_context->Instance();
   init_info.PhysicalDevice = graphics_context->PhysicalDevice();
@@ -71,22 +88,7 @@ auto init(std::shared_ptr<wren::Context> const& context)
   init_info.RenderPass = context->renderer->get_graph()
                              .node_by_name("ui")
                              ->render_pass->get();
-
-  {
-    std::array pool_sizes = {
-        ::vk::DescriptorPoolSize{
-            ::vk::DescriptorType::eCombinedImageSampler, 1},
-    };
-
-    ::vk::DescriptorPoolCreateInfo pool_info{
-        ::vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, 1,
-        pool_sizes};
-
-    VK_TRY_RESULT(
-        pool, graphics_context->Device().get().createDescriptorPool(
-                  pool_info));
-    init_info.DescriptorPool = pool;
-  }
+  init_info.DescriptorPool = pool;
 
   if (!ImGui_ImplVulkan_Init(&init_info)) {
     spdlog::error("Failed to initialize vulkan for imgui");
