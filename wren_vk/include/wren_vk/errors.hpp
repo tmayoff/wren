@@ -59,14 +59,22 @@ DEFINE_ERROR("VulkanErrors", VulkanErrors, NoDevicesFound,
   BOOST_PP_OVERLOAD(VK_TRY_RESULT_, __VA_ARGS__) \
   (RESULT_UNIQUE_NAME(), __VA_ARGS__)
 
-#define VK_TIE_RESULT_IMPL(unique, out, expr) \
-  vk::Result unique = ::vk::Result::eSuccess; \
-  std::tie(unique, out) = expr;               \
-  if (unique != vk::Result::eSuccess)         \
+#define VK_TIE_RESULT_IMPL(unique, out, expr)   \
+  ::vk::Result unique = ::vk::Result::eSuccess; \
+  std::tie(unique, out) = expr;                 \
+  if (unique != ::vk::Result::eSuccess)         \
     return tl::make_unexpected(make_error_code(unique));
 
 #define VK_TIE_RESULT(...) \
   VK_TIE_RESULT_IMPL(RESULT_UNIQUE_NAME(), __VA_ARGS__)
+
+#define VK_CHECK_RESULT_IMPL(unique, expr) \
+  ::vk::Result unique = (expr);            \
+  if ((unique) != ::vk::Result::eSuccess)  \
+    return tl::make_unexpected(make_error_code(unique));
+
+#define VK_CHECK_RESULT(expr) \
+  VK_CHECK_RESULT_IMPL(RESULT_UNIQUE_NAME(), (expr))
 
 // TODO Decprecate
 

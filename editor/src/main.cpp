@@ -149,7 +149,6 @@ void Scene::on_update() {
   ImGui::End();
 
   ImGui::Begin("Viewer");
-
   ImGui::Image(dset[0], ImGui::GetContentRegionAvail());
   ImGui::End();
 
@@ -196,11 +195,29 @@ auto Scene::build_ui_render_graph(
   vmaCreateImage(allocator, &info, &alloc_info, &scene_image,
                  &scene_alloc_, nullptr);
 
+  // transition image
+  TRY_RESULT(ctx->renderer->submit_command_buffer(
+      [this](::vk::CommandBuffer const &cmd_buf) {
+        vk::ImageMemoryBarrier barrier(
+            ::vk::AccessFlagBits::eTransferRead,
+            ::vk::AccessFlagBits::eMemoryRead,
+            ::vk::ImageLayout::eUndefined,
+            ::vk::ImageLayout::eShaderReadOnlyOptimal,
+            VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED,
+            scene_image,
+            vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor,
+                                      0, 1, 0, 1));
+
+        cmd_buf.pipelineBarrier(
+            ::vk::PipelineStageFlagBits::eTransfer,
+            ::vk::PipelineStageFlagBits::eTransfer,
+            vk::DependencyFlags(), {}, {}, barrier);
+      }));
+
   ::vk::ImageViewCreateInfo image_view_info(
       {}, scene_image, ::vk::ImageViewType::e2D, target->format, {},
       ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor,
                                   0, 1, 0, 1));
-
   VK_TIE_RESULT(scene_view,
                 ctx->graphics_context->Device().get().createImageView(
                     image_view_info));

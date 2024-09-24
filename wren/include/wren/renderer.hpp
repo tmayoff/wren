@@ -34,6 +34,10 @@ class Renderer {
 
   auto render_targets() { return render_targets_; }
 
+  auto submit_command_buffer(
+      std::function<void(::vk::CommandBuffer &)> const &cmd_buf)
+      -> expected<void>;
+
  private:
   explicit Renderer(std::shared_ptr<Context> const &ctx);
 
@@ -54,7 +58,7 @@ class Renderer {
 
   std::unordered_map<std::string, std::shared_ptr<Pipeline>>
       pipelines;
-  std::shared_ptr<Context> ctx;
+  std::shared_ptr<Context> ctx_;
   ::vk::SwapchainKHR swapchain;
   std::vector<::vk::Image> swapchain_images;
   std::vector<::vk::ImageView> swapchain_image_views_;
@@ -69,7 +73,8 @@ class Renderer {
   ::vk::Semaphore render_finished;
   ::vk::Fence in_flight_fence;
 
-  ::vk::CommandPool command_pool;
+  ::vk::CommandPool command_pool_;
+  ::vk::CommandBuffer one_time_cmd_buffer;
 
   Graph render_graph;
 
