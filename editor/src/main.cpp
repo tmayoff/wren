@@ -61,6 +61,8 @@ auto main() -> int {
 
   app->context()->renderer->set_graph_builder(g_err.value());
 
+  // FIXME: Render pass needs to exist before this, but the descriptor
+  // needs to exist for the render_graph
   editor::ui::init(app->context());
 
   app->add_callback_to_phase(wren::CallbackPhase::Update,
