@@ -16,6 +16,8 @@ class RenderTarget {
 
   ::vk::ImageUsageFlags image_usage;
 
+  ::vk::ImageLayout final_layout = ::vk::ImageLayout::ePresentSrcKHR;
+
   auto is_colour() { return true; }
 };
 

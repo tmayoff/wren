@@ -62,8 +62,6 @@ auto main() -> int {
 
   app->context()->renderer->set_graph_builder(g_err.value());
 
-  // FIXME: Render pass needs to exist before this, but the descriptor
-  // needs to exist for the render_graph
   editor::ui::init(app->context());
 
   vk::SamplerCreateInfo sampler_info{};
@@ -169,14 +167,8 @@ auto Scene::build_ui_render_graph(
     -> wren::expected<wren::GraphBuilder> {
   wren::GraphBuilder builder(ctx);
 
-  TRY_RESULT(auto mesh_shader,
-             wren::vk::Shader::Create(
-                 ctx->graphics_context->Device().get(),
-                 wren::shaders::MESH_VERT_SHADER.data(),
-                 wren::shaders::MESH_FRAG_SHADER.data()));
-
   auto target = std::make_shared<wren::RenderTarget>(
-      ::vk::Extent2D{245, 256}, ::vk::Format::eB8G8R8A8Srgb,
+      ::vk::Extent2D{512, 512}, ::vk::Format::eB8G8R8A8Srgb,
       ::vk::SampleCountFlagBits::e1, nullptr,
       ::vk::ImageUsageFlagBits::eColorAttachment |
           ::vk::ImageUsageFlagBits::eSampled);
@@ -222,24 +214,33 @@ auto Scene::build_ui_render_graph(
                 ctx->graphics_context->Device().get().createImageView(
                     image_view_info));
   target->image_view = scene_view;
+  target->final_layout = ::vk::ImageLayout::eShaderReadOnlyOptimal;
 
+  TRY_RESULT(auto mesh_shader,
+             wren::vk::Shader::Create(
+                 ctx->graphics_context->Device().get(),
+                 wren::shaders::MESH_VERT_SHADER.data(),
+                 wren::shaders::MESH_FRAG_SHADER.data()));
+
+  mesh = wren::Mesh(ctx->graphics_context->Device(),
+                    ctx->graphics_context->allocator());
   mesh.shader(mesh_shader);
 
   builder
-      .add_pass(
-          "mesh",
-          {
-              {
-                  {"mesh", mesh_shader},
-              },
-              "scene_viewer",
-              target,
-          },
-          [this](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
-            // pass.bind_pipeline("mesh");
-            // mesh.bind(cmd);
-            // mesh.draw(cmd);
-          })
+      .add_pass("mesh",
+                {
+                    {
+                        {"mesh", mesh_shader},
+                    },
+                    "scene_viewer",
+                    target,
+                },
+                [this, ctx](wren::RenderPass &pass,
+                            ::vk::CommandBuffer &cmd) {
+                  pass.bind_pipeline("mesh");
+                  mesh.bind(cmd);
+                  mesh.draw(cmd);
+                })
       .add_pass("ui", {{}, "swapchain_target"},
                 [](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
                   editor::ui::flush(cmd);

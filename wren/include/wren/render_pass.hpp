@@ -13,7 +13,8 @@ namespace wren {
 struct Context;
 
 struct PassResources {
-  std::map<std::string, std::shared_ptr<vk::Shader>> shaders;
+  std::unordered_map<std::string, std::shared_ptr<vk::Shader>>
+      shaders;
   std::string target_name;
   std::shared_ptr<RenderTarget> render_target;
 };

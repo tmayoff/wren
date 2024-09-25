@@ -63,7 +63,8 @@ void Renderer::end_frame(uint32_t image_index) {
   for (auto g : render_graph) {
     ZoneScopedN("render_pass->execute()");
     g->render_pass->execute();
-    cmd_bufs = g->render_pass->get_command_buffers();
+    auto const bufs = g->render_pass->get_command_buffers();
+    cmd_bufs.insert(cmd_bufs.end(), bufs.begin(), bufs.end());
   }
 
   ::vk::SubmitInfo submit_info(image_available, waitDstStageMask,
@@ -128,7 +129,7 @@ auto Renderer::New(std::shared_ptr<Context> const &ctx)
     -> expected<std::shared_ptr<Renderer>> {
   ZoneScoped;
 
-  auto device = ctx->graphics_context->Device();
+  auto const device = ctx->graphics_context->Device();
 
   auto renderer = std::shared_ptr<Renderer>(new Renderer(ctx));
   ctx->renderer = renderer;

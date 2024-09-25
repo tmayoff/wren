@@ -25,13 +25,13 @@ auto RenderPass::Create(
   std::vector<::vk::AttachmentDescription> attachments;
 
   auto const& rt = resources.render_target;
+
   ::vk::AttachmentDescription attachment(
       {}, rt->format, rt->sample_count,
       ::vk::AttachmentLoadOp::eClear, ::vk::AttachmentStoreOp::eStore,
       ::vk::AttachmentLoadOp::eDontCare,
       ::vk::AttachmentStoreOp::eDontCare,
-      ::vk::ImageLayout::eUndefined,
-      ::vk::ImageLayout::ePresentSrcKHR);
+      ::vk::ImageLayout::eUndefined, rt->final_layout);
   attachments.push_back(attachment);
 
   ::vk::AttachmentReference attachment_ref(
@@ -122,7 +122,7 @@ void RenderPass::execute() {
   if (res != ::vk::Result::eSuccess) return;
 
   ::vk::ClearValue clear_value(::vk::ClearColorValue{
-      std::array<float, 4>{1.0, 0.0, 0.0, 1.0}});
+      std::array<float, 4>{0.0, 0.0, 0.0, 1.0}});
 
   auto const extent = current_target_size();
   ::vk::RenderPassAttachmentBeginInfo attachment_begin(
