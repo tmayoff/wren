@@ -3,6 +3,7 @@ deps = [wren_dep, backward_dep, imgui, tracy]
 executable(
     'wren_editor',
     'src/main.cpp',
+    'src/editor.cpp',
     'src/ui.cpp',
     dependencies: deps,
     install: true,

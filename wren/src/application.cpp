@@ -84,6 +84,7 @@ void Application::run() {
 
   while (running) {
     FrameMark;
+    std::this_thread::sleep_for(std::chrono::milliseconds(16));
     ctx->window.DispatchEvents(ctx->event_dispatcher);
 
     for (auto const &cb : update_phase) {

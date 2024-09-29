@@ -102,7 +102,7 @@
         rawBuildInputs = with pkgs; [
           doxygen
           graphviz
-        
+
           boost185
 
           SDL2
@@ -123,32 +123,32 @@
       in rec {
         vulkan_layer_path = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d:${pkgs.renderdoc}/share/vulkan/implicit_layer.d";
 
-        packages = rec {
-          wren_editor = pkgs.stdenv.mkDerivation {
-            name = "wren_editor";
-            src = ./.;
+        # packages = rec {
+        #   wren_editor = pkgs.stdenv.mkDerivation {
+        #     name = "wren_editor";
+        #     src = ./.;
 
-            VK_LAYER_PATH = vulkan_layer_path;
+        #     VK_LAYER_PATH = vulkan_layer_path;
 
-            nativeBuildInputs = rawNativeBuildInputs;
-            buildInputs = rawBuildInputs;
+        #     nativeBuildInputs = rawNativeBuildInputs;
+        #     buildInputs = rawBuildInputs;
 
-            patchPhase = ''
-              mkdir -p subprojects
-              cp -r ${imgui_patched} subprojects/imgui-${imgui_patched.version}
-              ls -ls subprojects
-            '';
+        #     # patchPhase = ''
+        #     #   mkdir -p subprojects
+        #     #   cp -r ${imgui_patched} subprojects/imgui-${imgui_patched.version}
+        #     #   ls -ls subprojects
+        #     # '';
 
-            mesonFlags = [
-              "-Dauto_features=disabled"
-            ];
+        #     mesonFlags = [
+        #       "-Dauto_features=disabled"
+        #     ];
 
-            BOOST_INCLUDEDIR = "${pkgs.lib.getDev pkgs.boost}/include";
-            BOOST_LIBRARYDIR = "${pkgs.lib.getLib pkgs.boost}/lib";
-          };
+        #     # BOOST_INCLUDEDIR = "${pkgs.lib.getDev pkgs.boost}/include";
+        #     # BOOST_LIBRARYDIR = "${pkgs.lib.getLib pkgs.boost}/lib";
+        #   };
 
-          default = wren_editor;
-        };
+        #   default = wren_editor;
+        # };
 
         devShell = pkgs.mkShell.override {stdenv = pkgs.clangStdenv;} {
           hardeningDisable = ["all"];
@@ -158,15 +158,13 @@
             [
               vulkan-tools
               clang-tools
-              ccache
+              sccache
               muon
 
               just
 
               unstable.tracy-x11 # for the profiler
               wayland
-
-              pkgs.nixgl.nixVulkanIntel
             ]
             ++ rawNativeBuildInputs;
 
@@ -174,16 +172,22 @@
             [
               unstable.lldb
               vulkan-validation-layers
+
+              pkgs.nixgl.nixVulkanIntel
+              pkgs.nixgl.auto.nixGLDefault
             ]
             ++ rawBuildInputs;
 
           BOOST_INCLUDEDIR = "${pkgs.lib.getDev pkgs.boost}/include";
           BOOST_LIBRARYDIR = "${pkgs.lib.getLib pkgs.boost}/lib";
-        };
 
-        shellHook = ''
-          export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${pkgs.spirv-cross}"
-        '';
+          shellHook = ''
+            PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${pkgs.spirv-cross}"
+            LD_LIBRARY_PATH=$(nixVulkanIntel printenv LD_LIBRARY_PATH):$LD_LIBRARY_PATH
+
+            CXX="sccache clang++"
+          '';
+        };
       }
     );
 }
