@@ -36,7 +36,7 @@ auto Editor::New(std::shared_ptr<wren::Application> const &app)
       VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
   app->add_callback_to_phase(wren::CallbackPhase::Update,
-                             [&editor]() { editor->on_update(); });
+                             [editor]() { editor->on_update(); });
 
   return editor;
 }
@@ -183,20 +183,20 @@ auto Editor::build_ui_render_graph(
   mesh.shader(mesh_shader);
 
   builder
-      // .add_pass("mesh",
-      //           {
-      //               {
-      //                   {"mesh", mesh_shader},
-      //               },
-      //               "scene_viewer",
-      //               target,
-      //           },
-      //           [this, ctx](wren::RenderPass &pass,
-      //                       ::vk::CommandBuffer &cmd) {
-      //             pass.bind_pipeline("mesh");
-      //             mesh.bind(cmd);
-      //             mesh.draw(cmd);
-      //           })
+      .add_pass("mesh",
+                {
+                    {
+                        {"mesh", mesh_shader},
+                    },
+                    "scene_viewer",
+                    target,
+                },
+                [this, ctx](wren::RenderPass &pass,
+                            ::vk::CommandBuffer &cmd) {
+                  pass.bind_pipeline("mesh");
+                  mesh.bind(cmd);
+                  mesh.draw(cmd);
+                })
       .add_pass("ui", {{}, "swapchain_target"},
                 [](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
                   editor::ui::flush(cmd);

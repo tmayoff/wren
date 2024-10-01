@@ -182,9 +182,7 @@
           BOOST_LIBRARYDIR = "${pkgs.lib.getLib pkgs.boost}/lib";
 
           shellHook = ''
-            PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${pkgs.spirv-cross}"
-            LD_LIBRARY_PATH=$(nixVulkanIntel printenv LD_LIBRARY_PATH):$LD_LIBRARY_PATH
-
+            source nixVulkanIntel
             CXX="sccache clang++"
           '';
         };
