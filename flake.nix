@@ -174,7 +174,6 @@
               vulkan-validation-layers
 
               pkgs.nixgl.nixVulkanIntel
-              pkgs.nixgl.auto.nixGLDefault
             ]
             ++ rawBuildInputs;
 
