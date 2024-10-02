@@ -61,6 +61,10 @@ void Editor::on_update() {
     targets.at("scene_viewer")->format = target->format;
 
     scene_resized.reset();
+    ctx->renderer->get_graph()
+        .node_by_name("mesh")
+        ->render_pass->recreate_framebuffers(
+            ctx->graphics_context->Device().get());
   }
 
   editor::ui::begin();

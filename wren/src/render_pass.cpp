@@ -11,10 +11,11 @@
 
 namespace wren {
 
-auto RenderPass::Create(
-    std::shared_ptr<Context> const& ctx, std::string const& name,
-    PassResources const& resources,
-    execute_fn_t const& fn) -> expected<std::shared_ptr<RenderPass>> {
+auto RenderPass::Create(std::shared_ptr<Context> const& ctx,
+                        std::string const& name,
+                        PassResources const& resources,
+                        execute_fn_t const& fn)
+    -> expected<std::shared_ptr<RenderPass>> {
   auto pass = std::shared_ptr<RenderPass>(
       new RenderPass(name, resources, fn));
 
@@ -94,7 +95,9 @@ RenderPass::RenderPass(std::string name, PassResources resources,
       target(this->resources.render_target) {}
 
 void RenderPass::on_resource_resized(
-    std::pair<float, float> const& size) {}
+    std::pair<float, float> const& size) {
+  // Recreate framebuffer passed on new
+}
 
 void RenderPass::recreate_framebuffers(::vk::Device const& device) {
   auto const& rt = resources.render_target;
