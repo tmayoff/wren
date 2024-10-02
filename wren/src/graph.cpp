@@ -23,6 +23,14 @@ auto GraphBuilder::compile() const -> expected<Graph> {
 
   for (auto const &[name, resources, fn] : passes) {
     auto pass_resources = resources;
+
+    if (!ctx->renderer->render_targets().contains(
+            pass_resources.target_name)) {
+      // Add the render target
+      ctx->renderer->add_target(pass_resources.target_name,
+                                pass_resources.render_target);
+    }
+
     if (pass_resources.render_target == nullptr) {
       // Resolve target names
       pass_resources.render_target =

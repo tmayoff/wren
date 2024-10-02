@@ -30,11 +30,15 @@ class Editor {
   void on_update();
 
  private:
+  auto ResizeTarget(std::shared_ptr<wren::RenderTarget> const &target)
+      -> wren::expected<void>;
+
   std::shared_ptr<wren::Context> ctx;
   wren::Mesh mesh;
 
   VkImage scene_image{};
   VmaAllocation scene_alloc_{};
   wren::RenderTarget scene_target;
+  std::optional<wren::math::vec2f> scene_resized;
   wren::math::vec2f last_scene_size;
 };

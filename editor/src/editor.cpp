@@ -43,6 +43,26 @@ auto Editor::New(std::shared_ptr<wren::Application> const &app)
 
 void Editor::on_update() {
   ZoneScoped;  // NOLINT
+
+  if (scene_resized.has_value()) {
+    auto target = std::make_shared<wren::RenderTarget>(
+        ::vk::Extent2D{static_cast<uint32_t>(scene_resized->x()),
+                       static_cast<uint32_t>(scene_resized->y())},
+        ::vk::Format::eB8G8R8A8Srgb, ::vk::SampleCountFlagBits::e1,
+        nullptr,
+        ::vk::ImageUsageFlagBits::eColorAttachment |
+            ::vk::ImageUsageFlagBits::eSampled);
+
+    // Replace the target
+    ResizeTarget(target);
+    auto const &targets = ctx->renderer->render_targets();
+    targets.at("scene_viewer")->image_view = scene_view;
+    targets.at("scene_viewer")->size = target->size;
+    targets.at("scene_viewer")->format = target->format;
+
+    scene_resized.reset();
+  }
+
   editor::ui::begin();
 
   static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
@@ -106,7 +126,7 @@ void Editor::on_update() {
   auto curr_size = ImGui::GetContentRegionAvail();
   auto curr_size_vec = wren::math::vec2f{curr_size.x, curr_size.y};
   if (curr_size_vec != last_scene_size) {
-    // TODO resize target
+    scene_resized = curr_size_vec;
     last_scene_size = curr_size_vec;
   }
 
@@ -136,6 +156,47 @@ auto Editor::build_ui_render_graph(
       ::vk::ImageUsageFlagBits::eColorAttachment |
           ::vk::ImageUsageFlagBits::eSampled);
 
+  ResizeTarget(target);
+
+  target->image_view = scene_view;
+  target->final_layout = ::vk::ImageLayout::eShaderReadOnlyOptimal;
+
+  TRY_RESULT(auto mesh_shader,
+             wren::vk::Shader::Create(
+                 ctx->graphics_context->Device().get(),
+                 wren::shaders::MESH_VERT_SHADER.data(),
+                 wren::shaders::MESH_FRAG_SHADER.data()));
+
+  mesh = wren::Mesh(ctx->graphics_context->Device(),
+                    ctx->graphics_context->allocator());
+  mesh.shader(mesh_shader);
+
+  builder
+      .add_pass("mesh",
+                {
+                    {
+                        {"mesh", mesh_shader},
+                    },
+                    "scene_viewer",
+                    target,
+                },
+                [this, ctx](wren::RenderPass &pass,
+                            ::vk::CommandBuffer &cmd) {
+                  pass.bind_pipeline("mesh");
+                  mesh.bind(cmd);
+                  mesh.draw(cmd);
+                })
+      .add_pass("ui", {{}, "swapchain_target"},
+                [](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
+                  editor::ui::flush(cmd);
+                });
+
+  return builder;
+}
+
+auto Editor::ResizeTarget(
+    std::shared_ptr<wren::RenderTarget> const &target)
+    -> wren::expected<void> {
   ::vk::ImageCreateInfo image_info(
       {}, ::vk::ImageType::e2D, target->format,
       ::vk::Extent3D(target->size.width, target->size.height, 1), 1,
@@ -176,38 +237,6 @@ auto Editor::build_ui_render_graph(
   VK_TIE_RESULT(scene_view,
                 ctx->graphics_context->Device().get().createImageView(
                     image_view_info));
-  target->image_view = scene_view;
-  target->final_layout = ::vk::ImageLayout::eShaderReadOnlyOptimal;
 
-  TRY_RESULT(auto mesh_shader,
-             wren::vk::Shader::Create(
-                 ctx->graphics_context->Device().get(),
-                 wren::shaders::MESH_VERT_SHADER.data(),
-                 wren::shaders::MESH_FRAG_SHADER.data()));
-
-  mesh = wren::Mesh(ctx->graphics_context->Device(),
-                    ctx->graphics_context->allocator());
-  mesh.shader(mesh_shader);
-
-  builder
-      .add_pass("mesh",
-                {
-                    {
-                        {"mesh", mesh_shader},
-                    },
-                    "scene_viewer",
-                    target,
-                },
-                [this, ctx](wren::RenderPass &pass,
-                            ::vk::CommandBuffer &cmd) {
-                  pass.bind_pipeline("mesh");
-                  mesh.bind(cmd);
-                  mesh.draw(cmd);
-                })
-      .add_pass("ui", {{}, "swapchain_target"},
-                [](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
-                  editor::ui::flush(cmd);
-                });
-
-  return builder;
+  return {};
 }

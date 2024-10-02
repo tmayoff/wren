@@ -28,11 +28,17 @@ class Renderer {
   auto set_graph_builder(GraphBuilder const &builder) {
     render_graph = builder.compile().value();
   }
-  auto get_graph() { return render_graph; }
+  auto get_graph() const { return render_graph; }
 
-  auto swapchain_images_views() { return swapchain_image_views_; }
+  auto swapchain_images_views() const {
+    return swapchain_image_views_;
+  }
 
-  auto render_targets() { return render_targets_; }
+  auto render_targets() const { return render_targets_; }
+  auto add_target(std::string const &name,
+                  std::shared_ptr<RenderTarget> const &target) {
+    render_targets_.emplace(name, target);
+  }
 
   auto submit_command_buffer(
       std::function<void(::vk::CommandBuffer &)> const &cmd_buf)

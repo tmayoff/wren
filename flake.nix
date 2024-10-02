@@ -163,6 +163,8 @@
 
               just
 
+              gdb
+
               unstable.tracy-x11 # for the profiler
               wayland
             ]
