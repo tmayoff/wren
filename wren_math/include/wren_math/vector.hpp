@@ -105,6 +105,15 @@ struct vec {
   std::array<T, N> data{};
 };
 
+struct vec2i : vec<int, 2> {
+  vec2i() : vec<int, 2>() {}
+  vec2i(int x, int y) : vec<int, 2>(x, y) {}
+  vec2i(vec<int, 2> const& other) : vec<int, 2>(other) {}
+
+  [[nodiscard]] auto x() const { return data.at(0); }
+  [[nodiscard]] auto y() const { return data.at(1); }
+};
+
 struct vec2f : vec<float, 2> {
   vec2f() : vec<float, 2>() {}
   vec2f(float x, float y) : vec<float, 2>(x, y) {}

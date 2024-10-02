@@ -103,7 +103,14 @@ void Editor::on_update() {
   ImGui::End();
 
   ImGui::Begin("Viewer");
-  ImGui::Image(dset[0], ImGui::GetContentRegionAvail());
+  auto curr_size = ImGui::GetContentRegionAvail();
+  auto curr_size_vec = wren::math::vec2f{curr_size.x, curr_size.y};
+  if (curr_size_vec != last_scene_size) {
+    // TODO resize target
+    last_scene_size = curr_size_vec;
+  }
+
+  ImGui::Image(dset[0], {last_scene_size.x(), last_scene_size.y()});
   ImGui::End();
 
   ImGui::Begin("Inspector");

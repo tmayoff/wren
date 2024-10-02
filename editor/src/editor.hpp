@@ -34,8 +34,7 @@ class Editor {
   wren::Mesh mesh;
 
   VkImage scene_image{};
-
   VmaAllocation scene_alloc_{};
-
   wren::RenderTarget scene_target;
+  wren::math::vec2f last_scene_size;
 };
