@@ -4,14 +4,21 @@
 #include <string>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
+#include <wren_vk/buffer.hpp>
 #include <wren_vk/image.hpp>
 #include <wren_vk/shader.hpp>
 
 #include "render_target.hpp"
+#include "wren/context.hpp"
 
 namespace wren {
 
+// Forward declarations
 struct Context;
+
+namespace vk {
+class Buffer;
+}
 
 struct PassResources {
   std::unordered_map<std::string, std::shared_ptr<vk::Shader>> shaders;
@@ -30,6 +37,12 @@ class RenderPass {
       -> expected<std::shared_ptr<RenderPass>>;
 
   void execute();
+
+  template <typename T>
+  void write_scratch_buffer(const ::vk::CommandBuffer& cmd, uint32_t set,
+                            uint32_t binding, T data);
+  [[nodiscard]] auto get_scratch_buffer(uint32_t set, uint32_t binding,
+                                        size_t size) -> void*;
 
   auto resize_target(const math::vec2i& new_size) -> expected<void>;
 
@@ -69,6 +82,35 @@ class RenderPass {
   std::optional<vk::Image> target_image_;
   std::shared_ptr<RenderTarget> target_;
   ::vk::Framebuffer framebuffer_;
+
+  std::map<std::pair<uint32_t, uint32_t>, std::shared_ptr<vk::Buffer>> ubos_;
 };
+
+template <typename T>
+void RenderPass::write_scratch_buffer(const ::vk::CommandBuffer& cmd,
+                                      uint32_t set, uint32_t binding, T data) {
+  if (!ubos_.contains({set, binding})) {
+    // Create buffer
+
+    ubos_.insert(
+        {{set, binding},
+         vk::Buffer::create(
+             ctx_->graphics_context->allocator(), sizeof(data),
+             VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+             VmaAllocationCreateFlagBits::
+                 VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT)});
+  }
+
+  auto buffer = ubos_.at({set, binding});
+  buffer->set_data_raw(&data, sizeof(T));
+
+  ::vk::DescriptorBufferInfo buffer_info(buffer->get(), 0, sizeof(T));
+  std::array writes = {::vk::WriteDescriptorSet{
+      {}, 0, 0, ::vk::DescriptorType::eUniformBuffer, {}, buffer_info}};
+
+  cmd.pushDescriptorSetKHR(::vk::PipelineBindPoint::eGraphics,
+                           resources_.shaders.at("mesh")->pipeline_layout(), 0,
+                           writes);
+}
 
 }  // namespace wren

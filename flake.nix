@@ -164,6 +164,8 @@
 
               gdb
 
+              renderdoc
+
               unstable.tracy-x11 # for the profiler
               wayland
             ]

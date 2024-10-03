@@ -120,6 +120,7 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
     -> expected<void> {
   ::vk::Result res = ::vk::Result::eSuccess;
 
+  // \TODO Read ubos
   ::vk::DescriptorSetLayoutBinding ubo_layout_bindings(
       0, ::vk::DescriptorType::eUniformBuffer, 1,
       ::vk::ShaderStageFlagBits::eVertex);

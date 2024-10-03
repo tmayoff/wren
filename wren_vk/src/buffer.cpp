@@ -11,10 +11,10 @@
 
 namespace wren::vk {
 
-auto Buffer::Create(VmaAllocator const& allocator, size_t size,
+auto Buffer::create(const VmaAllocator& allocator, size_t size,
                     VkBufferUsageFlags usage,
-                    std::optional<VmaAllocationCreateFlags> const&
-                        flags) -> std::shared_ptr<Buffer> {
+                    const std::optional<VmaAllocationCreateFlags>& flags)
+    -> std::shared_ptr<Buffer> {
   auto b = std::make_shared<Buffer>(allocator);
 
   VkBufferCreateInfo create_info{};
@@ -27,22 +27,21 @@ auto Buffer::Create(VmaAllocator const& allocator, size_t size,
   if (flags) alloc_info.flags = *flags;
 
   VkBuffer buf{};
-  vmaCreateBuffer(allocator, &create_info, &alloc_info, &buf,
-                  &b->allocation_, nullptr);
-  b->buffer = buf;
+  vmaCreateBuffer(allocator, &create_info, &alloc_info, &buf, &b->allocation_,
+                  nullptr);
+  b->buffer_ = buf;
 
   return b;
 }
 
-auto Buffer::set_data_raw(void const* data,
-                          std::size_t size) -> expected<void> {
+auto Buffer::set_data_raw(const void* data, std::size_t size)
+    -> expected<void> {
   if (data == nullptr) {
     return {};
   }
 
-  auto const res =
-      static_cast<::vk::Result>(vmaCopyMemoryToAllocation(
-          allocator_, data, allocation_, 0, size));
+  const auto res = static_cast<::vk::Result>(
+      vmaCopyMemoryToAllocation(allocator_, data, allocation_, 0, size));
   if (res != ::vk::Result::eSuccess) {
     throw std::runtime_error(enum_to_string(res));
   }
@@ -53,18 +52,18 @@ auto Buffer::set_data_raw(void const* data,
   return {};
 }
 
-auto Buffer::copy_buffer(::vk::Device const& device,
-                         ::vk::Queue const& submit_queue,
-                         ::vk::CommandPool const& command_pool,
-                         std::shared_ptr<Buffer> const& src,
-                         std::shared_ptr<Buffer> const& dst,
-                         size_t size) -> expected<void> {
-  ::vk::CommandBufferAllocateInfo const alloc_info(
+auto Buffer::copy_buffer(const ::vk::Device& device,
+                         const ::vk::Queue& submit_queue,
+                         const ::vk::CommandPool& command_pool,
+                         const std::shared_ptr<Buffer>& src,
+                         const std::shared_ptr<Buffer>& dst, size_t size)
+    -> expected<void> {
+  const ::vk::CommandBufferAllocateInfo alloc_info(
       command_pool, ::vk::CommandBufferLevel::ePrimary, 1);
 
   VK_ERR_PROP(cmd_bufs, device.allocateCommandBuffers(alloc_info));
 
-  auto const cmd_buf = cmd_bufs.front();
+  const auto cmd_buf = cmd_bufs.front();
 
   ::vk::CommandBufferBeginInfo begin_info(
       ::vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
@@ -84,6 +83,9 @@ auto Buffer::copy_buffer(::vk::Device const& device,
   return {};
 }
 
-Buffer::~Buffer() { vmaFreeMemory(allocator_, allocation_); }
+Buffer::~Buffer() {
+  unmap();
+  vmaFreeMemory(allocator_, allocation_);
+}
 
 }  // namespace wren::vk

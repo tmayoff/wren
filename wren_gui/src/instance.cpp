@@ -22,7 +22,7 @@ Instance::Instance(std::shared_ptr<vk::Shader> const& shader,
   // ================ Vertex buffer =================== //
   {
     vertex_buffer =
-        vk::Buffer::Create(allocator, sizeof(Vertex) * MAX_VERTICES,
+        vk::Buffer::create(allocator, sizeof(Vertex) * MAX_VERTICES,
                            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
                                VK_BUFFER_USAGE_TRANSFER_DST_BIT);
   }
@@ -30,7 +30,7 @@ Instance::Instance(std::shared_ptr<vk::Shader> const& shader,
   // ============== Index buffer ============== //
   {
     index_buffer =
-        vk::Buffer::Create(allocator, sizeof(uint16_t) * MAX_INDICES,
+        vk::Buffer::create(allocator, sizeof(uint16_t) * MAX_INDICES,
                            VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
                                VK_BUFFER_USAGE_TRANSFER_DST_BIT);
   }
@@ -39,7 +39,7 @@ Instance::Instance(std::shared_ptr<vk::Shader> const& shader,
     const UBO ubo{};
     std::size_t const size = sizeof(ubo);
 
-    uniform_buffer = vk::Buffer::Create(
+    uniform_buffer = vk::Buffer::create(
         allocator, size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
         VmaAllocationCreateFlagBits::
             VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
@@ -62,7 +62,7 @@ void Instance::flush(::vk::CommandBuffer const& cmd) {
   {
     std::span data{vertices.begin(), vertices.end()};
 
-    auto staging_buffer = vk::Buffer::Create(
+    auto staging_buffer = vk::Buffer::create(
         allocator, data.size_bytes(),
         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT |
@@ -79,7 +79,7 @@ void Instance::flush(::vk::CommandBuffer const& cmd) {
   {
     std::span data{indices.begin(), indices.end()};
 
-    auto staging_buffer = vk::Buffer::Create(
+    auto staging_buffer = vk::Buffer::create(
         allocator, data.size_bytes(),
         VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT |

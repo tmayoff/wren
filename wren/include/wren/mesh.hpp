@@ -15,8 +15,6 @@ namespace wren {
 
 struct UBO {
   wren::math::mat4f model;
-  wren::math::mat4f view;
-  wren::math::mat4f proj;
 };
 
 struct Vertex {
@@ -24,30 +22,29 @@ struct Vertex {
   wren::math::vec3f colour;
 };
 
-std::vector<Vertex> const TRIANGLE_VERTICES = {
+const std::vector<Vertex> kTriangleVertices = {
     {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
     {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
     {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
 
-std::vector<Vertex> const QUAD_VERTICES = {
-    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-    {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}};
+const std::vector<Vertex> kQuadVertices = {{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+                                           {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+                                           {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+                                           {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}};
 
-std::vector<uint16_t> const QUAD_INDICES = {0, 1, 2, 2, 3, 0};
+const std::vector<uint16_t> kQuadIndices = {0, 1, 2, 2, 3, 0};
 
 class Mesh {
  public:
   Mesh() = default;
 
-  Mesh(vulkan::Device const& device, VmaAllocator allocator);
+  Mesh(const vulkan::Device& device, VmaAllocator allocator);
 
-  void shader(std::shared_ptr<vk::Shader> const& shader_) {
+  void shader(const std::shared_ptr<vk::Shader>& shader_) {
     this->shader_ = shader_;
   }
-  void draw(::vk::CommandBuffer const& cmd) const;
-  void bind(::vk::CommandBuffer const& cmd) const;
+  void draw(const ::vk::CommandBuffer& cmd) const;
+  void bind(const ::vk::CommandBuffer& cmd) const;
 
  private:
   std::shared_ptr<vk::Shader> shader_;

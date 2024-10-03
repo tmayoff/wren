@@ -185,6 +185,17 @@ void RenderPass::execute() {
   }
 }
 
+auto RenderPass::get_scratch_buffer(uint32_t set, uint32_t binding, size_t size)
+    -> void* {
+  auto buf = vk::Buffer::create(
+      ctx_->graphics_context->allocator(), size,
+      VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+      VmaAllocationCreateFlagBits::
+          VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+
+  return buf->map();
+}
+
 void RenderPass::bind_pipeline(const std::string& pipeline_name) {
   auto cmd = command_buffers_.front();
 
