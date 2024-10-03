@@ -120,35 +120,34 @@
           libdwarf
           backward-cpp
         ];
-      in rec {
         vulkan_layer_path = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d:${pkgs.renderdoc}/share/vulkan/implicit_layer.d";
+      in {
+        packages = rec {
+          wren_editor = pkgs.stdenv.mkDerivation {
+            name = "wren_editor";
+            src = ./.;
 
-        # packages = rec {
-        #   wren_editor = pkgs.stdenv.mkDerivation {
-        #     name = "wren_editor";
-        #     src = ./.;
+            VK_LAYER_PATH = vulkan_layer_path;
 
-        #     VK_LAYER_PATH = vulkan_layer_path;
+            nativeBuildInputs = rawNativeBuildInputs;
+            buildInputs = rawBuildInputs;
 
-        #     nativeBuildInputs = rawNativeBuildInputs;
-        #     buildInputs = rawBuildInputs;
+            # patchPhase = ''
+            #   mkdir -p subprojects
+            #   cp -r ${imgui_patched} subprojects/imgui-${imgui_patched.version}
+            #   ls -ls subprojects
+            # '';
 
-        #     # patchPhase = ''
-        #     #   mkdir -p subprojects
-        #     #   cp -r ${imgui_patched} subprojects/imgui-${imgui_patched.version}
-        #     #   ls -ls subprojects
-        #     # '';
+            # mesonFlags = [
+            #   "-Dauto_features=disabled"
+            # ];
 
-        #     mesonFlags = [
-        #       "-Dauto_features=disabled"
-        #     ];
+            # BOOST_INCLUDEDIR = "${pkgs.lib.getDev pkgs.boost}/include";
+            # BOOST_LIBRARYDIR = "${pkgs.lib.getLib pkgs.boost}/lib";
+          };
 
-        #     # BOOST_INCLUDEDIR = "${pkgs.lib.getDev pkgs.boost}/include";
-        #     # BOOST_LIBRARYDIR = "${pkgs.lib.getLib pkgs.boost}/lib";
-        #   };
-
-        #   default = wren_editor;
-        # };
+          default = wren_editor;
+        };
 
         devShell = pkgs.mkShell.override {stdenv = pkgs.clangStdenv;} {
           hardeningDisable = ["all"];

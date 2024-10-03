@@ -5,12 +5,13 @@
 #include <imgui_impl_vulkan.h>
 
 #include <vulkan/vulkan.hpp>
+#include <wren/context.hpp>
 #include <wren/renderer.hpp>
 #include <wren_vk/errors.hpp>
 
 namespace editor::ui {
 
-void CheckResult(VkResult res) {
+void check_result(VkResult res) {
   if (res != VK_SUCCESS) {
     throw std::runtime_error("Vulkan error");
   }
@@ -27,29 +28,28 @@ auto mouse_code_to_imgui(wren::MouseCode code) {
   }
 }
 
-auto init(std::shared_ptr<wren::Context> const& context)
+auto init(const std::shared_ptr<wren::Context>& context)
     -> wren::expected<void> {
   ImGui::CreateContext();
   ImGuiIO& io = ImGui::GetIO();
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
   // Setup events
-  context->event_dispatcher.on<wren::Event::MouseMoved>(
-      [&io](auto const& e) {
-        if (!e.relative) {
-          io.AddMousePosEvent(e.x, e.y);
-        } else {
-          io.MouseDelta = {e.x, e.y};
-        }
-      });
+  context->event_dispatcher.on<wren::Event::MouseMoved>([&io](const auto& e) {
+    if (!e.relative) {
+      io.AddMousePosEvent(e.x, e.y);
+    } else {
+      io.MouseDelta = {e.x, e.y};
+    }
+  });
 
   context->event_dispatcher.on<wren::Event::MouseButtonDown>(
-      [&io](auto const& e) {
+      [&io](const auto& e) {
         io.AddMouseButtonEvent(mouse_code_to_imgui(e.button), true);
       });
 
   context->event_dispatcher.on<wren::Event::MouseButtonUp>(
-      [&io](auto const& e) {
+      [&io](const auto& e) {
         io.AddMouseButtonEvent(mouse_code_to_imgui(e.button), false);
       });
 
@@ -61,34 +61,28 @@ auto init(std::shared_ptr<wren::Context> const& context)
 
   ImGui_ImplSDL2_InitForVulkan(context->window.NativeHandle());
 
-  auto const& graphics_context = context->graphics_context;
+  const auto& graphics_context = context->graphics_context;
 
   ::vk::DescriptorPool pool;
 
   {
     std::array pool_sizes = {
-        ::vk::DescriptorPoolSize{::vk::DescriptorType::eSampler,
+        ::vk::DescriptorPoolSize{::vk::DescriptorType::eSampler, 1000},
+        ::vk::DescriptorPoolSize{::vk::DescriptorType::eCombinedImageSampler,
                                  1000},
-        ::vk::DescriptorPoolSize{
-            ::vk::DescriptorType::eCombinedImageSampler, 1000},
-        ::vk::DescriptorPoolSize{::vk::DescriptorType::eSampledImage,
+        ::vk::DescriptorPoolSize{::vk::DescriptorType::eSampledImage, 1000},
+        ::vk::DescriptorPoolSize{::vk::DescriptorType::eStorageImage, 1000},
+        ::vk::DescriptorPoolSize{::vk::DescriptorType::eUniformTexelBuffer,
                                  1000},
-        ::vk::DescriptorPoolSize{::vk::DescriptorType::eStorageImage,
+        ::vk::DescriptorPoolSize{::vk::DescriptorType::eStorageTexelBuffer,
                                  1000},
-        ::vk::DescriptorPoolSize{
-            ::vk::DescriptorType::eUniformTexelBuffer, 1000},
-        ::vk::DescriptorPoolSize{
-            ::vk::DescriptorType::eStorageTexelBuffer, 1000},
-        ::vk::DescriptorPoolSize{::vk::DescriptorType::eUniformBuffer,
+        ::vk::DescriptorPoolSize{::vk::DescriptorType::eUniformBuffer, 1000},
+        ::vk::DescriptorPoolSize{::vk::DescriptorType::eStorageBuffer, 1000},
+        ::vk::DescriptorPoolSize{::vk::DescriptorType::eUniformBufferDynamic,
                                  1000},
-        ::vk::DescriptorPoolSize{::vk::DescriptorType::eStorageBuffer,
+        ::vk::DescriptorPoolSize{::vk::DescriptorType::eStorageBufferDynamic,
                                  1000},
-        ::vk::DescriptorPoolSize{
-            ::vk::DescriptorType::eUniformBufferDynamic, 1000},
-        ::vk::DescriptorPoolSize{
-            ::vk::DescriptorType::eStorageBufferDynamic, 1000},
-        ::vk::DescriptorPoolSize{
-            ::vk::DescriptorType::eInputAttachment, 1000},
+        ::vk::DescriptorPoolSize{::vk::DescriptorType::eInputAttachment, 1000},
     };
 
     ::vk::DescriptorPoolCreateInfo pool_info{
@@ -96,8 +90,7 @@ auto init(std::shared_ptr<wren::Context> const& context)
         1000 * pool_sizes.size(), pool_sizes};
 
     VK_TIE_RESULT(
-        pool, graphics_context->Device().get().createDescriptorPool(
-                  pool_info));
+        pool, graphics_context->Device().get().createDescriptorPool(pool_info));
   }
 
   ImGui_ImplVulkan_InitInfo init_info{};
@@ -108,14 +101,12 @@ auto init(std::shared_ptr<wren::Context> const& context)
   init_info.QueueFamily =
       graphics_context->FindQueueFamilyIndices()->graphics_index;
   init_info.MinImageCount = 2;
-  init_info.ImageCount =
-      context->renderer->swapchain_images_views().size();
+  init_info.ImageCount = context->renderer->swapchain_images_views().size();
   init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-  init_info.RenderPass = context->renderer->get_graph()
-                             .node_by_name("ui")
-                             ->render_pass->get();
+  init_info.RenderPass =
+      context->renderer->get_graph().node_by_name("ui")->render_pass->get();
   init_info.DescriptorPool = pool;
-  init_info.CheckVkResultFn = &CheckResult;
+  init_info.CheckVkResultFn = &check_result;
 
   if (!ImGui_ImplVulkan_Init(&init_info)) {
     spdlog::error("Failed to initialize vulkan for imgui");
@@ -134,7 +125,7 @@ auto begin() -> void {
 
 auto end() -> void {}
 
-void flush(::vk::CommandBuffer const& cmd) {
+void flush(const ::vk::CommandBuffer& cmd) {
   ImGui::Render();
   ImDrawData* draw_data = ImGui::GetDrawData();
 

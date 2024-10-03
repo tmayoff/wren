@@ -7,7 +7,7 @@ class CommandBuffer;
 }
 
 namespace wren {
-class Context;
+struct Context;
 }
 
 namespace editor::ui {
