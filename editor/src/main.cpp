@@ -12,7 +12,7 @@
 
 #include "editor.hpp"
 
-backward::SignalHandling const sh;
+backward::SignalHandling const kSh;
 
 auto main() -> int {
   auto const &err = wren::Application::Create("Editor");
@@ -28,7 +28,7 @@ auto main() -> int {
   // match the output framebuffer add a pass specifically for
   // transitioning into the presentable layout
 
-  auto const res = Editor::create(app);
+  auto const res = editor::Editor::create(app);
   if (!res.has_value()) {
     return EXIT_FAILURE;
   }

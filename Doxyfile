@@ -949,7 +949,8 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = editor/src \
+INPUT                  = docs/ \
+ 						 editor/src \
 						 wren/src \
                          wren/include \
 						 wren_gui/include \

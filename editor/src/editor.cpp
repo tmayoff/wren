@@ -12,6 +12,8 @@
 
 #include "ui.hpp"
 
+namespace editor {
+
 auto Editor::create(const std::shared_ptr<wren::Application> &app)
     -> wren::expected<std::shared_ptr<Editor>> {
   auto editor = std::make_shared<Editor>(app->context());
@@ -164,6 +166,8 @@ auto Editor::build_ui_render_graph(const std::shared_ptr<wren::Context> &ctx)
                  },
                  "scene_viewer"},
                 [this, ctx](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
+                  // TODO use the camera
+
                   pass.bind_pipeline("mesh");
                   mesh_.bind(cmd);
                   mesh_.draw(cmd);
@@ -175,3 +179,5 @@ auto Editor::build_ui_render_graph(const std::shared_ptr<wren::Context> &ctx)
 
   return builder;
 }
+
+}  // namespace editor

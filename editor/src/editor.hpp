@@ -6,12 +6,16 @@
 #include <wren_math/vector.hpp>
 #include <wren_utils/errors.hpp>
 
+#include "camera.hpp"
+
 namespace wren {
 struct Context;
 class Application;
 class GraphBuilder;
 class RenderTarget;
 }  // namespace wren
+
+namespace editor {
 
 class Editor {
  public:
@@ -26,6 +30,8 @@ class Editor {
   void on_update();
 
  private:
+  Camera caemra;
+
   std::shared_ptr<wren::Context> ctx_;
   wren::Mesh mesh_;
 
@@ -35,3 +41,5 @@ class Editor {
   std::optional<wren::math::vec2i> scene_resized_;
   wren::math::vec2i last_scene_size_;
 };
+
+}  // namespace editor
