@@ -4,6 +4,7 @@
 #include <string>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
+#include <wren_vk/image.hpp>
 #include <wren_vk/shader.hpp>
 
 #include "render_target.hpp"
@@ -24,12 +25,13 @@ class RenderPass {
 
   static auto create(const std::shared_ptr<Context>& ctx,
                      const std::string& name, const PassResources& resources,
-                     const execute_fn_t& fn)
+                     const execute_fn_t& fn,
+                     const std::optional<vk::Image>& image)
       -> expected<std::shared_ptr<RenderPass>>;
 
   void execute();
 
-  void resize_target(const math::vec2f& new_size);
+  auto resize_target(const math::vec2i& new_size) -> expected<void>;
 
   void on_resource_resized(const std::pair<float, float>& size);
 
@@ -49,7 +51,8 @@ class RenderPass {
 
  private:
   RenderPass(const std::shared_ptr<Context>& ctx, std::string name,
-             PassResources resources, execute_fn_t fn);
+             PassResources resources, execute_fn_t fn,
+             const std::optional<vk::Image>& image);
 
   std::shared_ptr<Context> ctx_;
 
@@ -63,7 +66,7 @@ class RenderPass {
   ::vk::CommandPool command_pool_;
   std::vector<::vk::CommandBuffer> command_buffers_;
 
-  std::optional<::vk::Image> target_image_;
+  std::optional<vk::Image> target_image_;
   std::shared_ptr<RenderTarget> target_;
   ::vk::Framebuffer framebuffer_;
 };

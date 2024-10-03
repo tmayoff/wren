@@ -34,6 +34,6 @@ class Editor {
   std::vector<VkDescriptorSet> dset_{};
   vk::Sampler texture_sampler_;
 
-  std::optional<wren::math::vec2f> scene_resized_;
-  wren::math::vec2f last_scene_size_;
+  std::optional<wren::math::vec2i> scene_resized_;
+  wren::math::vec2i last_scene_size_;
 };

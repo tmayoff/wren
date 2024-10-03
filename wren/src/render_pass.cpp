@@ -13,10 +13,11 @@ namespace wren {
 
 auto RenderPass::create(const std::shared_ptr<Context>& ctx,
                         const std::string& name, const PassResources& resources,
-                        const execute_fn_t& fn)
+                        const execute_fn_t& fn,
+                        const std::optional<vk::Image>& image)
     -> expected<std::shared_ptr<RenderPass>> {
-  auto pass =
-      std::shared_ptr<RenderPass>(new RenderPass(ctx, name, resources, fn));
+  auto pass = std::shared_ptr<RenderPass>(
+      new RenderPass(ctx, name, resources, fn, image));
 
   const auto& device = ctx->graphics_context->Device();
   const auto& swapchain_images = ctx->renderer->swapchain_images_views();
@@ -82,10 +83,46 @@ auto RenderPass::create(const std::shared_ptr<Context>& ctx,
   return pass;
 }
 
-void RenderPass::resize_target(const math::vec2f& new_size) {
-  // TODO Resize everything
+auto RenderPass::resize_target(const math::vec2i& new_size) -> expected<void> {
+  target_->size = new_size;
 
+  // Delete image
+  target_image_.reset();
+
+  // Create a new image
+
+  TRY_RESULT(
+      target_image_,
+      vk::Image::create(ctx_->graphics_context->Device().get(),
+                        ctx_->graphics_context->allocator(), target_->format,
+                        target_->size, target_->image_usage));
+
+  // transition image
+  TRY_RESULT(ctx_->renderer->submit_command_buffer(
+      [this](const ::vk::CommandBuffer& cmd_buf) {
+        ::vk::ImageMemoryBarrier barrier(
+            ::vk::AccessFlagBits::eTransferRead,
+            ::vk::AccessFlagBits::eMemoryRead, ::vk::ImageLayout::eUndefined,
+            ::vk::ImageLayout::eShaderReadOnlyOptimal, VK_QUEUE_FAMILY_IGNORED,
+            VK_QUEUE_FAMILY_IGNORED, target_image_->get(),
+            ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor, 0, 1,
+                                        0, 1));
+
+        cmd_buf.pipelineBarrier(::vk::PipelineStageFlagBits::eTransfer,
+                                ::vk::PipelineStageFlagBits::eTransfer,
+                                ::vk::DependencyFlags(), {}, {}, barrier);
+      }));
+
+  ::vk::ImageViewCreateInfo image_view_info(
+      {}, target_image_->get(), ::vk::ImageViewType::e2D, target_->format, {},
+      ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor, 0, 1, 0,
+                                  1));
+  VK_TIE_RESULT(
+      target_->image_view,
+      ctx_->graphics_context->Device().get().createImageView(image_view_info));
   recreate_framebuffers(ctx_->graphics_context->Device().get());
+
+  return {};
 }
 
 void RenderPass::on_resource_resized(const std::pair<float, float>& size) {
@@ -157,11 +194,13 @@ void RenderPass::bind_pipeline(const std::string& pipeline_name) {
 }
 
 RenderPass::RenderPass(const std::shared_ptr<Context>& ctx, std::string name,
-                       PassResources resources, execute_fn_t fn)
+                       PassResources resources, execute_fn_t fn,
+                       const std::optional<vk::Image>& image)
     : ctx_(ctx),
       name_(std::move(name)),
       resources_(std::move(resources)),
       execute_fn_(std::move(fn)),
+      target_image_(image),
       target_(this->resources_.render_target) {}
 
 }  // namespace wren

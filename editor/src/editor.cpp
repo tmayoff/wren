@@ -28,7 +28,6 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app)
   editor->texture_sampler_ = t.value;
 
   editor->dset_.resize(1);
-  // for (uint32_t i = 0; i < 1; i++)
   const auto scene_view = app->context()
                               ->renderer->get_graph()
                               .node_by_name("mesh")
@@ -48,25 +47,21 @@ void Editor::on_update() {
   ZoneScoped;  // NOLINT
 
   if (scene_resized_.has_value()) {
-    // auto target = std::make_shared<wren::RenderTarget>(
-    //     ::vk::Extent2D{static_cast<uint32_t>(scene_resized->x()),
-    //                    static_cast<uint32_t>(scene_resized->y())},
-    //     ::vk::Format::eB8G8R8A8Srgb, ::vk::SampleCountFlagBits::e1, nullptr,
-    //     ::vk::ImageUsageFlagBits::eColorAttachment |
-    //         ::vk::ImageUsageFlagBits::eSampled);
+    const auto &mesh_pass =
+        ctx_->renderer->get_graph().node_by_name("mesh")->render_pass;
 
-    // // Replace the target
-    // ResizeTarget(target);
-    // const auto &targets = ctx->renderer->render_targets();
-    // targets.at("scene_viewer")->image_view = scene_view;
-    // targets.at("scene_viewer")->size = target->size;
-    // targets.at("scene_viewer")->format = target->format;
+    mesh_pass->resize_target(scene_resized_.value());
 
-    // scene_resized.reset();
-    // ctx->renderer->get_graph()
-    //     .node_by_name("mesh")
-    //     ->render_pass->recreate_framebuffers(
-    //         ctx->graphics_context->Device().get());
+    const auto scene_view = ctx_->renderer->get_graph()
+                                .node_by_name("mesh")
+                                ->render_pass->target()
+                                ->image_view;
+
+    ImGui_ImplVulkan_RemoveTexture(dset_[0]);
+    dset_[0] = ImGui_ImplVulkan_AddTexture(
+        texture_sampler_, scene_view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+    scene_resized_.reset();
   }
 
   editor::ui::begin();
@@ -126,13 +121,15 @@ void Editor::on_update() {
 
   ImGui::Begin("Viewer");
   auto curr_size = ImGui::GetContentRegionAvail();
-  auto curr_size_vec = wren::math::vec2f{curr_size.x, curr_size.y};
+  auto curr_size_vec = wren::math::vec2i{static_cast<int>(curr_size.x),
+                                         static_cast<int>(curr_size.y)};
   if (curr_size_vec != last_scene_size_) {
     scene_resized_ = curr_size_vec;
     last_scene_size_ = curr_size_vec;
   }
 
-  ImGui::Image(dset_[0], {last_scene_size_.x(), last_scene_size_.y()});
+  ImGui::Image(dset_[0], {static_cast<float>(last_scene_size_.x()),
+                          static_cast<float>(last_scene_size_.y())});
   ImGui::End();
 
   ImGui::Begin("Inspector");
