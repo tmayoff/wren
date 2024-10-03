@@ -64,6 +64,9 @@ void Editor::on_update() {
     dset_[0] = ImGui_ImplVulkan_AddTexture(
         texture_sampler_, scene_view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
+    camera_.aspect(
+        static_cast<float>(scene_resized_->x() / scene_resized_->y()));
+
     scene_resized_.reset();
   }
 
@@ -161,34 +164,33 @@ auto Editor::build_ui_render_graph(const std::shared_ptr<wren::Context> &ctx)
   mesh_.shader(mesh_shader);
 
   builder
-      .add_pass(
-          "mesh",
-          {{
-               {"mesh", mesh_shader},
-           },
-           "scene_viewer"},
-          [this, ctx](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
-            pass.bind_pipeline("mesh");
+      .add_pass("mesh",
+                {{
+                     {"mesh", mesh_shader},
+                 },
+                 "scene_viewer"},
+                [this, ctx](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
+                  pass.bind_pipeline("mesh");
 
-            // TODO use the camera
-            struct GLOBALS {
-              wren::math::mat4f view;
-              wren::math::mat4f proj;
-            };
-            GLOBALS ubo{};
+                  // TODO use the camera
+                  struct GLOBALS {
+                    wren::math::mat4f view;
+                    wren::math::mat4f proj;
+                  };
+                  GLOBALS ubo{};
 
-            ubo.view = wren::math::look_at(wren::math::vec3f(2.0f, 2.0f, 2.0f),
-                                           wren::math::vec3f(0.0f, 0.0f, 0.0f),
-                                           wren::math::vec3f::UnitZ());
+                  ubo.view =
+                      wren::math::look_at(wren::math::vec3f(2.0f, 2.0f, 2.0f),
+                                          wren::math::vec3f(0.0f, 0.0f, 0.0f),
+                                          wren::math::vec3f::UnitZ());
 
-            ubo.proj = wren::math::perspective(
-                wren::math::radians(45.0f), 2226.0f / 1415.0f, 0.01f, 1000.0f);
+                  ubo.proj = this->camera_.projection();
 
-            pass.write_scratch_buffer(cmd, 0, 0, ubo);
+                  pass.write_scratch_buffer(cmd, 0, 0, ubo);
 
-            mesh_.bind(cmd);
-            mesh_.draw(cmd);
-          })
+                  mesh_.bind(cmd);
+                  mesh_.draw(cmd);
+                })
       .add_pass("ui", {{}, "swapchain_target"},
                 [](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
                   editor::ui::flush(cmd);

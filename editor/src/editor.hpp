@@ -22,7 +22,7 @@ class Editor {
   static auto create(const std::shared_ptr<wren::Application> &app)
       -> wren::expected<std::shared_ptr<Editor>>;
 
-  Editor(const std::shared_ptr<wren::Context> &ctx) : ctx_(ctx) {}
+  Editor(const std::shared_ptr<wren::Context> &ctx) : camera_(45.F, 16.f/9.f, 0.1, 1000.0f), ctx_(ctx) {}
 
   auto build_ui_render_graph(const std::shared_ptr<wren::Context> &ctx)
       -> wren::expected<wren::GraphBuilder>;
@@ -30,7 +30,7 @@ class Editor {
   void on_update();
 
  private:
-  Camera caemra;
+  Camera camera_;
 
   std::shared_ptr<wren::Context> ctx_;
   wren::Mesh mesh_;
