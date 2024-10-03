@@ -39,7 +39,7 @@ auto GraphBuilder::compile() const -> expected<Graph> {
     }
 
     TRY_RESULT(auto pass,
-               RenderPass::Create(ctx, name, pass_resources, fn));
+               RenderPass::create(ctx, name, pass_resources, fn));
     node_t n = std::make_shared<Node>(name, pass);
 
     graph.nodes.push_back(n);
