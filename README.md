@@ -2,7 +2,7 @@
 
 [![builds.sr.ht status](https://builds.sr.ht/~tmayoff/wren/commits/main/nixos.yml.svg)](https://builds.sr.ht/~tmayoff/wren/commits/main/nixos.yml?)
 
-[docs](https://tmayoff.srht.site)
+[docs](https://tmayoff.srht.site/wren)
 
 Custom vulkan renderer, with eventually no major dependencies
 

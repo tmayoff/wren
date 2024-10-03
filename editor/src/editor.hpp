@@ -1,15 +1,16 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 #include <vulkan/vulkan.hpp>
-#include <wren/graph.hpp>
 #include <wren/mesh.hpp>
+#include <wren_math/vector.hpp>
 #include <wren_utils/errors.hpp>
 
 namespace wren {
 struct Context;
 class Application;
+class GraphBuilder;
+class RenderTarget;
 }  // namespace wren
 
 class Editor {
@@ -25,9 +26,6 @@ class Editor {
   void on_update();
 
  private:
-  auto resize_target(const std::shared_ptr<wren::RenderTarget> &target)
-      -> wren::expected<void>;
-
   std::shared_ptr<wren::Context> ctx_;
   wren::Mesh mesh_;
 

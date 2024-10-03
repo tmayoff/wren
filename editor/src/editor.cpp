@@ -16,7 +16,7 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app)
     -> wren::expected<std::shared_ptr<Editor>> {
   auto editor = std::make_shared<Editor>(app->context());
 
-  TRY_RESULT(auto graph, editor->build_ui_render_graph(app->context()));
+  TRY_RESULT(const auto graph, editor->build_ui_render_graph(app->context()));
   app->context()->renderer->set_graph_builder(graph);
 
   editor::ui::init(app->context());
@@ -148,7 +148,7 @@ auto Editor::build_ui_render_graph(const std::shared_ptr<wren::Context> &ctx)
     -> wren::expected<wren::GraphBuilder> {
   wren::GraphBuilder builder(ctx);
 
-  TRY_RESULT(auto mesh_shader,
+  TRY_RESULT(const auto mesh_shader,
              wren::vk::Shader::Create(ctx->graphics_context->Device().get(),
                                       wren::shaders::MESH_VERT_SHADER.data(),
                                       wren::shaders::MESH_FRAG_SHADER.data()));
