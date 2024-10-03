@@ -40,11 +40,14 @@ struct ShaderModule {
 
   [[nodiscard]] auto get_vertex_input_attributes() const
       -> std::vector<::vk::VertexInputAttributeDescription>;
+
+  [[nodiscard]] auto get_descriptor_set_layout_bindings() const
+      -> std::vector<::vk::DescriptorSetLayoutBinding>;
 };
 
 class Shader {
  public:
-  static auto Create(const ::vk::Device &device,
+  static auto create(const ::vk::Device &device,
                      const std::string &vertex_shader,
                      const std::string &fragment_shader)
       -> expected<std::shared_ptr<Shader>>;
@@ -55,16 +58,16 @@ class Shader {
                              const std::string &shader_source)
       -> wren::expected<ShaderModule>;
 
-  [[nodiscard]] auto get_pipeline() const { return pipeline; }
+  [[nodiscard]] auto get_pipeline() const { return pipeline_; }
   [[nodiscard]] auto pipeline_layout() const { return pipeline_layout_; }
   [[nodiscard]] auto descriptor_layout() const { return descriptor_layout_; }
 
   void fragment_shader(const ShaderModule &fragment) {
-    fragment_shader_module = fragment;
+    fragment_shader_module_ = fragment;
   }
 
   void vertex_shader(const ShaderModule &vertex) {
-    vertex_shader_module = vertex;
+    vertex_shader_module_ = vertex;
   }
 
   auto create_graphics_pipeline(const ::vk::Device &device,
@@ -74,10 +77,10 @@ class Shader {
  private:
   ::vk::DescriptorSetLayout descriptor_layout_;
   ::vk::PipelineLayout pipeline_layout_;
-  ::vk::Pipeline pipeline;
+  ::vk::Pipeline pipeline_;
 
-  ShaderModule vertex_shader_module;
-  ShaderModule fragment_shader_module;
+  ShaderModule vertex_shader_module_;
+  ShaderModule fragment_shader_module_;
 };
 
 }  // namespace wren::vk

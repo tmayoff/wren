@@ -152,7 +152,7 @@ auto Editor::build_ui_render_graph(const std::shared_ptr<wren::Context> &ctx)
   wren::GraphBuilder builder(ctx);
 
   TRY_RESULT(const auto mesh_shader,
-             wren::vk::Shader::Create(ctx->graphics_context->Device().get(),
+             wren::vk::Shader::create(ctx->graphics_context->Device().get(),
                                       wren::shaders::kMeshVertShader.data(),
                                       wren::shaders::kMeshFragShader.data()));
 
@@ -182,7 +182,7 @@ auto Editor::build_ui_render_graph(const std::shared_ptr<wren::Context> &ctx)
                                            wren::math::vec3f::UnitZ());
 
             ubo.proj = wren::math::perspective(
-                wren::math::radians(90.0f), 2226.0f / 1415.0f, 0.01f, 1000.0f);
+                wren::math::radians(45.0f), 2226.0f / 1415.0f, 0.01f, 1000.0f);
 
             pass.write_scratch_buffer(cmd, 0, 0, ubo);
 

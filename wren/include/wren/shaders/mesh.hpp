@@ -22,7 +22,7 @@ layout(binding = 1) uniform LOCALS {
 layout(location = 0) out vec3 out_color;
 
 void main() {
-    gl_Position = globals.proj * globals.view * vec4(in_position, 0.0, 1.0);
+    gl_Position = globals.proj * globals.view * locals.model * vec4(in_position, 0.0, 1.0);
     out_color = in_color;
 }
 )";

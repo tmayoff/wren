@@ -60,7 +60,31 @@ auto ShaderModule::get_vertex_input_attributes() const
   return attrs;
 }
 
-auto Shader::Create(const ::vk::Device &device,
+auto ShaderModule::get_descriptor_set_layout_bindings() const
+    -> std::vector<::vk::DescriptorSetLayoutBinding> {
+  uint32_t count = 0;
+  reflection->EnumerateDescriptorSets(&count, nullptr);
+  std::vector<SpvReflectDescriptorSet *> spv_sets(count);
+  reflection->EnumerateDescriptorSets(&count, spv_sets.data());
+
+  // TODO Vector of sets of bindings
+  std::vector<::vk::DescriptorSetLayoutBinding> layouts;
+  for (const SpvReflectDescriptorSet *set : spv_sets) {
+    std::span<SpvReflectDescriptorBinding *> bindings(set->bindings,
+                                                      set->binding_count);
+
+    for (SpvReflectDescriptorBinding *binding : bindings) {
+      layouts.emplace_back(
+          binding->binding,
+          static_cast<::vk::DescriptorType>(binding->descriptor_type),
+          binding->count, ::vk::ShaderStageFlagBits::eVertex);
+    }
+  }
+
+  return layouts;
+}
+
+auto Shader::create(const ::vk::Device &device,
                     const std::string &vertex_shader,
                     const std::string &fragment_shader)
     -> expected<std::shared_ptr<Shader>> {
@@ -120,13 +144,10 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
     -> expected<void> {
   ::vk::Result res = ::vk::Result::eSuccess;
 
-  // \TODO Read ubos
-  ::vk::DescriptorSetLayoutBinding ubo_layout_bindings(
-      0, ::vk::DescriptorType::eUniformBuffer, 1,
-      ::vk::ShaderStageFlagBits::eVertex);
+  const auto bindings =
+      vertex_shader_module_.get_descriptor_set_layout_bindings();
   ::vk::DescriptorSetLayoutCreateInfo dl_create_info(
-      ::vk::DescriptorSetLayoutCreateFlagBits::ePushDescriptorKHR,
-      ubo_layout_bindings);
+      ::vk::DescriptorSetLayoutCreateFlagBits::ePushDescriptorKHR, bindings);
 
   VK_TIE_ERR_PROP(descriptor_layout_,
                   device.createDescriptorSetLayout(dl_create_info));
@@ -139,9 +160,9 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
   std::array dynamic_states = {::vk::DynamicState::eViewport,
                                ::vk::DynamicState::eScissor};
   ::vk::PipelineDynamicStateCreateInfo dynamic_state({}, dynamic_states);
-  const auto input_bindings = vertex_shader_module.get_vertex_input_bindings();
+  const auto input_bindings = vertex_shader_module_.get_vertex_input_bindings();
   const auto input_attributes =
-      vertex_shader_module.get_vertex_input_attributes();
+      vertex_shader_module_.get_vertex_input_attributes();
 
   ::vk::PipelineVertexInputStateCreateInfo vertex_input_info{
       {}, input_bindings, input_attributes};
@@ -179,10 +200,10 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
       {0.0, 0.0, 0.0, 0.0});
 
   auto v_stage_create_info = ::vk::PipelineShaderStageCreateInfo(
-      {}, ::vk::ShaderStageFlagBits::eVertex, vertex_shader_module.module,
+      {}, ::vk::ShaderStageFlagBits::eVertex, vertex_shader_module_.module,
       "main");
   auto f_stage_create_info = ::vk::PipelineShaderStageCreateInfo(
-      {}, ::vk::ShaderStageFlagBits::eFragment, fragment_shader_module.module,
+      {}, ::vk::ShaderStageFlagBits::eFragment, fragment_shader_module_.module,
       "main");
   std::array shader_stages = {v_stage_create_info, f_stage_create_info};
 
@@ -191,7 +212,7 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
       &viewport_state, &rasterization, &multisample, {}, &colour_blend,
       &dynamic_state, pipeline_layout_, render_pass);
 
-  std::tie(res, pipeline) = device.createGraphicsPipeline({}, create_info);
+  std::tie(res, pipeline_) = device.createGraphicsPipeline({}, create_info);
   if (res != ::vk::Result::eSuccess)
     return tl::make_unexpected(make_error_code(res));
 
