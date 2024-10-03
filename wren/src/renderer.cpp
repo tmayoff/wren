@@ -29,7 +29,7 @@ auto Renderer::begin_frame() -> expected<uint32_t> {
 
   ::vk::Result res = ::vk::Result::eSuccess;
 
-  auto const &device = ctx_->graphics_context->Device().get();
+  const auto &device = ctx_->graphics_context->Device().get();
   {
     ZoneScopedN("device.waitForFences()");  // NOLINT
     VK_ERR_PROP_VOID(
@@ -41,8 +41,8 @@ auto Renderer::begin_frame() -> expected<uint32_t> {
 
   {
     ZoneScopedN("device.acquireNextImageKHR()");
-    std::tie(res, image_index) = device.acquireNextImageKHR(
-        swapchain, UINT64_MAX, image_available);
+    std::tie(res, image_index) =
+        device.acquireNextImageKHR(swapchain, UINT64_MAX, image_available);
     if (res == ::vk::Result::eErrorOutOfDateKHR) {
       recreate_swapchain();
       return tl::make_unexpected(make_error_code(res));
@@ -56,19 +56,19 @@ auto Renderer::begin_frame() -> expected<uint32_t> {
 }
 
 void Renderer::end_frame(uint32_t image_index) {
-  ::vk::PipelineStageFlags waitDstStageMask =
+  ::vk::PipelineStageFlags wait_dst_stage_mask =
       ::vk::PipelineStageFlagBits::eColorAttachmentOutput;
 
   std::vector<::vk::CommandBuffer> cmd_bufs;
   for (auto g : render_graph) {
     ZoneScopedN("render_pass->execute()");
     g->render_pass->execute();
-    auto const bufs = g->render_pass->get_command_buffers();
+    const auto bufs = g->render_pass->get_command_buffers();
     cmd_bufs.insert(cmd_bufs.end(), bufs.begin(), bufs.end());
   }
 
-  ::vk::SubmitInfo submit_info(image_available, waitDstStageMask,
-                               cmd_bufs, render_finished);
+  ::vk::SubmitInfo submit_info(image_available, wait_dst_stage_mask, cmd_bufs,
+                               render_finished);
   ::vk::Result res =
       ctx_->graphics_context->Device().get_graphics_queue().submit(
           submit_info, in_flight_fence);
@@ -76,11 +76,9 @@ void Renderer::end_frame(uint32_t image_index) {
     spdlog::warn("{}", ::vk::to_string(res));
   }
 
-  ::vk::PresentInfoKHR present_info{render_finished, swapchain,
-                                    image_index};
-  res =
-      ctx_->graphics_context->Device().get_present_queue().presentKHR(
-          present_info);
+  ::vk::PresentInfoKHR present_info{render_finished, swapchain, image_index};
+  res = ctx_->graphics_context->Device().get_present_queue().presentKHR(
+      present_info);
   if (res == ::vk::Result::eErrorOutOfDateKHR ||
       res == ::vk::Result::eSuboptimalKHR) {
     recreate_swapchain();
@@ -93,43 +91,39 @@ void Renderer::end_frame(uint32_t image_index) {
 }
 
 auto Renderer::submit_command_buffer(
-    std::function<void(::vk::CommandBuffer &)> const &cmd_buf)
+    const std::function<void(::vk::CommandBuffer &)> &cmd_buf)
     -> expected<void> {
   if (!cmd_buf) return {};
 
-  VK_CHECK_RESULT(
-      one_time_cmd_buffer.begin(::vk::CommandBufferBeginInfo(
-          ::vk::CommandBufferUsageFlagBits::eOneTimeSubmit)));
+  VK_CHECK_RESULT(one_time_cmd_buffer.begin(::vk::CommandBufferBeginInfo(
+      ::vk::CommandBufferUsageFlagBits::eOneTimeSubmit)));
 
   cmd_buf(one_time_cmd_buffer);
 
   VK_CHECK_RESULT(one_time_cmd_buffer.end());
 
   ::vk::SubmitInfo submit_info({}, {}, one_time_cmd_buffer);
-  VK_CHECK_RESULT(
-      ctx_->graphics_context->Device().get_graphics_queue().submit(
-          submit_info));
+  VK_CHECK_RESULT(ctx_->graphics_context->Device().get_graphics_queue().submit(
+      submit_info));
 
-  VK_CHECK_RESULT(ctx_->graphics_context->Device()
-                      .get_graphics_queue()
-                      .waitIdle());
+  VK_CHECK_RESULT(
+      ctx_->graphics_context->Device().get_graphics_queue().waitIdle());
 
   return {};
 }
 
-Renderer::Renderer(std::shared_ptr<Context> const &ctx)
+Renderer::Renderer(const std::shared_ptr<Context> &ctx)
     : ctx_(ctx),
-      m(ctx->graphics_context->Device(),
-        ctx->graphics_context->allocator()) {
+      m(ctx->graphics_context->Device(), ctx->graphics_context->allocator()) {
   ctx->event_dispatcher.on<Event::WindowResized>(
       [this](auto &w) { recreate_swapchain(); });
 }
 
-auto Renderer::New(std::shared_ptr<Context> const &ctx)
+auto Renderer::New(const std::shared_ptr<Context> &ctx)
     -> expected<std::shared_ptr<Renderer>> {
   ZoneScoped;
 
-  auto const device = ctx->graphics_context->Device();
+  const auto device = ctx->graphics_context->Device();
 
   auto renderer = std::shared_ptr<Renderer>(new Renderer(ctx));
   ctx->renderer = renderer;
@@ -138,9 +132,8 @@ auto Renderer::New(std::shared_ptr<Context> const &ctx)
   if (!res.has_value()) return tl::make_unexpected(res.error());
 
   ::vk::Result vres = ::vk::Result::eSuccess;
-  std::tie(vres, renderer->in_flight_fence) =
-      device.get().createFence(::vk::FenceCreateInfo{
-          ::vk::FenceCreateFlagBits::eSignaled});
+  std::tie(vres, renderer->in_flight_fence) = device.get().createFence(
+      ::vk::FenceCreateInfo{::vk::FenceCreateFlagBits::eSignaled});
   if (vres != ::vk::Result::eSuccess)
     return tl::make_unexpected(make_error_code(vres));
 
@@ -154,21 +147,19 @@ auto Renderer::New(std::shared_ptr<Context> const &ctx)
   if (vres != ::vk::Result::eSuccess)
     return tl::make_unexpected(make_error_code(vres));
 
-  VK_TIE_RESULT(
-      renderer->command_pool_,
-      device.get().createCommandPool(::vk::CommandPoolCreateInfo{
-          ::vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-          ctx->graphics_context->FindQueueFamilyIndices()
-              .value()
-              .graphics_index}));
+  VK_TIE_RESULT(renderer->command_pool_,
+                device.get().createCommandPool(::vk::CommandPoolCreateInfo{
+                    ::vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+                    ctx->graphics_context->FindQueueFamilyIndices()
+                        .value()
+                        .graphics_index}));
 
   ::vk::CommandBufferAllocateInfo alloc_info(
       renderer->command_pool_, ::vk::CommandBufferLevel::ePrimary, 1);
 
   VK_TRY_RESULT(
       bufs,
-      ctx->graphics_context->Device().get().allocateCommandBuffers(
-          alloc_info));
+      ctx->graphics_context->Device().get().allocateCommandBuffers(alloc_info));
 
   renderer->one_time_cmd_buffer = bufs.front();
 
@@ -179,11 +170,10 @@ auto Renderer::recreate_swapchain() -> expected<void> {
   ZoneScoped;  // NOLINT
   ::vk::Result res = ::vk::Result::eSuccess;
 
-  auto const &device = ctx_->graphics_context->Device();
+  const auto &device = ctx_->graphics_context->Device();
 
   {
-    ZoneScopedN(
-        "ctx->graphics_context->Device().get().waitIdle()");  // NOLINT
+    ZoneScopedN("ctx->graphics_context->Device().get().waitIdle()");  // NOLINT
     res = ctx_->graphics_context->Device().get().waitIdle();
   }
 
@@ -194,7 +184,7 @@ auto Renderer::recreate_swapchain() -> expected<void> {
   // }
 
   if (render_targets_.contains(SWAPCHAIN_RENDERTARGET_NAME.data())) {
-    for (auto const &iv : swapchain_image_views_)
+    for (const auto &iv : swapchain_image_views_)
       device.get().destroyImageView(iv);
     swapchain_image_views_.clear();
   }
@@ -202,30 +192,25 @@ auto Renderer::recreate_swapchain() -> expected<void> {
   device.get().destroySwapchainKHR(swapchain);
 
   //=========== Create Swapchain
-  auto swapchain_support =
-      ctx_->graphics_context->GetSwapchainSupport();
+  auto swapchain_support = ctx_->graphics_context->GetSwapchainSupport();
   if (!swapchain_support.has_value())
     return tl::make_unexpected(swapchain_support.error());
 
-  auto format =
-      choose_swapchain_format(swapchain_support->surface_formats);
-  auto present_mode = choose_swapchain_presentation_mode(
-      swapchain_support->present_modes);
+  auto format = choose_swapchain_format(swapchain_support->surface_formats);
+  auto present_mode =
+      choose_swapchain_presentation_mode(swapchain_support->present_modes);
   swapchain_extent =
       choose_swapchain_extent(swapchain_support->surface_capabilites);
 
-  auto image_count =
-      swapchain_support->surface_capabilites.minImageCount + 1;
+  auto image_count = swapchain_support->surface_capabilites.minImageCount + 1;
   if (swapchain_support->surface_capabilites.maxImageCount > 0 &&
-      image_count >
-          swapchain_support->surface_capabilites.maxImageCount) {
-    image_count =
-        swapchain_support->surface_capabilites.maxImageCount;
+      image_count > swapchain_support->surface_capabilites.maxImageCount) {
+    image_count = swapchain_support->surface_capabilites.maxImageCount;
   }
 
   ::vk::SwapchainCreateInfoKHR create_info(
-      {}, ctx_->graphics_context->Surface(), image_count,
-      format.format, format.colorSpace, swapchain_extent, 1,
+      {}, ctx_->graphics_context->Surface(), image_count, format.format,
+      format.colorSpace, swapchain_extent, 1,
       ::vk::ImageUsageFlagBits::eColorAttachment);
 
   auto queue_families = vulkan::Queue::FindQueueFamilyIndices(
@@ -236,8 +221,7 @@ auto Renderer::recreate_swapchain() -> expected<void> {
 
   std::array queue_indices = {queue_families->graphics_index,
                               queue_families->present_index};
-  if (queue_families->graphics_index !=
-      queue_families->present_index) {
+  if (queue_families->graphics_index != queue_families->present_index) {
     create_info.setImageSharingMode(::vk::SharingMode::eConcurrent);
     create_info.setQueueFamilyIndices(queue_indices);
   } else {
@@ -246,38 +230,34 @@ auto Renderer::recreate_swapchain() -> expected<void> {
 
   create_info.setPreTransform(
       swapchain_support->surface_capabilites.currentTransform);
-  create_info.setCompositeAlpha(
-      ::vk::CompositeAlphaFlagBitsKHR::eOpaque);
+  create_info.setCompositeAlpha(::vk::CompositeAlphaFlagBitsKHR::eOpaque);
   create_info.setPresentMode(present_mode);
   create_info.setClipped(true);
 
   std::tie(res, swapchain) =
-      ctx_->graphics_context->Device().get().createSwapchainKHR(
-          create_info);
+      ctx_->graphics_context->Device().get().createSwapchainKHR(create_info);
   if (res != ::vk::Result::eSuccess)
     return tl::make_unexpected(make_error_code(res));
 
   std::tie(res, swapchain_images) =
-      ctx_->graphics_context->Device().get().getSwapchainImagesKHR(
-          swapchain);
+      ctx_->graphics_context->Device().get().getSwapchainImagesKHR(swapchain);
   if (res != ::vk::Result::eSuccess)
     return tl::make_unexpected(make_error_code(res));
 
   swapchain_image_format = format.format;
 
   swapchain_image_views_.reserve(swapchain_images.size());
-  for (auto const &swapchain_image : swapchain_images) {
+  for (const auto &swapchain_image : swapchain_images) {
     ::vk::ImageViewCreateInfo create_info(
-        {}, swapchain_image, ::vk::ImageViewType::e2D,
-        swapchain_image_format, {},
-        ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor,
-                                    0, 1, 0, 1));
+        {}, swapchain_image, ::vk::ImageViewType::e2D, swapchain_image_format,
+        {},
+        ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor, 0, 1, 0,
+                                    1));
 
     ::vk::ImageView image_view;
     VK_TIE_ERR_PROP(
         image_view,
-        ctx_->graphics_context->Device().get().createImageView(
-            create_info));
+        ctx_->graphics_context->Device().get().createImageView(create_info));
 
     swapchain_image_views_.push_back(image_view);
   }
@@ -286,19 +266,20 @@ auto Renderer::recreate_swapchain() -> expected<void> {
     render_targets_.emplace(
         SWAPCHAIN_RENDERTARGET_NAME.data(),
         std::make_shared<RenderTarget>(
-            swapchain_extent, swapchain_image_format,
-            ::vk::SampleCountFlagBits::e1,
+            math::vec2i{static_cast<int32_t>(swapchain_extent.width),
+                        static_cast<int32_t>(swapchain_extent.height)},
+            swapchain_image_format, ::vk::SampleCountFlagBits::e1,
             swapchain_image_views_.front(),
             ::vk::ImageUsageFlagBits::eColorAttachment));
   } else {
-    auto const &target =
-        render_targets_.at(SWAPCHAIN_RENDERTARGET_NAME.data());
-    target->size = swapchain_extent;
+    const auto &target = render_targets_.at(SWAPCHAIN_RENDERTARGET_NAME.data());
+    target->size = {static_cast<int32_t>(swapchain_extent.width),
+                    static_cast<int32_t>(swapchain_extent.height)};
     target->format = swapchain_image_format;
     target->image_view = swapchain_image_views_.front();
   }
 
-  for (auto const &g : render_graph)
+  for (const auto &g : render_graph)
     g->render_pass->recreate_framebuffers(
         ctx_->graphics_context->Device().get());
 
@@ -306,15 +287,14 @@ auto Renderer::recreate_swapchain() -> expected<void> {
 }
 
 auto Renderer::choose_swapchain_format(
-    std::vector<::vk::SurfaceFormatKHR> const &formats)
+    const std::vector<::vk::SurfaceFormatKHR> &formats)
     -> ::vk::SurfaceFormatKHR {
-  auto const PREFERED_FORMAT = ::vk::Format::eB8G8R8Srgb;
-  auto const PREFERED_COLOR_SPACE =
-      ::vk::ColorSpaceKHR::eSrgbNonlinear;
+  const auto prefered_format = ::vk::Format::eB8G8R8Srgb;
+  const auto prefered_color_space = ::vk::ColorSpaceKHR::eSrgbNonlinear;
 
-  for (auto const &format : formats) {
-    if (format.format == PREFERED_FORMAT &&
-        format.colorSpace == PREFERED_COLOR_SPACE)
+  for (const auto &format : formats) {
+    if (format.format == prefered_format &&
+        format.colorSpace == prefered_color_space)
       return format;
   }
 
@@ -322,37 +302,35 @@ auto Renderer::choose_swapchain_format(
 }
 
 auto Renderer::choose_swapchain_presentation_mode(
-    std::vector<::vk::PresentModeKHR> const &modes)
-    -> ::vk::PresentModeKHR {
-  auto const PREFERED_PRESENT_MDOE = ::vk::PresentModeKHR::eMailbox;
+    const std::vector<::vk::PresentModeKHR> &modes) -> ::vk::PresentModeKHR {
+  const auto prefered_present_mdoe = ::vk::PresentModeKHR::eMailbox;
 
-  for (auto const &mode : modes) {
-    if (mode == PREFERED_PRESENT_MDOE) return mode;
+  for (const auto &mode : modes) {
+    if (mode == prefered_present_mdoe) return mode;
   }
 
   return ::vk::PresentModeKHR::eFifo;
 }
 
 auto Renderer::choose_swapchain_extent(
-    ::vk::SurfaceCapabilitiesKHR const &surface_capabilities)
+    const ::vk::SurfaceCapabilitiesKHR &surface_capabilities)
     -> ::vk::Extent2D {
   if (surface_capabilities.currentExtent.width !=
       std::numeric_limits<uint32_t>::max()) {
     return surface_capabilities.currentExtent;
   } else {
     auto [width, height] = ctx_->window.GetSize();
-    VkExtent2D actualExtent = {static_cast<uint32_t>(width),
-                               static_cast<uint32_t>(height)};
+    VkExtent2D actual_extent = {static_cast<uint32_t>(width),
+                                static_cast<uint32_t>(height)};
 
-    actualExtent.width = std::clamp(
-        actualExtent.width, surface_capabilities.minImageExtent.width,
-        surface_capabilities.maxImageExtent.width);
-    actualExtent.height =
-        std::clamp(actualExtent.height,
-                   surface_capabilities.minImageExtent.height,
-                   surface_capabilities.maxImageExtent.height);
+    actual_extent.width = std::clamp(actual_extent.width,
+                                     surface_capabilities.minImageExtent.width,
+                                     surface_capabilities.maxImageExtent.width);
+    actual_extent.height = std::clamp(
+        actual_extent.height, surface_capabilities.minImageExtent.height,
+        surface_capabilities.maxImageExtent.height);
 
-    return actualExtent;
+    return actual_extent;
   }
 }
 }  // namespace wren

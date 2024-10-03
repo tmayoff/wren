@@ -2,6 +2,7 @@ wren_vk = library(
     'wren_vk',
     'src/errors.cpp',
     'src/buffer.cpp',
+    'src/image.cpp',
     'src/shader.cpp',
     'src/memory.cpp',
     'src/vulkan.cpp',
@@ -10,6 +11,7 @@ wren_vk = library(
     dependencies: [
         wren_utils_dep,
         wren_reflect_dep,
+        wrenm_dep,
         spdlog,
         vma,
         vulkan,
@@ -23,6 +25,7 @@ wren_vk_dep = declare_dependency(
     dependencies: [
         wren_utils_dep,
         wren_reflect_dep,
+        wrenm_dep,
         spdlog,
         vma,
         vulkan,

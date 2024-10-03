@@ -1,5 +1,5 @@
 ---
 BasedOnStyle: Google
 ColumnLimit: 80
-QualifierAlignment: Right
+QualifierAlignment: Left
 ---

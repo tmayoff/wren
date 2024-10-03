@@ -22,16 +22,16 @@ class RenderPass {
  public:
   using execute_fn_t = std::function<void(RenderPass&, ::vk::CommandBuffer&)>;
 
-  static auto create(std::shared_ptr<Context> const& ctx,
-                     std::string const& name, PassResources const& resources,
-                     execute_fn_t const& fn)
+  static auto create(const std::shared_ptr<Context>& ctx,
+                     const std::string& name, const PassResources& resources,
+                     const execute_fn_t& fn)
       -> expected<std::shared_ptr<RenderPass>>;
 
   void execute();
 
-  void resize_target(math::vec2f const& new_size);
+  void resize_target(const math::vec2f& new_size);
 
-  void on_resource_resized(std::pair<float, float> const& size);
+  void on_resource_resized(const std::pair<float, float>& size);
 
   auto current_target_size() { return resources_.render_target->size; }
 
@@ -39,14 +39,16 @@ class RenderPass {
 
   [[nodiscard]] auto get_framebuffer() const { return framebuffer_; }
 
-  void recreate_framebuffers(::vk::Device const& device);
+  void recreate_framebuffers(const ::vk::Device& device);
 
-  void bind_pipeline(std::string const& pipeline_name);
+  void bind_pipeline(const std::string& pipeline_name);
 
   [[nodiscard]] auto get() const { return render_pass_; }
 
+  [[nodiscard]] auto target() const { return target_; }
+
  private:
-  RenderPass(std::shared_ptr<Context> const& ctx, std::string name,
+  RenderPass(const std::shared_ptr<Context>& ctx, std::string name,
              PassResources resources, execute_fn_t fn);
 
   std::shared_ptr<Context> ctx_;

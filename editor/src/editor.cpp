@@ -12,28 +12,31 @@
 
 #include "ui.hpp"
 
-auto Editor::New(std::shared_ptr<wren::Application> const &app)
+auto Editor::create(const std::shared_ptr<wren::Application> &app)
     -> wren::expected<std::shared_ptr<Editor>> {
   auto editor = std::make_shared<Editor>(app->context());
 
-  TRY_RESULT(auto graph,
-             editor->build_ui_render_graph(app->context()));
+  TRY_RESULT(auto graph, editor->build_ui_render_graph(app->context()));
   app->context()->renderer->set_graph_builder(graph);
 
   editor::ui::init(app->context());
 
   vk::SamplerCreateInfo sampler_info{};
 
-  auto t =
-      app->context()->graphics_context->Device().get().createSampler(
-          sampler_info);
-  editor->texture_sampler = t.value;
+  auto t = app->context()->graphics_context->Device().get().createSampler(
+      sampler_info);
+  editor->texture_sampler_ = t.value;
 
-  editor->dset.resize(1);
+  editor->dset_.resize(1);
   // for (uint32_t i = 0; i < 1; i++)
-  editor->dset[0] = ImGui_ImplVulkan_AddTexture(
-      editor->texture_sampler, editor->scene_view,
-      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+  const auto scene_view = app->context()
+                              ->renderer->get_graph()
+                              .node_by_name("mesh")
+                              ->render_pass->target()
+                              ->image_view;
+  editor->dset_[0] =
+      ImGui_ImplVulkan_AddTexture(editor->texture_sampler_, scene_view,
+                                  VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
   app->add_callback_to_phase(wren::CallbackPhase::Update,
                              [editor]() { editor->on_update(); });
@@ -44,27 +47,26 @@ auto Editor::New(std::shared_ptr<wren::Application> const &app)
 void Editor::on_update() {
   ZoneScoped;  // NOLINT
 
-  if (scene_resized.has_value()) {
-    auto target = std::make_shared<wren::RenderTarget>(
-        ::vk::Extent2D{static_cast<uint32_t>(scene_resized->x()),
-                       static_cast<uint32_t>(scene_resized->y())},
-        ::vk::Format::eB8G8R8A8Srgb, ::vk::SampleCountFlagBits::e1,
-        nullptr,
-        ::vk::ImageUsageFlagBits::eColorAttachment |
-            ::vk::ImageUsageFlagBits::eSampled);
+  if (scene_resized_.has_value()) {
+    // auto target = std::make_shared<wren::RenderTarget>(
+    //     ::vk::Extent2D{static_cast<uint32_t>(scene_resized->x()),
+    //                    static_cast<uint32_t>(scene_resized->y())},
+    //     ::vk::Format::eB8G8R8A8Srgb, ::vk::SampleCountFlagBits::e1, nullptr,
+    //     ::vk::ImageUsageFlagBits::eColorAttachment |
+    //         ::vk::ImageUsageFlagBits::eSampled);
 
-    // Replace the target
-    ResizeTarget(target);
-    auto const &targets = ctx->renderer->render_targets();
-    targets.at("scene_viewer")->image_view = scene_view;
-    targets.at("scene_viewer")->size = target->size;
-    targets.at("scene_viewer")->format = target->format;
+    // // Replace the target
+    // ResizeTarget(target);
+    // const auto &targets = ctx->renderer->render_targets();
+    // targets.at("scene_viewer")->image_view = scene_view;
+    // targets.at("scene_viewer")->size = target->size;
+    // targets.at("scene_viewer")->format = target->format;
 
-    scene_resized.reset();
-    ctx->renderer->get_graph()
-        .node_by_name("mesh")
-        ->render_pass->recreate_framebuffers(
-            ctx->graphics_context->Device().get());
+    // scene_resized.reset();
+    // ctx->renderer->get_graph()
+    //     .node_by_name("mesh")
+    //     ->render_pass->recreate_framebuffers(
+    //         ctx->graphics_context->Device().get());
   }
 
   editor::ui::begin();
@@ -72,18 +74,17 @@ void Editor::on_update() {
   static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
   ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
 
-  ImGuiViewport const *viewport = ImGui::GetMainViewport();
+  const ImGuiViewport *viewport = ImGui::GetMainViewport();
   ImGui::SetNextWindowPos(viewport->WorkPos);
   ImGui::SetNextWindowSize(viewport->WorkSize);
   ImGui::SetNextWindowViewport(viewport->ID);
   ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0F);
   ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0F);
 
-  window_flags |=
-      ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
-      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-      ImGuiWindowFlags_NoBringToFrontOnFocus |
-      ImGuiWindowFlags_NoNavFocus;
+  window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+                  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                  ImGuiWindowFlags_NoBringToFrontOnFocus |
+                  ImGuiWindowFlags_NoNavFocus;
 
   ImGui::Begin("Editor", nullptr, window_flags);
   ImGui::PopStyleVar(2);
@@ -91,26 +92,23 @@ void Editor::on_update() {
   ImGuiIO &io = ImGui::GetIO();
   if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
     ImGuiID dockspace_id = ImGui::GetID("Editor");
-    ImGui::DockSpace(dockspace_id, ImVec2{0.0F, 0.0F},
-                     dockspace_flags);
+    ImGui::DockSpace(dockspace_id, ImVec2{0.0F, 0.0F}, dockspace_flags);
 
     static bool first_time = true;
     if (first_time) {
       first_time = false;
 
       ImGui::DockBuilderRemoveNode(dockspace_id);
-      ImGui::DockBuilderAddNode(
-          dockspace_id,
-          dockspace_flags | ImGuiDockNodeFlags_DockSpace);
+      ImGui::DockBuilderAddNode(dockspace_id,
+                                dockspace_flags | ImGuiDockNodeFlags_DockSpace);
       ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
 
-      auto const dockspace_id_bottom = ImGui::DockBuilderSplitNode(
+      const auto dockspace_id_bottom = ImGui::DockBuilderSplitNode(
           dockspace_id, ImGuiDir_Down, 0.25, nullptr, &dockspace_id);
 
-      auto const dockspace_id_right =
-          ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Right,
-                                      0.25F, nullptr, &dockspace_id);
-      auto const dockspace_id_left = ImGui::DockBuilderSplitNode(
+      const auto dockspace_id_right = ImGui::DockBuilderSplitNode(
+          dockspace_id, ImGuiDir_Right, 0.25F, nullptr, &dockspace_id);
+      const auto dockspace_id_left = ImGui::DockBuilderSplitNode(
           dockspace_id, ImGuiDir_Left, 0.25F, nullptr, &dockspace_id);
 
       ImGui::DockBuilderDockWindow("Inspector", dockspace_id_right);
@@ -129,12 +127,12 @@ void Editor::on_update() {
   ImGui::Begin("Viewer");
   auto curr_size = ImGui::GetContentRegionAvail();
   auto curr_size_vec = wren::math::vec2f{curr_size.x, curr_size.y};
-  if (curr_size_vec != last_scene_size) {
-    scene_resized = curr_size_vec;
-    last_scene_size = curr_size_vec;
+  if (curr_size_vec != last_scene_size_) {
+    scene_resized_ = curr_size_vec;
+    last_scene_size_ = curr_size_vec;
   }
 
-  ImGui::Image(dset[0], {last_scene_size.x(), last_scene_size.y()});
+  ImGui::Image(dset_[0], {last_scene_size_.x(), last_scene_size_.y()});
   ImGui::End();
 
   ImGui::Begin("Inspector");
@@ -149,46 +147,29 @@ void Editor::on_update() {
   editor::ui::end();
 }
 
-auto Editor::build_ui_render_graph(
-    std::shared_ptr<wren::Context> const &ctx)
+auto Editor::build_ui_render_graph(const std::shared_ptr<wren::Context> &ctx)
     -> wren::expected<wren::GraphBuilder> {
   wren::GraphBuilder builder(ctx);
 
-  auto target = std::make_shared<wren::RenderTarget>(
-      ::vk::Extent2D{512, 512}, ::vk::Format::eB8G8R8A8Srgb,
-      ::vk::SampleCountFlagBits::e1, nullptr,
-      ::vk::ImageUsageFlagBits::eColorAttachment |
-          ::vk::ImageUsageFlagBits::eSampled);
-
-  ResizeTarget(target);
-
-  target->image_view = scene_view;
-  target->final_layout = ::vk::ImageLayout::eShaderReadOnlyOptimal;
-
   TRY_RESULT(auto mesh_shader,
-             wren::vk::Shader::Create(
-                 ctx->graphics_context->Device().get(),
-                 wren::shaders::MESH_VERT_SHADER.data(),
-                 wren::shaders::MESH_FRAG_SHADER.data()));
+             wren::vk::Shader::Create(ctx->graphics_context->Device().get(),
+                                      wren::shaders::MESH_VERT_SHADER.data(),
+                                      wren::shaders::MESH_FRAG_SHADER.data()));
 
-  mesh = wren::Mesh(ctx->graphics_context->Device(),
-                    ctx->graphics_context->allocator());
-  mesh.shader(mesh_shader);
+  mesh_ = wren::Mesh(ctx->graphics_context->Device(),
+                     ctx->graphics_context->allocator());
+  mesh_.shader(mesh_shader);
 
   builder
       .add_pass("mesh",
-                {
-                    {
-                        {"mesh", mesh_shader},
-                    },
-                    "scene_viewer",
-                    target,
-                },
-                [this, ctx](wren::RenderPass &pass,
-                            ::vk::CommandBuffer &cmd) {
+                {{
+                     {"mesh", mesh_shader},
+                 },
+                 "scene_viewer"},
+                [this, ctx](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
                   pass.bind_pipeline("mesh");
-                  mesh.bind(cmd);
-                  mesh.draw(cmd);
+                  mesh_.bind(cmd);
+                  mesh_.draw(cmd);
                 })
       .add_pass("ui", {{}, "swapchain_target"},
                 [](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
@@ -196,51 +177,4 @@ auto Editor::build_ui_render_graph(
                 });
 
   return builder;
-}
-
-auto Editor::ResizeTarget(
-    std::shared_ptr<wren::RenderTarget> const &target)
-    -> wren::expected<void> {
-  ::vk::ImageCreateInfo image_info(
-      {}, ::vk::ImageType::e2D, target->format,
-      ::vk::Extent3D(target->size.width, target->size.height, 1), 1,
-      1);
-  image_info.setUsage(target->image_usage);
-  image_info.setSharingMode(::vk::SharingMode::eExclusive);
-
-  VmaAllocationCreateInfo alloc_info{};
-  alloc_info.usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
-  auto const &allocator = ctx->graphics_context->allocator();
-  auto info = static_cast<VkImageCreateInfo>(image_info);
-  vmaCreateImage(allocator, &info, &alloc_info, &scene_image,
-                 &scene_alloc_, nullptr);
-
-  // transition image
-  TRY_RESULT(ctx->renderer->submit_command_buffer(
-      [this](::vk::CommandBuffer const &cmd_buf) {
-        vk::ImageMemoryBarrier barrier(
-            ::vk::AccessFlagBits::eTransferRead,
-            ::vk::AccessFlagBits::eMemoryRead,
-            ::vk::ImageLayout::eUndefined,
-            ::vk::ImageLayout::eShaderReadOnlyOptimal,
-            VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED,
-            scene_image,
-            vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor,
-                                      0, 1, 0, 1));
-
-        cmd_buf.pipelineBarrier(
-            ::vk::PipelineStageFlagBits::eTransfer,
-            ::vk::PipelineStageFlagBits::eTransfer,
-            vk::DependencyFlags(), {}, {}, barrier);
-      }));
-
-  ::vk::ImageViewCreateInfo image_view_info(
-      {}, scene_image, ::vk::ImageViewType::e2D, target->format, {},
-      ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor,
-                                  0, 1, 0, 1));
-  VK_TIE_RESULT(scene_view,
-                ctx->graphics_context->Device().get().createImageView(
-                    image_view_info));
-
-  return {};
 }

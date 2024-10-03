@@ -14,31 +14,26 @@ class Application;
 
 class Editor {
  public:
-  std::vector<VkDescriptorSet> dset{};
-  vk::Sampler texture_sampler;
-  ::vk::ImageView scene_view;
-
-  static auto New(std::shared_ptr<wren::Application> const &app)
+  static auto create(const std::shared_ptr<wren::Application> &app)
       -> wren::expected<std::shared_ptr<Editor>>;
 
-  Editor(std::shared_ptr<wren::Context> const &ctx) : ctx(ctx) {}
+  Editor(const std::shared_ptr<wren::Context> &ctx) : ctx_(ctx) {}
 
-  auto build_ui_render_graph(
-      std::shared_ptr<wren::Context> const &ctx)
+  auto build_ui_render_graph(const std::shared_ptr<wren::Context> &ctx)
       -> wren::expected<wren::GraphBuilder>;
 
   void on_update();
 
  private:
-  auto ResizeTarget(std::shared_ptr<wren::RenderTarget> const &target)
+  auto resize_target(const std::shared_ptr<wren::RenderTarget> &target)
       -> wren::expected<void>;
 
-  std::shared_ptr<wren::Context> ctx;
-  wren::Mesh mesh;
+  std::shared_ptr<wren::Context> ctx_;
+  wren::Mesh mesh_;
 
-  VkImage scene_image{};
-  VmaAllocation scene_alloc_{};
-  wren::RenderTarget scene_target;
-  std::optional<wren::math::vec2f> scene_resized;
-  wren::math::vec2f last_scene_size;
+  std::vector<VkDescriptorSet> dset_{};
+  vk::Sampler texture_sampler_;
+
+  std::optional<wren::math::vec2f> scene_resized_;
+  wren::math::vec2f last_scene_size_;
 };

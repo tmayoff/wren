@@ -28,7 +28,7 @@ auto main() -> int {
   // match the output framebuffer add a pass specifically for
   // transitioning into the presentable layout
 
-  auto const res = Editor::New(app);
+  auto const res = Editor::create(app);
   if (!res.has_value()) {
     return EXIT_FAILURE;
   }

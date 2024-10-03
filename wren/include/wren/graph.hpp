@@ -6,6 +6,7 @@
 #include <vector>
 #include <vulkan/vulkan.hpp>
 #include <wren_utils/errors.hpp>
+#include <wren_vk/image.hpp>
 
 #include "render_pass.hpp"
 
@@ -23,10 +24,9 @@ struct Graph {
   auto begin() { return nodes.begin(); }
   auto end() { return nodes.end(); }
 
-  auto node_by_name(std::string const &name) const -> node_t {
-    auto const node = std::ranges::find_if(
-        nodes,
-        [name](node_t const &node) { return name == node->name; });
+  [[nodiscard]] auto node_by_name(const std::string &name) const -> node_t {
+    const auto node = std::ranges::find_if(
+        nodes, [name](const node_t &node) { return name == node->name; });
     if (node != nodes.end()) return *node;
 
     return nullptr;
@@ -38,20 +38,20 @@ struct Graph {
 
 class GraphBuilder {
  public:
-  explicit GraphBuilder(std::shared_ptr<Context> const &ctx)
-      : ctx(ctx) {}
+  explicit GraphBuilder(const std::shared_ptr<Context> &ctx) : ctx_(ctx) {}
 
   [[nodiscard]] auto compile() const -> expected<Graph>;
 
-  auto add_pass(std::string const &name,
-                PassResources const &resources,
-                RenderPass::execute_fn_t const &fn) -> GraphBuilder &;
+  auto add_pass(const std::string &name, const PassResources &resources,
+                const RenderPass::execute_fn_t &fn) -> GraphBuilder &;
 
  private:
-  std::shared_ptr<Context> ctx;
-  std::vector<std::tuple<std::string, PassResources,
-                         RenderPass::execute_fn_t>>
-      passes;
+  [[nodiscard]] auto create_target() const
+      -> expected<std::pair<vk::Image, std::shared_ptr<RenderTarget>>>;
+
+  std::shared_ptr<Context> ctx_;
+  std::vector<std::tuple<std::string, PassResources, RenderPass::execute_fn_t>>
+      passes_;
 };
 
 }  // namespace wren

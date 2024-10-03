@@ -8,7 +8,8 @@ namespace wren {
 
 class RenderTarget {
  public:
-  ::vk::Extent2D size;
+  math::vec2i size;
+
   ::vk::Format format;
   ::vk::SampleCountFlagBits sample_count;
 

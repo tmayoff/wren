@@ -11,6 +11,7 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
+#include <wren_math/vector.hpp>
 #include <wren_reflect/parser.hpp>
 #include <wren_utils/errors.hpp>
 
@@ -32,8 +33,7 @@ struct ShaderModule {
   std::shared_ptr<spv_reflect::ShaderModule> reflection;
 
   ShaderModule() = default;
-  ShaderModule(reflect::spirv_t spirv,
-               ::vk::ShaderModule const &module);
+  ShaderModule(reflect::spirv_t spirv, const ::vk::ShaderModule &module);
 
   [[nodiscard]] auto get_vertex_input_bindings() const
       -> std::vector<::vk::VertexInputBindingDescription>;
@@ -44,37 +44,32 @@ struct ShaderModule {
 
 class Shader {
  public:
-  static auto Create(::vk::Device const &device,
-                     std::string const &vertex_shader,
-                     std::string const &fragment_shader)
+  static auto Create(const ::vk::Device &device,
+                     const std::string &vertex_shader,
+                     const std::string &fragment_shader)
       -> expected<std::shared_ptr<Shader>>;
 
-  static auto compile_shader(::vk::Device const &device,
-                             shaderc_shader_kind const &shader_kind,
-                             std::string const &filename,
-                             std::string const &shader_source)
+  static auto compile_shader(const ::vk::Device &device,
+                             const shaderc_shader_kind &shader_kind,
+                             const std::string &filename,
+                             const std::string &shader_source)
       -> wren::expected<ShaderModule>;
 
   [[nodiscard]] auto get_pipeline() const { return pipeline; }
-  [[nodiscard]] auto pipeline_layout() const {
-    return pipeline_layout_;
-  }
-  [[nodiscard]] auto descriptor_layout() const {
-    return descriptor_layout_;
-  }
+  [[nodiscard]] auto pipeline_layout() const { return pipeline_layout_; }
+  [[nodiscard]] auto descriptor_layout() const { return descriptor_layout_; }
 
-  void fragment_shader(ShaderModule const &fragment) {
+  void fragment_shader(const ShaderModule &fragment) {
     fragment_shader_module = fragment;
   }
 
-  void vertex_shader(ShaderModule const &vertex) {
+  void vertex_shader(const ShaderModule &vertex) {
     vertex_shader_module = vertex;
   }
 
-  auto create_graphics_pipeline(::vk::Device const &device,
-                                ::vk::RenderPass const &render_pass,
-                                ::vk::Extent2D const &size)
-      -> expected<void>;
+  auto create_graphics_pipeline(const ::vk::Device &device,
+                                const ::vk::RenderPass &render_pass,
+                                const math::vec2i &size) -> expected<void>;
 
  private:
   ::vk::DescriptorSetLayout descriptor_layout_;
