@@ -8,6 +8,7 @@ wren = library(
     'src/pipeline.cpp',
     'src/render_pass.cpp',
     'src/renderer.cpp',
+    'src/scene/scene.cpp',
     'src/window.cpp',
     'src/utils/vulkan.cpp',
     'src/utils/queue.cpp',
@@ -15,6 +16,7 @@ wren = library(
 
     include_directories: ['include', 'include/wren'],
     dependencies: [
+        entt,
         vulkan,
         wren_vk_dep,
         wren_reflect_dep,
@@ -23,12 +25,13 @@ wren = library(
         sdl2,
         tracy,
     ],
-    install: true
+    install: true,
 )
 wren_dep = declare_dependency(
     include_directories: 'include',
     link_with: wren,
     dependencies: [
+        entt,
         vulkan,
         wren_vk_dep,
         wren_reflect_dep,

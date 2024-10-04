@@ -19,13 +19,12 @@ expected = dependency('tl-expected', modules: ['tl::expected'])
 spirv = dependency('SPIRV-Headers')
 tracy = dependency('tracy')
 imgui = dependency('imgui_docking')
+entt = dependency('entt')
 
 add_project_arguments(
-    # '-DVULKAN_HPP_NAMESPACE=_VK_',
     '-DVULKAN_HPP_NO_EXCEPTIONS',
     '-DVUKLAN_HPP_ASSERT_ON_RESULT(x)',
     '-DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1',
-    # '-DVK_NS=_VK_',
     language: 'cpp',
 )
 
@@ -50,4 +49,5 @@ subdir('wren_text')
 subdir('wren_vk')
 subdir('wren_gui')
 subdir('wren')
+subdir('wren_ecs')
 subdir('editor')

@@ -4,10 +4,6 @@ FormatStyle: google
 CheckOptions:
   - key: mist-include-cleaner.IgnoreHeaders
     value: Eigen/src/.*
-  - key: readability-identifier-naming.TypeAliasSuffix
-    value: _t
-  - key: readability-identifier-naming.TypdefSuffix
-    value: _t
   - key:             readability-identifier-naming.ClassCase
     value:           CamelCase
   - key:             readability-identifier-naming.ClassMemberCase

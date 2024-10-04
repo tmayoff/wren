@@ -119,6 +119,7 @@
           elfutils
           libdwarf
           backward-cpp
+          entt
         ];
         vulkan_layer_path = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d:${pkgs.renderdoc}/share/vulkan/implicit_layer.d";
       in {

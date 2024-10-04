@@ -67,7 +67,6 @@ auto ShaderModule::get_descriptor_set_layout_bindings() const
   std::vector<SpvReflectDescriptorSet *> spv_sets(count);
   reflection->EnumerateDescriptorSets(&count, spv_sets.data());
 
-  // TODO Vector of sets of bindings
   std::vector<::vk::DescriptorSetLayoutBinding> layouts;
   for (const SpvReflectDescriptorSet *set : spv_sets) {
     std::span<SpvReflectDescriptorBinding *> bindings(set->bindings,

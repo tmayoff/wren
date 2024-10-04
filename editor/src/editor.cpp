@@ -8,6 +8,8 @@
 #include <wren/application.hpp>
 #include <wren/context.hpp>
 #include <wren/renderer.hpp>
+#include <wren/scene/components/mesh.hpp>
+#include <wren/scene/entity.hpp>
 #include <wren/shaders/mesh.hpp>
 #include <wren_math/geometry.hpp>
 
@@ -17,7 +19,21 @@ namespace editor {
 
 auto Editor::create(const std::shared_ptr<wren::Application> &app)
     -> wren::expected<std::shared_ptr<Editor>> {
+  const auto &ctx = app->context();
+
   auto editor = std::make_shared<Editor>(app->context());
+
+  TRY_RESULT(
+      editor->mesh_shader_,
+      wren::vk::Shader::create(app->context()->graphics_context->Device().get(),
+                               wren::shaders::kMeshVertShader.data(),
+                               wren::shaders::kMeshFragShader.data()));
+
+  wren::Mesh m(ctx->graphics_context->Device(),
+               ctx->graphics_context->allocator());
+  m.shader(editor->mesh_shader_);
+  auto mesh = editor->scene_->create_entity();
+  mesh.add_component<wren::scene::components::MeshRenderer>(m);
 
   TRY_RESULT(const auto graph, editor->build_ui_render_graph(app->context()));
   app->context()->renderer->set_graph_builder(graph);
@@ -45,6 +61,11 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app)
 
   return editor;
 }
+
+Editor::Editor(const std::shared_ptr<wren::Context> &ctx)
+    : camera_(45.F, 16.f / 9.f, 0.1, 1000.0f),
+      scene_(wren::scene::Scene::create()),
+      ctx_(ctx) {}
 
 void Editor::on_update() {
   ZoneScoped;  // NOLINT
@@ -154,25 +175,15 @@ auto Editor::build_ui_render_graph(const std::shared_ptr<wren::Context> &ctx)
     -> wren::expected<wren::GraphBuilder> {
   wren::GraphBuilder builder(ctx);
 
-  TRY_RESULT(const auto mesh_shader,
-             wren::vk::Shader::create(ctx->graphics_context->Device().get(),
-                                      wren::shaders::kMeshVertShader.data(),
-                                      wren::shaders::kMeshFragShader.data()));
-
-  mesh_ = wren::Mesh(ctx->graphics_context->Device(),
-                     ctx->graphics_context->allocator());
-  mesh_.shader(mesh_shader);
-
   builder
       .add_pass("mesh",
                 {{
-                     {"mesh", mesh_shader},
+                     {"mesh", mesh_shader_},
                  },
                  "scene_viewer"},
                 [this, ctx](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
                   pass.bind_pipeline("mesh");
 
-                  // TODO use the camera
                   struct GLOBALS {
                     wren::math::mat4f view;
                     wren::math::mat4f proj;
@@ -188,8 +199,13 @@ auto Editor::build_ui_render_graph(const std::shared_ptr<wren::Context> &ctx)
 
                   pass.write_scratch_buffer(cmd, 0, 0, ubo);
 
-                  mesh_.bind(cmd);
-                  mesh_.draw(cmd);
+                  for (const auto &[entity, mesh_renderer] :
+                       scene_->registry()
+                           .view<wren::scene::components::MeshRenderer>()
+                           .each()) {
+                    mesh_renderer.mesh.bind(cmd);
+                    mesh_renderer.mesh.draw(cmd);
+                  }
                 })
       .add_pass("ui", {{}, "swapchain_target"},
                 [](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
