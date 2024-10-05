@@ -115,7 +115,7 @@ auto Renderer::submit_command_buffer(
 Renderer::Renderer(const std::shared_ptr<Context> &ctx)
     : ctx_(ctx),
       m(ctx->graphics_context->Device(), ctx->graphics_context->allocator()) {
-  ctx->event_dispatcher.on<Event::WindowResized>(
+  ctx->event_dispatcher.on<event::WindowResized>(
       [this](auto &w) { recreate_swapchain(); });
 }
 
@@ -319,7 +319,7 @@ auto Renderer::choose_swapchain_extent(
       std::numeric_limits<uint32_t>::max()) {
     return surface_capabilities.currentExtent;
   } else {
-    auto [width, height] = ctx_->window.GetSize();
+    const auto [width, height] = ctx_->window.get_size();
     VkExtent2D actual_extent = {static_cast<uint32_t>(width),
                                 static_cast<uint32_t>(height)};
 

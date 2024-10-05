@@ -1,3 +1,3 @@
 #include "wren/event.hpp"
 
-namespace wren::Event {}
+namespace wren::event {}

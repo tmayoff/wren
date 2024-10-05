@@ -15,32 +15,32 @@
 
 namespace wren {
 
-auto Application::Create(std::string const &application_name)
+auto Application::Create(const std::string &application_name)
     -> expected<std::shared_ptr<Application>> {
   spdlog::set_level(spdlog::level::debug);
   ZoneScoped;
 
   spdlog::debug("Initializing application");
 
-  auto window = Window::Create(application_name);
+  auto window = Window::create(application_name);
   if (!window.has_value()) {
     return tl::make_unexpected(window.error());
   }
 
-  TRY_RESULT(auto extensions, window->GetRequiredVulkanExtension());
+  TRY_RESULT(auto extensions, window->get_required_vulkan_extension());
 
   TRY_RESULT(auto graphics_context,
              GraphicsContext::Create(application_name, extensions));
   spdlog::trace("Created graphics context");
 
-  TRY_RESULT(auto const surface,
-             window->CreateSurface(graphics_context->Instance()));
+  TRY_RESULT(const auto surface,
+             window->create_surface(graphics_context->Instance()));
   graphics_context->Surface(surface);
 
   TRY_RESULT(graphics_context->SetupDevice());
 
-  auto ctx = std::make_shared<Context>(*window, Event::Dispatcher(),
-                                       graphics_context);
+  auto ctx =
+      std::make_shared<Context>(*window, event::Dispatcher(), graphics_context);
 
   TRY_RESULT(auto renderer, Renderer::New(ctx));
 
@@ -48,7 +48,7 @@ auto Application::Create(std::string const &application_name)
 }
 
 void Application::add_callback_to_phase(CallbackPhase phase,
-                                        phase_cb_t const &cb) {
+                                        const phase_cb_t &cb) {
   switch (phase) {
     case CallbackPhase::Startup:
       startup_phase.emplace_back(cb);
@@ -62,39 +62,38 @@ void Application::add_callback_to_phase(CallbackPhase phase,
   }
 }
 
-Application::Application(std::shared_ptr<Context> const &ctx,
-                         std::shared_ptr<Renderer> const &renderer)
+Application::Application(const std::shared_ptr<Context> &ctx,
+                         const std::shared_ptr<Renderer> &renderer)
     : ctx(ctx), renderer(renderer), running(true) {}
 
 void Application::run() {
-  this->ctx->event_dispatcher.on<Event::WindowClose>([this](auto &w) {
+  this->ctx->event_dispatcher.on<event::WindowClose>([this](auto &w) {
     spdlog::debug("{}", w.debug_name);
     this->running = false;
   });
 
-  this->ctx->event_dispatcher.on<Event::WindowResized>(
-      [](Event::WindowResized const &size) {
-        spdlog::debug("{} ({}, {})", size.debug_name, size.width,
-                      size.height);
+  this->ctx->event_dispatcher.on<event::WindowResized>(
+      [](const event::WindowResized &size) {
+        spdlog::debug("{} ({}, {})", size.debug_name, size.width, size.height);
       });
 
-  for (auto const &cb : startup_phase) {
+  for (const auto &cb : startup_phase) {
     if (cb) cb();
   }
 
   while (running) {
     FrameMark;
     std::this_thread::sleep_for(std::chrono::milliseconds(16));
-    ctx->window.DispatchEvents(ctx->event_dispatcher);
+    ctx->window.dispatch_events(ctx->event_dispatcher);
 
-    for (auto const &cb : update_phase) {
+    for (const auto &cb : update_phase) {
       if (cb) cb();
     }
 
     ctx->renderer->draw();
   }
 
-  for (auto const &cb : update_phase) {
+  for (const auto &cb : update_phase) {
     if (cb) cb();
   }
 }

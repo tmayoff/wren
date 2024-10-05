@@ -17,31 +17,31 @@ DEFINE_ERROR("WindowErrors", WindowErrors, SDL_INIT, SDL_WINDOW,
 
 class Window {
  public:
-  static auto Create(std::string const &application_name)
+  static auto create(std::string const &application_name)
       -> expected<Window>;
 
-  void Shutdown();
+  void shutdown();
 
-  auto CreateSurface(::vk::Instance const &instance)
+  auto create_surface(::vk::Instance const &instance)
       -> expected<::vk::SurfaceKHR>;
 
-  void DispatchEvents(Event::Dispatcher const &dispatcher);
+  void dispatch_events(event::Dispatcher const &dispatcher);
 
-  [[nodiscard]] auto GetRequiredVulkanExtension() const
+  [[nodiscard]] auto get_required_vulkan_extension() const
       -> expected<std::vector<std::string_view>>;
 
-  auto GetSize() -> std::pair<int32_t, int32_t> {
+  auto get_size() -> std::pair<int32_t, int32_t> {
     int w = 0, h = 0;
-    SDL_GetWindowSize(window, &w, &h);
+    SDL_GetWindowSize(window_, &w, &h);
     return {w, h};
   }
 
-  auto NativeHandle() const { return window; }
+  [[nodiscard]] auto native_handle() const { return window_; }
 
  private:
-  explicit Window(SDL_Window *window) : window(window) {}
+  explicit Window(SDL_Window *window) : window_(window) {}
 
-  SDL_Window *window;
+  SDL_Window *window_;
 };
 
 }  // namespace wren
