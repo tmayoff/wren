@@ -9,10 +9,12 @@
 #include <wren/context.hpp>
 #include <wren/renderer.hpp>
 #include <wren/scene/components/mesh.hpp>
+#include <wren/scene/components/tag.hpp>
 #include <wren/scene/entity.hpp>
 #include <wren/shaders/mesh.hpp>
 #include <wren_math/geometry.hpp>
 
+#include "scene_panel.hpp"
 #include "ui.hpp"
 
 namespace editor {
@@ -93,6 +95,8 @@ void Editor::on_update() {
 
   editor::ui::begin();
 
+  ImGui::ShowDemoWindow();
+
   static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
   ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
 
@@ -143,8 +147,9 @@ void Editor::on_update() {
   }
 
   ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2{500, 100});
-  ImGui::Begin("Scene");
-  ImGui::End();
+
+  // Panels
+  render_scene_panel(scene_, selected_entity_);
 
   ImGui::Begin("Viewer");
   auto curr_size = ImGui::GetContentRegionAvail();
