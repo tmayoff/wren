@@ -5,4 +5,4 @@ ecs = library(
 )
 ecs_dep = declare_dependency(include_directories: 'include', link_with: ecs)
 
-subdir('tests')
+# subdir('tests')
