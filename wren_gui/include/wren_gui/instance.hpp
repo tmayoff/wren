@@ -26,11 +26,11 @@ static std::size_t const MAX_INDICES = MAX_VERTICES * 10;
 
 struct Vertex {
   wren::math::vec2f pos;
-  wren::math::vec4f colour;
+  wren::math::Vec4f colour;
 };
 
 struct UBO {
-  wren::math::mat4f proj;
+  wren::math::Mat4f proj;
 };
 
 struct Inputs {
@@ -69,7 +69,7 @@ class Instance {
 
  private:
   void draw_quad(wren::math::vec2f const& pos, wren::math::vec2f const& size,
-                 wren::math::vec4f const& colour);
+                 wren::math::Vec4f const& colour);
 
   auto point_in_bounds(wren::math::vec2f const& p, wren::math::vec2f const& pos,
                        wren::math::vec2f const& size) -> bool;

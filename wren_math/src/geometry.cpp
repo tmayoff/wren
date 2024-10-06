@@ -7,14 +7,14 @@
 
 namespace wren::math {
 
-auto look_at(vec3f const& eye, vec3f const& center,
-             vec3f const& world_up) -> mat4f {
-  vec3f const up = world_up.normalized();
-  vec3f const f = (center - eye).normalized();
-  vec3f const s = (up % f).normalized();
-  vec3f const u = f % s;
+auto look_at(const Vec3f& eye, const Vec3f& center, const Vec3f& world_up)
+    -> Mat4f {
+  const Vec3f up = world_up.normalized();
+  const Vec3f f = (center - eye).normalized();
+  const Vec3f s = (up % f).normalized();
+  const Vec3f u = f % s;
 
-  mat4f mat;
+  Mat4f mat;
 
   mat.data.at(0).at(0) = s.x();
   mat.data.at(1).at(0) = s.y();
@@ -31,28 +31,37 @@ auto look_at(vec3f const& eye, vec3f const& center,
   return mat;
 }
 
-auto translate(mat4f mat, vec3f offset) -> mat4f {
-  return mat4f::IDENTITY();
+auto translate(Mat4f mat, Vec4f offset) -> Mat4f {
+  auto res = Mat4f::identity();
+
+  for (size_t i = 0; i < 4; ++i) {
+    res.data.at(3).at(i) = offset.data.at(i);
+  }
+
+  return res;
 }
 
-auto rotate(mat4f const& matrix, float angle,
-            vec3f const& axis) -> mat4f {
-  float const sin = std::sin(angle);
-  float const cos = std::cos(angle);
-  float const x2 = axis.x() * axis.x();
-  float const y2 = axis.y() * axis.y();
-  float const z2 = axis.z() * axis.z();
-  float const yx = axis.y() * axis.x();
-  float const yz = axis.y() * axis.z();
-  float const xy = axis.x() * axis.y();
-  float const xz = axis.x() * axis.z();
-  float const zx = axis.z() * axis.x();
-  float const zy = axis.z() * axis.y();
-  float const x = axis.x();
-  float const y = axis.y();
-  float const z = axis.z();
+auto translate(Mat4f mat, Vec3f offset) -> Mat4f {
+  return translate(mat, Vec4f(offset, 1.0));
+}
 
-  mat4f mat = matrix;
+auto rotate(const Mat4f& matrix, float angle, const Vec3f& axis) -> Mat4f {
+  const float sin = std::sin(angle);
+  const float cos = std::cos(angle);
+  const float x2 = axis.x() * axis.x();
+  const float y2 = axis.y() * axis.y();
+  const float z2 = axis.z() * axis.z();
+  const float yx = axis.y() * axis.x();
+  const float yz = axis.y() * axis.z();
+  const float xy = axis.x() * axis.y();
+  const float xz = axis.x() * axis.z();
+  const float zx = axis.z() * axis.x();
+  const float zy = axis.z() * axis.y();
+  const float x = axis.x();
+  const float y = axis.y();
+  const float z = axis.z();
+
+  Mat4f mat = matrix;
 
   mat.data = {{{cos + x2 * (1 - cos), xy * (1 - cos) - z * sin,
                 xz * (1 - cos) + y * sin, 0},

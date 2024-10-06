@@ -4,6 +4,7 @@
 #include <imgui_impl_vulkan.h>
 #include <imgui_internal.h>
 
+#include <glm/glm.hpp>
 #include <tracy/Tracy.hpp>
 #include <wren/application.hpp>
 #include <wren/context.hpp>
@@ -14,8 +15,10 @@
 #include <wren/shaders/mesh.hpp>
 #include <wren_math/geometry.hpp>
 
+#include "inspector_panel.hpp"
 #include "scene_panel.hpp"
 #include "ui.hpp"
+#include "wren/scene/components/transform.hpp"
 
 namespace editor {
 
@@ -87,8 +90,8 @@ void Editor::on_update() {
     dset_[0] = ImGui_ImplVulkan_AddTexture(
         texture_sampler_, scene_view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-    camera_.aspect(
-        static_cast<float>(scene_resized_->x() / scene_resized_->y()));
+    camera_.aspect(static_cast<float>(scene_resized_->x()) /
+                   static_cast<float>(scene_resized_->y()));
 
     scene_resized_.reset();
   }
@@ -164,8 +167,7 @@ void Editor::on_update() {
                           static_cast<float>(last_scene_size_.y())});
   ImGui::End();
 
-  ImGui::Begin("Inspector");
-  ImGui::End();
+  render_inspector_panel(scene_, selected_entity_);
 
   ImGui::Begin("Filesystem");
   ImGui::End();
@@ -190,24 +192,48 @@ auto Editor::build_ui_render_graph(const std::shared_ptr<wren::Context> &ctx)
                   pass.bind_pipeline("mesh");
 
                   struct GLOBALS {
-                    wren::math::mat4f view;
-                    wren::math::mat4f proj;
+                    wren::math::Mat4f view{};
+
+                    wren::math::Mat4f proj{};
+
+                    glm::mat4 proj_glm{};
                   };
                   GLOBALS ubo{};
 
-                  ubo.view =
-                      wren::math::look_at(wren::math::vec3f(2.0f, 2.0f, 2.0f),
-                                          wren::math::vec3f(0.0f, 0.0f, 0.0f),
-                                          wren::math::vec3f::UnitZ());
+                  // ubo.view =
+                  // wren::math::look_at(wren::math::Vec3f(2.0f, 2.0f, 2.0f),
+                  //                                wren::math::Vec3f(0.0f,
+                  //                                0.0f, 0.0f),
+                  //                                wren::math::Vec3f::UnitZ());
 
                   ubo.proj = this->camera_.projection();
+                  ubo.proj_glm = this->camera_.glm_perspective();
 
                   pass.write_scratch_buffer(cmd, 0, 0, ubo);
 
-                  for (const auto &[entity, mesh_renderer] :
+                  for (const auto &[entity, transform, mesh_renderer] :
                        scene_->registry()
-                           .view<wren::scene::components::MeshRenderer>()
+                           .view<wren::scene::components::Transform,
+                                 wren::scene::components::MeshRenderer>()
                            .each()) {
+                    struct LOCALS {
+                      wren::math::Mat4f model;
+                    };
+                    LOCALS ubo{};
+
+                    // static auto start_time =
+                    //     std::chrono::high_resolution_clock::now();
+                    // auto current_time =
+                    // std::chrono::high_resolution_clock::now(); float time =
+                    //     std::chrono::duration<float,
+                    //     std::chrono::seconds::period>(
+                    //         current_time - start_time)
+                    //         .count();
+
+                    ubo.model = transform.matrix();
+
+                    pass.write_scratch_buffer(cmd, 0, 1, ubo);
+
                     mesh_renderer.mesh.bind(cmd);
                     mesh_renderer.mesh.draw(cmd);
                   }

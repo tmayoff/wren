@@ -106,11 +106,11 @@ void RenderPass::write_scratch_buffer(const ::vk::CommandBuffer& cmd,
 
   ::vk::DescriptorBufferInfo buffer_info(buffer->get(), 0, sizeof(T));
   std::array writes = {::vk::WriteDescriptorSet{
-      {}, 0, 0, ::vk::DescriptorType::eUniformBuffer, {}, buffer_info}};
+      {}, binding, 0, ::vk::DescriptorType::eUniformBuffer, {}, buffer_info}};
 
   cmd.pushDescriptorSetKHR(::vk::PipelineBindPoint::eGraphics,
-                           resources_.shaders.at("mesh")->pipeline_layout(), 0,
-                           writes);
+                           resources_.shaders.at("mesh")->pipeline_layout(),
+                           set, writes);
 }
 
 }  // namespace wren

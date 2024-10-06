@@ -37,19 +37,31 @@ auto key_code_to_imgui(wren::KeyCode code) {
     case wren::KeyCode::kEscape:
       return ImGuiKey::ImGuiKey_Escape;
     case wren::KeyCode::kBackspace:
+      return ImGuiKey::ImGuiKey_Backspace;
     case wren::KeyCode::kTab:
+      return ImGuiKey::ImGuiKey_Tab;
     case wren::KeyCode::kSpace:
+      return ImGuiKey::ImGuiKey_Space;
     case wren::KeyCode::kExclaim:
+      return ImGuiKey::ImGuiKey_None;  // FIXME
     case wren::KeyCode::kDoubleQuote:
+      return ImGuiKey::ImGuiKey_None;  // FIXME
     case wren::KeyCode::kHash:
+      return ImGuiKey::ImGuiKey_None;  // FIXME
     case wren::KeyCode::kPercent:
+      return ImGuiKey::ImGuiKey_None;  // FIXME
     case wren::KeyCode::kDollar:
+      return ImGuiKey::ImGuiKey_None;  // FIXME
     case wren::KeyCode::kAmpersand:
+      return ImGuiKey::ImGuiKey_None;  // FIXME
     case wren::KeyCode::kQuote:
+      return ImGuiKey::ImGuiKey_None;  // FIXME
     case wren::KeyCode::kLeftParen:
+      return ImGuiKey::ImGuiKey_None;  // FIXME
     case wren::KeyCode::kRightParen:
-      return ImGuiKey::ImGuiKey_RightBracket;
+      return ImGuiKey::ImGuiKey_None;  // FIXME
     case wren::KeyCode::kAsterix:
+      return ImGuiKey::ImGuiKey_None;  // FIXME
     case wren::KeyCode::kPlus:
     case wren::KeyCode::kComma:
     case wren::KeyCode::kMinus:

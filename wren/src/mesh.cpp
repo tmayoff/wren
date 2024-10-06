@@ -67,26 +67,6 @@ void Mesh::draw(const ::vk::CommandBuffer& cmd) const {
 }
 
 void Mesh::bind(const ::vk::CommandBuffer& cmd) const {
-  static auto start_time = std::chrono::high_resolution_clock::now();
-  auto current_time = std::chrono::high_resolution_clock::now();
-  float time = std::chrono::duration<float, std::chrono::seconds::period>(
-                   current_time - start_time)
-                   .count();
-
-  UBO ubo{};
-  ubo.model =
-      wren::math::rotate(wren::math::mat4f{}, time * wren::math::radians(90.0f),
-                         wren::math::vec3f(0.0f, 0.0f, 1.0f));
-
-  uniform_buffer->set_data_raw(&ubo, sizeof(ubo));
-
-  ::vk::DescriptorBufferInfo buffer_info(uniform_buffer->get(), 0, sizeof(UBO));
-  std::array writes = {::vk::WriteDescriptorSet{
-      {}, 1, 0, ::vk::DescriptorType::eUniformBuffer, {}, buffer_info}};
-
-  cmd.pushDescriptorSetKHR(::vk::PipelineBindPoint::eGraphics,
-                           shader_->pipeline_layout(), 0, writes);
-
   cmd.bindIndexBuffer(index_buffer->get(), 0, ::vk::IndexType::eUint16);
   cmd.bindVertexBuffers(0, vertex_buffer->get(), ::vk::DeviceSize{0});
 }

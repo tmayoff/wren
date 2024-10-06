@@ -161,8 +161,8 @@ void Instance::EndWindow() {
     auto& window = windows_.at(window_name);
     draw_quad(window.pos, window.size,
               window.hovered
-                  ? wren::math::vec4f{1.0, 1.0, 1.0, 1.0}
-                  : wren::math::vec4f{0.5f, 0.5f, 0.5f, 1.0f});
+                  ? wren::math::Vec4f{1.0, 1.0, 1.0, 1.0}
+                  : wren::math::Vec4f{0.5f, 0.5f, 0.5f, 1.0f});
 
     if (window.selected) {
       // Move window
@@ -173,7 +173,7 @@ void Instance::EndWindow() {
 
 void Instance::draw_quad(wren::math::vec2f const& pos,
                          wren::math::vec2f const& size,
-                         wren::math::vec4f const& colour) {
+                         wren::math::Vec4f const& colour) {
   std::array quad_vertices = {
       Vertex{(wren::math::vec2f{0.0, 0.0} * size) + pos, colour},
       Vertex{(wren::math::vec2f{1.0, 0.0} * size) + pos, colour},

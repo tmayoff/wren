@@ -2,29 +2,33 @@
 
 #include <array>
 
+#include "vector.hpp"
+
 namespace wren::math {
 
-struct mat4f {
-  using mat_t = std::array<std::array<float, 4>, 4>;
+// ROW First matrices
+template <typename T, std::size_t N>
+class Mat {
+ public:
+  using mat_t = Mat<T, N>;
 
-  static auto IDENTITY() {
-    return mat4f{{{
-        {1, 0, 0, 0},
-        {0, 1, 0, 0},
-        {0, 0, 1, 0},
-        {0, 0, 0, 1},
-    }}};
+  constexpr static auto identity() {
+    std::array<std::array<T, N>, N> data{};
+
+    for (size_t i = 0; i < N; ++i) {
+      data.at(i).at(i) = 1.0;
+    }
+    return Mat(data);
   }
 
-  mat4f() { data = IDENTITY().data; }
-  mat4f(float d) { data.fill(std::array<float, 4>{d}); }
-  mat4f(mat_t const& data) : data(data) {}
+  Mat() : data(identity().data) {}
+  Mat(const std::array<std::array<T, N>, N>& data) : data(data) {}
+  Mat(float d) { data.fill(std::array<T, N>{d}); }
 
-  auto operator==(mat4f const& rhs) const { return data == rhs.data; }
-  auto operator!=(mat4f const& rhs) const { return !(*this == rhs); }
-
-  auto operator*(mat4f const& rhs) {
-    mat4f m;
+  auto operator==(const Mat<T, N>& rhs) const { return data == rhs.data; }
+  auto operator!=(const Mat<T, N>& rhs) const { return !(*this == rhs); }
+  auto operator*(const Mat<T, N>& rhs) {
+    Mat<T, N> m;
 
     for (std::size_t i = 0; i < data.size(); i++) {
       for (std::size_t j = 0; j < rhs.data.at(i).size(); j++) {
@@ -39,7 +43,27 @@ struct mat4f {
     return m;
   }
 
-  mat_t data{};
+  auto operator*(const Vec<T, N>& rhs) {
+    Mat<T, N> res{};
+
+    for (size_t v = 0; v < N; ++v) {
+      for (size_t m = 0; m < N; ++m) {
+        res.data.at(m).at(v) = data.at(m).at(v) * rhs.data.at(v);
+      }
+    }
+
+    return res;
+  }
+
+  std::array<std::array<T, N>, N> data{};
+
+ private:
+  auto columns() {}
+};
+
+struct Mat4f : Mat<float, 4> {
+  Mat4f() = default;
+  Mat4f(const Mat<float, 4>& other) : Mat<float, 4>(other) {}
 };
 
 }  // namespace wren::math

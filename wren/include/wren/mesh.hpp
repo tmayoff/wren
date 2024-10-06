@@ -14,12 +14,12 @@
 namespace wren {
 
 struct UBO {
-  wren::math::mat4f model;
+  wren::math::Mat4f model;
 };
 
 struct Vertex {
   wren::math::vec2f pos;
-  wren::math::vec3f colour;
+  wren::math::Vec3f colour;
 };
 
 const std::vector<Vertex> kTriangleVertices = {

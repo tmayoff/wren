@@ -57,8 +57,8 @@ BOOST_AUTO_TEST_CASE(MUL) {
 
 BOOST_AUTO_TEST_CASE(DOT) {
   struct Test {
-    wren::math::vec3f a;
-    wren::math::vec3f b;
+    wren::math::Vec3f a;
+    wren::math::Vec3f b;
     float expected = 0;
   };
 
@@ -76,9 +76,9 @@ BOOST_AUTO_TEST_CASE(DOT) {
 
 BOOST_AUTO_TEST_CASE(CROSS) {
   struct Test {
-    wren::math::vec3f a;
-    wren::math::vec3f b;
-    wren::math::vec3f expected{};
+    wren::math::Vec3f a;
+    wren::math::Vec3f b;
+    wren::math::Vec3f expected{};
   };
 
   std::array tests = {

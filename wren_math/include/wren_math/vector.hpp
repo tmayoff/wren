@@ -6,17 +6,17 @@
 namespace wren::math {
 
 template <typename T, std::size_t N>
-struct vec {
-  using vec_t = vec<T, N>;
+struct Vec {
+  using vec_t = Vec<T, N>;
 
   static auto UnitX() { return vec_t{1.0f}; }
   static auto UnitY() { return vec_t{0.0f, 1.0f}; }
   static auto UnitZ() { return vec_t{0.0f, 0.0f, 1.0f}; }
 
-  vec() : data() {}
+  Vec() : data() {}
 
-  vec(auto&&... d) : data({{std::forward<decltype(d)>(d)...}}) {}
-  vec(std::array<T, N> data) : data(data) {}
+  Vec(auto&&... d) : data({{std::forward<decltype(d)>(d)...}}) {}
+  Vec(std::array<T, N> data) : data(data) {}
 
   constexpr auto operator*=(float scalar) const {
     for (auto& d : data) {
@@ -26,18 +26,17 @@ struct vec {
 
   constexpr auto operator*(float scalar) const {
     vec_t v{};
-    for (std::size_t i = 0; i < N; i++)
-      v.data.at(i) = data.at(i) * scalar;
+    for (std::size_t i = 0; i < N; i++) v.data.at(i) = data.at(i) * scalar;
     return v;
   }
 
-  constexpr auto operator*=(vec_t const& other) {
+  constexpr auto operator*=(const vec_t& other) {
     for (std::size_t i = 0; i < N; i++) {
       data.at(i) = data.at(i) * other.data.at(i);
     }
   }
 
-  constexpr auto operator*(vec_t const& other) const {
+  constexpr auto operator*(const vec_t& other) const {
     vec_t v{};
     for (std::size_t i = 0; i < N; i++) {
       v.data.at(i) = data.at(i) * other.data.at(i);
@@ -45,28 +44,27 @@ struct vec {
     return v;
   }
 
-  [[nodiscard]] constexpr auto dot(vec_t const& other) const {
+  [[nodiscard]] constexpr auto dot(const vec_t& other) const {
     T dot = 0;
-    auto const a = this->normalized();
-    auto const b = other.normalized();
-    for (std::size_t i = 0; i < N; i++)
-      dot += a.data.at(i) * b.data.at(i);
+    const auto a = this->normalized();
+    const auto b = other.normalized();
+    for (std::size_t i = 0; i < N; i++) dot += a.data.at(i) * b.data.at(i);
     return dot;
   }
 
-  constexpr auto operator+=(vec_t const& other) {
+  constexpr auto operator+=(const vec_t& other) {
     for (std::size_t i = 0; i < N; i++)
       data.at(i) = data.at(i) + other.data.at(i);
   }
 
-  constexpr auto operator+(vec_t const& other) const {
+  constexpr auto operator+(const vec_t& other) const {
     vec_t v{};
     for (std::size_t i = 0; i < N; i++)
       v.data.at(i) = data.at(i) + other.data.at(i);
     return v;
   }
 
-  constexpr auto operator-(vec_t const& other) const {
+  constexpr auto operator-(const vec_t& other) const {
     vec_t v{};
     for (std::size_t i = 0; i < N; i++)
       v.data.at(i) = data.at(i) - other.data.at(i);
@@ -81,22 +79,21 @@ struct vec {
 
   auto operator/(float scalar) const {
     vec_t v{};
-    for (std::size_t i = 0; i < N; i++)
-      v.data.at(i) = data.at(i) / scalar;
+    for (std::size_t i = 0; i < N; i++) v.data.at(i) = data.at(i) / scalar;
     return v;
   }
 
-  constexpr auto operator==(vec_t const& other) const {
+  constexpr auto operator==(const vec_t& other) const {
     return data == other.data;
   }
 
-  constexpr auto operator!=(vec_t const& other) const {
+  constexpr auto operator!=(const vec_t& other) const {
     return !(*this == other);
   }
 
   [[nodiscard]] constexpr auto length() const {
     T sum = 0;
-    for (auto const& d : data) sum += d * d;
+    for (const auto& d : data) sum += d * d;
     return std::sqrt(sum);
   }
 
@@ -105,45 +102,48 @@ struct vec {
   std::array<T, N> data{};
 };
 
-struct vec2i : vec<int, 2> {
-  vec2i() : vec<int, 2>() {}
-  vec2i(int x, int y) : vec<int, 2>(x, y) {}
-  vec2i(vec<int, 2> const& other) : vec<int, 2>(other) {}
+struct vec2i : Vec<int, 2> {
+  vec2i() : Vec<int, 2>() {}
+  vec2i(int x, int y) : Vec<int, 2>(x, y) {}
+  vec2i(const Vec<int, 2>& other) : Vec<int, 2>(other) {}
 
   [[nodiscard]] auto x() const { return data.at(0); }
   [[nodiscard]] auto y() const { return data.at(1); }
 };
 
-struct vec2f : vec<float, 2> {
-  vec2f() : vec<float, 2>() {}
-  vec2f(float x, float y) : vec<float, 2>(x, y) {}
-  vec2f(vec<float, 2> const& other) : vec<float, 2>(other) {}
+struct vec2f : Vec<float, 2> {
+  vec2f() : Vec<float, 2>() {}
+  vec2f(float x, float y) : Vec<float, 2>(x, y) {}
+  vec2f(const Vec<float, 2>& other) : Vec<float, 2>(other) {}
 
   [[nodiscard]] auto x() const { return data.at(0); }
   [[nodiscard]] auto y() const { return data.at(1); }
 };
 
-struct vec3f : vec<float, 3> {
-  vec3f() : vec<float, 3>() {}
-  vec3f(float x, float y, float z) : vec<float, 3>(x, y, z) {}
-  vec3f(vec<float, 3> const& other) : vec<float, 3>(other) {}
+struct Vec3f : Vec<float, 3> {
+  Vec3f() : Vec<float, 3>() {}
+  Vec3f(float x, float y, float z) : Vec<float, 3>(x, y, z) {}
+  Vec3f(const Vec<float, 3>& other) : Vec<float, 3>(other) {}
 
   [[nodiscard]] auto x() const { return data.at(0); }
+  auto x(float x) { data.at(0) = x; }
   [[nodiscard]] auto y() const { return data.at(1); }
+  auto y(float y) { data.at(1) = y; }
   [[nodiscard]] auto z() const { return data.at(2); }
+  auto z(float z) { data.at(2) = z; }
 
-  auto operator%(vec3f const& other) const {
-    return vec3f{y() * other.z() - z() * other.y(),
+  auto operator%(const Vec3f& other) const {
+    return Vec3f{y() * other.z() - z() * other.y(),
                  z() * other.x() - x() * other.z(),
                  x() * other.y() - y() * other.x()};
   }
 };
 
-struct vec4f : vec<float, 4> {
-  vec4f() : vec<float, 4>() {}
-  vec4f(float x, float y, float z, float w)
-      : vec<float, 4>(x, y, z, w) {}
-  vec4f(vec<float, 4> const& other) : vec<float, 4>(other) {}
+struct Vec4f : Vec<float, 4> {
+  Vec4f() : Vec<float, 4>() {}
+  Vec4f(float x, float y, float z, float w) : Vec<float, 4>(x, y, z, w) {}
+  Vec4f(const Vec3f& vec, float w) : Vec<float, 4>(vec.x(), vec.y(), vec.z(), w) {}
+  Vec4f(const Vec<float, 4>& other) : Vec<float, 4>(other) {}
 
   [[nodiscard]] auto x() const { return data.at(0); }
   [[nodiscard]] auto y() const { return data.at(1); }

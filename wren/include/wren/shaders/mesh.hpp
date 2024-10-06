@@ -13,6 +13,7 @@ layout(location = 1) in vec3 in_color;
 layout(binding = 0) uniform GLOBALS {
     mat4 view;
     mat4 proj;
+    mat4 glm_proj;
 } globals;
 
 layout(binding = 1) uniform LOCALS {

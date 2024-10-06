@@ -1,4 +1,4 @@
-deps = [wren_dep, backward_dep, imgui, tracy]
+deps = [wren_dep, backward_dep, imgui, tracy, glm]
 
 executable(
     'wren_editor',
@@ -6,6 +6,7 @@ executable(
     'src/editor.cpp',
     'src/ui.cpp',
     'src/scene_panel.cpp',
+    'src/inspector_panel.cpp',
     dependencies: deps,
     install: true,
 )

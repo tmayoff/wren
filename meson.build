@@ -20,6 +20,7 @@ spirv = dependency('SPIRV-Headers')
 tracy = dependency('tracy')
 imgui = dependency('imgui_docking')
 entt = dependency('entt')
+glm = dependency('glm')
 
 add_project_arguments(
     '-DVULKAN_HPP_NO_EXCEPTIONS',

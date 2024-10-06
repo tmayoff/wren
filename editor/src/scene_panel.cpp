@@ -5,7 +5,7 @@
 #include <wren/scene/components/tag.hpp>
 
 void render_scene_panel(const std::shared_ptr<wren::scene::Scene> &scene,
-                        entt::entity &selected_entity) {
+                        std::optional<entt::entity> &selected_entity) {
   ImGui::Begin("Scene");
 
   const auto &entities = scene->registry().view<wren::scene::components::Tag>();
@@ -15,7 +15,7 @@ void render_scene_panel(const std::shared_ptr<wren::scene::Scene> &scene,
       ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf;
 
   for (const auto &[entity, tag] : entities.each()) {
-    if (entity == selected_entity) {
+    if (selected_entity.has_value() && entity == selected_entity) {
       entity_node_flags |= ImGuiTreeNodeFlags_Selected;
     }
 
