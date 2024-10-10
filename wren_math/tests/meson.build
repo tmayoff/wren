@@ -1,4 +1,4 @@
-tests = ['vector', 'matrix']
+tests = ['vector', 'matrix', 'geometry']
 foreach test : tests
     test(
         'wren_math_@0@'.format(test),

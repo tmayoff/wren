@@ -1,5 +1,5 @@
 ---
-Checks: 'cppcoreguidelines-*, modernize-*,-cppcoreguidelines-avoid-do-while,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-macro-usage,readability-identifier-naming'
+Checks: 'cppcoreguidelines-*, modernize-*,-cppcoreguidelines-avoid-do-while,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-macro-usage,-cppcoreguidelines-pro-type-vararg,readability-identifier-naming'
 FormatStyle: google
 CheckOptions:
   - key: mist-include-cleaner.IgnoreHeaders

@@ -15,8 +15,13 @@ struct Vec {
 
   Vec() : data() {}
 
-  Vec(auto&&... d) : data({{std::forward<decltype(d)>(d)...}}) {}
   Vec(std::array<T, N> data) : data(data) {}
+
+  // template <typename... Args>
+  // Vec(Args&&... d) : data({{std::forward<Args>(d)...}}) {}
+
+  auto at(std::size_t i) -> T& { return data.at(i); }
+  [[nodiscard]] auto at(std::size_t i) const { return data.at(i); }
 
   constexpr auto operator*=(float scalar) const {
     for (auto& d : data) {
@@ -104,7 +109,7 @@ struct Vec {
 
 struct vec2i : Vec<int, 2> {
   vec2i() : Vec<int, 2>() {}
-  vec2i(int x, int y) : Vec<int, 2>(x, y) {}
+  vec2i(int x, int y) : Vec<int, 2>({x, y}) {}
   vec2i(const Vec<int, 2>& other) : Vec<int, 2>(other) {}
 
   [[nodiscard]] auto x() const { return data.at(0); }
@@ -113,7 +118,7 @@ struct vec2i : Vec<int, 2> {
 
 struct vec2f : Vec<float, 2> {
   vec2f() : Vec<float, 2>() {}
-  vec2f(float x, float y) : Vec<float, 2>(x, y) {}
+  vec2f(float x, float y) : Vec<float, 2>({x, y}) {}
   vec2f(const Vec<float, 2>& other) : Vec<float, 2>(other) {}
 
   [[nodiscard]] auto x() const { return data.at(0); }
@@ -122,7 +127,7 @@ struct vec2f : Vec<float, 2> {
 
 struct Vec3f : Vec<float, 3> {
   Vec3f() : Vec<float, 3>() {}
-  Vec3f(float x, float y, float z) : Vec<float, 3>(x, y, z) {}
+  Vec3f(float x, float y, float z) : Vec<float, 3>({x, y, z}) {}
   Vec3f(const Vec<float, 3>& other) : Vec<float, 3>(other) {}
 
   [[nodiscard]] auto x() const { return data.at(0); }
@@ -141,9 +146,11 @@ struct Vec3f : Vec<float, 3> {
 
 struct Vec4f : Vec<float, 4> {
   Vec4f() : Vec<float, 4>() {}
-  Vec4f(float x, float y, float z, float w) : Vec<float, 4>(x, y, z, w) {}
-  Vec4f(const Vec3f& vec, float w) : Vec<float, 4>(vec.x(), vec.y(), vec.z(), w) {}
+  Vec4f(float x, float y, float z, float w) : Vec<float, 4>({x, y, z, w}) {}
+  Vec4f(const Vec3f& vec, float w)
+      : Vec<float, 4>({vec.x(), vec.y(), vec.z(), w}) {}
   Vec4f(const Vec<float, 4>& other) : Vec<float, 4>(other) {}
+  Vec4f(std::array<float, 4> data) : Vec<float, 4>(data) {}
 
   [[nodiscard]] auto x() const { return data.at(0); }
   [[nodiscard]] auto y() const { return data.at(1); }

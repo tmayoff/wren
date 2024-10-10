@@ -170,7 +170,7 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
       {}, ::vk::PrimitiveTopology::eTriangleList, false);
 
   ::vk::Viewport viewport{
-      0, 0, static_cast<float>(size.x()), static_cast<float>(size.y()), 0, 1};
+      0, 0, static_cast<float>(size.x()), static_cast<float>(size.y()), 1, 0};
   ::vk::Rect2D scissor{
       {0, 0},
       {static_cast<uint32_t>(size.x()), static_cast<uint32_t>(size.y())}};

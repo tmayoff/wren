@@ -159,6 +159,7 @@
             [
               vulkan-tools
               clang-tools
+              unstable.mesonlsp
               sccache
               muon
 

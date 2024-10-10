@@ -19,17 +19,18 @@ auto operator<<(std::ostream& os, const Vec<T, N>& value) -> std::ostream& {
   return os;
 }
 
-template <typename T, std::size_t N>
-auto operator<<(std::ostream& os, const Mat<T, N>& value) -> std::ostream& {
+template <typename T, std::size_t Rows, std::size_t Cols>
+auto operator<<(std::ostream& os, const Mat<T, Rows, Cols>& value)
+    -> std::ostream& {
   os << "\n(";
 
-  for (std::size_t r = 0; r < N; ++r) {
-    for (std::size_t c = 0; c < N; ++c) {
-      os << value.data.at(r).at(c);
-      if (c < N - 1) os << ",";
+  for (std::size_t r = 0; r < Rows; ++r) {
+    for (std::size_t c = 0; c < Cols; ++c) {
+      os << value.at(c, r);
+      if (c < Cols - 1) os << ",";
     }
 
-    if (r < N - 1) os << "\n";
+    if (r < Rows - 1) os << "\n";
   }
   os << ")";
   return os;

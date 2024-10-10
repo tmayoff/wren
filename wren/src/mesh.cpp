@@ -1,6 +1,5 @@
 #include "mesh.hpp"
 
-#include <chrono>
 #include <vulkan/vulkan.hpp>
 #include <wren_math/geometry.hpp>
 #include <wren_math/vector.hpp>
@@ -8,10 +7,11 @@
 namespace wren {
 
 Mesh::Mesh(const vulkan::Device& device, VmaAllocator allocator)
-    : vertices(kQuadVertices), indices(kQuadIndices) {
+    : vertices_(kQuadVertices.begin(), kQuadVertices.end()),
+      indices_(kQuadIndices) {
   // ================ Vertex buffer =================== //
   {
-    std::span data{vertices.begin(), vertices.end()};
+    std::span data{vertices_.begin(), vertices_.end()};
     auto staging_buffer = vk::Buffer::create(
         allocator, data.size_bytes(),
         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT |
@@ -31,7 +31,7 @@ Mesh::Mesh(const vulkan::Device& device, VmaAllocator allocator)
 
   // ============== Index buffer ============== //
   {
-    std::span data{indices.begin(), indices.end()};
+    std::span data{indices_.begin(), indices_.end()};
 
     auto staging_buffer = vk::Buffer::create(
         allocator, data.size_bytes(),
@@ -63,7 +63,7 @@ Mesh::Mesh(const vulkan::Device& device, VmaAllocator allocator)
 }
 
 void Mesh::draw(const ::vk::CommandBuffer& cmd) const {
-  cmd.drawIndexed(indices.size(), 1, 0, 0, 0);
+  cmd.drawIndexed(indices_.size(), 1, 0, 0, 0);
 }
 
 void Mesh::bind(const ::vk::CommandBuffer& cmd) const {

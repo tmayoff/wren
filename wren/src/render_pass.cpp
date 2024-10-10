@@ -56,7 +56,7 @@ auto RenderPass::create(const std::shared_ptr<Context>& ctx,
   }
 
   ::vk::Viewport viewport(0, 0, static_cast<float>(rt->size.x()),
-                          static_cast<float>(rt->size.y()));
+                          static_cast<float>(rt->size.y()), 1, 0);
   ::vk::Rect2D scissor({}, {static_cast<uint32_t>(rt->size.x()),
                             static_cast<uint32_t>(rt->size.y())});
   ::vk::PipelineViewportStateCreateInfo viewport_state({}, viewport, scissor);

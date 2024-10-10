@@ -4,6 +4,7 @@
 #include <imgui_impl_vulkan.h>
 #include <imgui_internal.h>
 
+#include <array>
 #include <glm/glm.hpp>
 #include <tracy/Tracy.hpp>
 #include <wren/application.hpp>
@@ -68,7 +69,7 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app)
 }
 
 Editor::Editor(const std::shared_ptr<wren::Context> &ctx)
-    : camera_(45.F, 16.f / 9.f, 0.1, 1000.0f),
+    : camera_(45.F, 16.f / 9.f, 0.1, 1000.0),
       scene_(wren::scene::Scene::create()),
       ctx_(ctx) {}
 
@@ -92,6 +93,7 @@ void Editor::on_update() {
 
     camera_.aspect(static_cast<float>(scene_resized_->x()) /
                    static_cast<float>(scene_resized_->y()));
+    proj = camera_.projection();
 
     scene_resized_.reset();
   }
@@ -170,6 +172,7 @@ void Editor::on_update() {
   render_inspector_panel(scene_, selected_entity_);
 
   ImGui::Begin("Filesystem");
+
   ImGui::End();
 
   ImGui::End();
@@ -192,11 +195,8 @@ auto Editor::build_ui_render_graph(const std::shared_ptr<wren::Context> &ctx)
                   pass.bind_pipeline("mesh");
 
                   struct GLOBALS {
-                    wren::math::Mat4f view{};
-
-                    wren::math::Mat4f proj{};
-
-                    glm::mat4 proj_glm{};
+                    wren::math::Mat4f view = wren::math::Mat4f::identity();
+                    wren::math::Mat4f proj = wren::math::Mat4f::identity();
                   };
                   GLOBALS ubo{};
 
@@ -206,8 +206,7 @@ auto Editor::build_ui_render_graph(const std::shared_ptr<wren::Context> &ctx)
                   //                                0.0f, 0.0f),
                   //                                wren::math::Vec3f::UnitZ());
 
-                  ubo.proj = this->camera_.projection();
-                  ubo.proj_glm = this->camera_.glm_perspective();
+                  ubo.proj = this->proj;
 
                   pass.write_scratch_buffer(cmd, 0, 0, ubo);
 

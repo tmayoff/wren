@@ -50,6 +50,8 @@ class Editor {
 
   std::optional<wren::math::vec2i> scene_resized_;
   wren::math::vec2i last_scene_size_;
+
+  wren::math::Mat4f proj;
 };
 
 }  // namespace editor

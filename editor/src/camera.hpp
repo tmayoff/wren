@@ -20,17 +20,14 @@ class Camera {
     aspect_ratio_ = aspect;
     update_projection_matrix();
   }
-  [[nodiscard]] auto projection() const { return projection_; }
+  [[nodiscard]] auto aspect() const { return aspect_ratio_; }
 
-  auto glm_perspective() const { return glm_projection_; }
+  [[nodiscard]] auto projection() const { return projection_; }
 
  private:
   void update_projection_matrix() {
     projection_ = wren::math::perspective(wren::math::radians(fov_),
                                           aspect_ratio_, z_near_, z_far_);
-
-    glm_projection_ = glm::perspective(wren::math::radians(fov_), aspect_ratio_,
-                                       z_near_, z_far_);
   }
 
   float fov_{};
@@ -40,6 +37,5 @@ class Camera {
 
   wren::math::Vec3f position_;
   wren::math::Mat4f projection_;
-  glm::mat4 glm_projection_;
 };
 }  // namespace editor
