@@ -10,8 +10,9 @@ Custom vulkan renderer, with eventually no major dependencies
 
 **Dependencies to remove**
 - SPIRV-Reflect
-- Boost.Describe
+- Boost.Describe (C++26?)
 - Vulkan Memory Allocator
+- ImGui
 
 ## Contributing
 
