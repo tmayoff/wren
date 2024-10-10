@@ -67,6 +67,11 @@ struct KeyUp {
   APPEND_EVENT_INFO("KeyUp", Category::KEYBOARD)
 };
 
+struct KeyTyped {
+  std::string_view text;
+  APPEND_EVENT_INFO("KeyTyped", Category::KEYBOARD);
+};
+
 class Dispatcher {
  public:
   template <typename T>

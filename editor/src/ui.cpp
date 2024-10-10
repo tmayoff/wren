@@ -277,6 +277,9 @@ auto init(const std::shared_ptr<wren::Context>& context)
     io.AddKeyEvent(key_code_to_imgui(e.key), false);
   });
 
+  context->event_dispatcher.on<wren::event::KeyTyped>(
+      [&io](const auto& e) { io.AddInputCharactersUTF8(e.text.data()); });
+
   context->event_dispatcher.on<wren::event::MouseWheel>(
       [&io](const auto& e) { io.AddMouseWheelEvent(e.x, e.y); });
 

@@ -466,6 +466,10 @@ void Window::dispatch_events(const event::Dispatcher &dispatcher) {
 
           break;
         }
+        case SDL_TEXTINPUT: {
+            dispatcher.dispatch(event::KeyTyped{event.text.text});
+            break;
+        }
         case SDL_KEYUP: {
           dispatcher.dispatch(
               event::KeyUp{sdl_key_to_wren_key(event.key.keysym.sym)});
