@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(TRANSLATE) {
 
   for (const auto &test : tests) {
     const auto got = wren::math::translate(wren::math::Mat4f{}, test.pos);
-    // BOOST_TEST(got == test.expected);
+    BOOST_TEST(got == test.expected);
   }
 }
 

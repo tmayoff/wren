@@ -46,20 +46,6 @@ auto translate(Mat4f mat, Vec3f offset) -> Mat4f {
   return translate(mat, Vec4f(offset, 1.0));
 }
 
-auto rotate(const Mat3f rotation_matrix) -> Mat4f {
-  // return Mat4f{std::array<std::array<float, 4>, 4>{{
-  //     {rotation_matrix.data.at(0).at(0), rotation_matrix.data.at(0).at(1),
-  //      rotation_matrix.data.at(0).at(2), 0.0f},
-  //     {rotation_matrix.data.at(1).at(0), rotation_matrix.data.at(1).at(1),
-  //      rotation_matrix.data.at(1).at(2), 0.0f},
-  //     {rotation_matrix.data.at(2).at(0), rotation_matrix.data.at(2).at(1),
-  //      rotation_matrix.data.at(2).at(2), 0.0f},
-  //     {0.0F, 0.0F, 0.0F, 1.0F},
-  // }}};
-
-  return Mat4f{};
-}
-
 auto rotate(const Mat4f& matrix, float angle, const Vec3f& axis) -> Mat4f {
   const float sin = std::sin(angle);
   const float cos = std::cos(angle);
@@ -77,14 +63,25 @@ auto rotate(const Mat4f& matrix, float angle, const Vec3f& axis) -> Mat4f {
   const float z = axis.z();
 
   Mat4f mat = matrix;
+  mat.at(0, 0) = cos + x2 * (1 - cos);
+  mat.at(1, 0) = xy * (1 - cos) - z * sin;
+  mat.at(2, 0) = xz * (1 - cos) + y * sin;
+  mat.at(3, 0) = 0;
 
-  // mat.data = {{{cos + x2 * (1 - cos), xy * (1 - cos) - z * sin,
-  //               xz * (1 - cos) + y * sin, 0},
-  //              {yx * (1 - cos) + z * sin, cos + y2 * (1 - cos),
-  //               yz * (1 - cos) - x * sin, 0},
-  //              {zx * (1 - cos) - y * sin, zy * (1 - cos) + z * sin,
-  //               cos + z2 * (1 - cos), 0},
-  //              {0, 0, 0, 1}}};
+  mat.at(0, 1) = yx * (1 - cos) + z * sin;
+  mat.at(1, 1) = cos + y2 * (1 - cos);
+  mat.at(2, 1) = yz * (1 - cos) - x * sin;
+  mat.at(3, 1) = 0.0F;
+
+  mat.at(0, 2) = zx * (1 - cos) - y * sin;
+  mat.at(1, 2) = zy * (1 - cos) + z * sin;
+  mat.at(2, 2) = cos + z2 * (1 - cos);
+  mat.at(3, 0) = 0.0f;
+
+  mat.at(0, 3) = 0.0F;
+  mat.at(1, 3) = 0.0f;
+  mat.at(2, 3) = 0.0f;
+  mat.at(3, 3) = 0.0f;
 
   return mat;
 }
