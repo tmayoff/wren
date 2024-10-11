@@ -53,19 +53,22 @@ void draw_component(const std::string_view& tag, wren::math::Vec3f& vec) {
   ImGui::Text("X");
   ImGui::SameLine();
   float x = vec.x();
-  if (ImGui::DragFloat(("##x" + std::string(tag.data())).c_str(), &x, 0.1F)) vec.x(x);
+  if (ImGui::DragFloat(("##x" + std::string(tag.data())).c_str(), &x, 0.1F))
+    vec.x(x);
 
   ImGui::SameLine();
   ImGui::Text("Y");
   ImGui::SameLine();
   float y = vec.y();
-  if (ImGui::DragFloat(("##y" + std::string(tag.data())).c_str(), &y, 0.1F)) vec.y(y);
+  if (ImGui::DragFloat(("##y" + std::string(tag.data())).c_str(), &y, 0.1F))
+    vec.y(y);
 
   ImGui::SameLine();
   ImGui::Text("Z");
   ImGui::SameLine();
   float z = vec.z();
-  if (ImGui::DragFloat(("##z" + std::string(tag.data())).c_str(), &z, 0.1F)) vec.z(z);
+  if (ImGui::DragFloat(("##z" + std::string(tag.data())).c_str(), &z, 0.1F))
+    vec.z(z);
 
   ImGui::PopItemWidth();
 }

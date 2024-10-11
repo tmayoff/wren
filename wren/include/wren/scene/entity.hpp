@@ -14,7 +14,7 @@ class Entity {
       : entity_(entity), scene_(scene) {}
 
   template <typename T>
-  auto has_component() const -> bool;
+  [[nodiscard]] auto has_component() const -> bool;
 
   template <typename T>
   auto get_component() -> T&;

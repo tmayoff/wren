@@ -7,7 +7,7 @@
 
 namespace wren::scene {
 
-auto serialize(const Scene& scene, const std::filesystem::path& out_file)
-    -> expected<void>;
+auto serialize(const std::shared_ptr<Scene>& scene,
+               const std::filesystem::path& out_file) -> expected<void>;
 
 }

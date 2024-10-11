@@ -125,7 +125,7 @@ void Editor::on_update() {
         // SAVE the scene
 
         auto file = project_path_ / "scene.wren";
-        wren::scene::serialize(*scene_.get(), file);
+        wren::scene::serialize(scene_, file);
       }
 
       ImGui::EndMenu();
