@@ -4,7 +4,6 @@
 #include <imgui_impl_vulkan.h>
 #include <imgui_internal.h>
 
-#include <array>
 #include <glm/glm.hpp>
 #include <tracy/Tracy.hpp>
 #include <wren/application.hpp>
@@ -20,14 +19,18 @@
 #include "scene_panel.hpp"
 #include "ui.hpp"
 #include "wren/scene/components/transform.hpp"
+#include "wren/scene/serialization.hpp"
 
 namespace editor {
 
-auto Editor::create(const std::shared_ptr<wren::Application> &app)
+auto Editor::create(const std::shared_ptr<wren::Application> &app,
+                    const std::filesystem::path &project_path)
     -> wren::expected<std::shared_ptr<Editor>> {
   const auto &ctx = app->context();
 
   auto editor = std::make_shared<Editor>(app->context());
+  editor->project_path_ = project_path;
+  editor->load_scene();
 
   TRY_RESULT(
       editor->mesh_shader_,
@@ -41,7 +44,7 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app)
   auto mesh = editor->scene_->create_entity();
   mesh.add_component<wren::scene::components::MeshRenderer>(m);
 
-  TRY_RESULT(const auto graph, editor->build_ui_render_graph(app->context()));
+  TRY_RESULT(const auto graph, editor->build_render_graph(app->context()));
   app->context()->renderer->set_graph_builder(graph);
 
   editor::ui::init(app->context());
@@ -93,17 +96,20 @@ void Editor::on_update() {
 
     camera_.aspect(static_cast<float>(scene_resized_->x()) /
                    static_cast<float>(scene_resized_->y()));
-    proj = camera_.projection();
 
     scene_resized_.reset();
   }
 
   editor::ui::begin();
 
-  ImGui::ShowDemoWindow();
+  // ImGui::ShowDemoWindow();
 
   static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
-  ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
+  ImGuiWindowFlags window_flags =
+      ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+      ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
+      ImGuiWindowFlags_MenuBar;
 
   const ImGuiViewport *viewport = ImGui::GetMainViewport();
   ImGui::SetNextWindowPos(viewport->WorkPos);
@@ -112,12 +118,21 @@ void Editor::on_update() {
   ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0F);
   ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0F);
 
-  window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
-                  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-                  ImGuiWindowFlags_NoBringToFrontOnFocus |
-                  ImGuiWindowFlags_NoNavFocus;
-
   ImGui::Begin("Editor", nullptr, window_flags);
+  if (ImGui::BeginMenuBar()) {
+    if (ImGui::BeginMenu("File")) {
+      if (ImGui::MenuItem("Save")) {
+        // SAVE the scene
+
+        auto file = project_path_ / "scene.wren";
+        wren::scene::serialize(*scene_.get(), file);
+      }
+
+      ImGui::EndMenu();
+    }
+    ImGui::EndMenuBar();
+  }
+
   ImGui::PopStyleVar(2);
 
   ImGuiIO &io = ImGui::GetIO();
@@ -181,7 +196,14 @@ void Editor::on_update() {
   editor::ui::end();
 }
 
-auto Editor::build_ui_render_graph(const std::shared_ptr<wren::Context> &ctx)
+auto Editor::load_scene() -> wren::expected<void> {
+  // Deserialize project
+  std::string scene_name;
+
+  return {};
+}
+
+auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
     -> wren::expected<wren::GraphBuilder> {
   wren::GraphBuilder builder(ctx);
 
@@ -206,7 +228,7 @@ auto Editor::build_ui_render_graph(const std::shared_ptr<wren::Context> &ctx)
                   //                                0.0f, 0.0f),
                   //                                wren::math::Vec3f::UnitZ());
 
-                  ubo.proj = this->proj;
+                  ubo.proj = this->camera_.projection();
 
                   pass.write_scratch_buffer(cmd, 0, 0, ubo);
 

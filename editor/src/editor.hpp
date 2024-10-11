@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <memory>
 #include <vulkan/vulkan.hpp>
 #include <wren/mesh.hpp>
@@ -20,17 +21,23 @@ namespace editor {
 
 class Editor {
  public:
-  static auto create(const std::shared_ptr<wren::Application> &app)
+  static auto create(const std::shared_ptr<wren::Application> &app,
+                     const std::filesystem::path &project_path)
       -> wren::expected<std::shared_ptr<Editor>>;
 
   Editor(const std::shared_ptr<wren::Context> &ctx);
 
-  auto build_ui_render_graph(const std::shared_ptr<wren::Context> &ctx)
-      -> wren::expected<wren::GraphBuilder>;
-
   void on_update();
 
  private:
+  auto load_scene() -> wren::expected<void>;
+
+  auto build_render_graph(const std::shared_ptr<wren::Context> &ctx)
+      -> wren::expected<wren::GraphBuilder>;
+
+  // Project
+  std::filesystem::path project_path_;
+
   // Editor camera
   Camera camera_;
 
@@ -50,8 +57,6 @@ class Editor {
 
   std::optional<wren::math::vec2i> scene_resized_;
   wren::math::vec2i last_scene_size_;
-
-  wren::math::Mat4f proj;
 };
 
 }  // namespace editor

@@ -3,22 +3,43 @@
 #include <imgui_internal.h>
 
 #include <backward.hpp>
+#include <filesystem>
 #include <memory>
 #include <tracy/Tracy.hpp>
 #include <wren/application.hpp>
 #include <wren/context.hpp>
 #include <wren/graph.hpp>
 #include <wren/shaders/mesh.hpp>
+#include <wren_utils/format.hpp>
 
 #include "editor.hpp"
 
-backward::SignalHandling const kSh;
+const backward::SignalHandling kSh;
 
-auto main() -> int {
-  auto const &err = wren::Application::Create("Editor");
+auto main(int argc, char** argv) -> int {
+  spdlog::set_level(spdlog::level::debug);
+
+  // Fix this warning
+  std::span args(argv + 1, argc - 1);
+
+  spdlog::debug("launching editor");
+  spdlog::debug("args:");
+  for (const auto arg : args) {
+    spdlog::debug("\t{}", arg);
+  }
+
+  std::optional<std::filesystem::path> project_path;
+  if (!args.empty()) {
+    std::filesystem::path p(args.front());
+    if (std::filesystem::exists(p)) {
+      spdlog::info("Loading project {}", args.front());
+      project_path = p;
+    }
+  }
+
+  const auto& err = wren::Application::Create("Editor");
   if (!err.has_value()) {
-    spdlog::error("failed to create application: {}",
-                  err.error().message());
+    spdlog::error("failed to create application: {}", err.error().message());
     return EXIT_FAILURE;
   }
 
@@ -28,11 +49,11 @@ auto main() -> int {
   // match the output framebuffer add a pass specifically for
   // transitioning into the presentable layout
 
-  auto const res = editor::Editor::create(app);
+  const auto res = editor::Editor::create(app, project_path.value());
   if (!res.has_value()) {
     return EXIT_FAILURE;
   }
-  auto const editor = res.value();
+  const auto editor = res.value();
 
   app->run();
 

@@ -19,7 +19,8 @@ void render_scene_panel(const std::shared_ptr<wren::scene::Scene> &scene,
       entity_node_flags |= ImGuiTreeNodeFlags_Selected;
     }
 
-    if (ImGui::TreeNodeEx(tag.tag.c_str(), entity_node_flags)) {
+    const auto name = tag.tag.empty() ? "(unamed)" : tag.tag;
+    if (ImGui::TreeNodeEx(name.c_str(), entity_node_flags)) {
       // Set the selected entity
       if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
         selected_entity = entity;

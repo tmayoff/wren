@@ -9,11 +9,8 @@ reconfigure:
 build:
     meson compile -C build
 
-nix_run: build
-    nixVulkanIntel ./build/editor/wren_editor
-
 run: build
-    ./build/editor/wren_editor
+    ./build/editor/wren_editor ~/Documents/wren_game
 
 test: build
     meson test -C build --print-errorlogs

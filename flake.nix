@@ -109,6 +109,8 @@
           SDL2
           spdlog
           tl-expected
+          tomlplusplus
+          
           vulkan-headers
           vulkan-loader
           tracy

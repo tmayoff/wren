@@ -9,6 +9,7 @@ wren = library(
     'src/render_pass.cpp',
     'src/renderer.cpp',
     'src/scene/scene.cpp',
+    'src/scene/serialization.cpp',
     'src/window.cpp',
     'src/utils/vulkan.cpp',
     'src/utils/queue.cpp',
@@ -24,6 +25,7 @@ wren = library(
         spdlog,
         sdl2,
         tracy,
+        toml
     ],
     install: true,
 )
