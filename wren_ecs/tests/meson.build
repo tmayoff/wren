@@ -5,7 +5,7 @@ foreach test : tests
         executable(
             'ecs_@0@_test'.format(test),
             '@0@.cpp'.format(test),
-            dependencies: [wrenm_dep, boost_test],
+            dependencies: [ecs_dep, boost_test],
             cpp_args: ['-DBOOST_TEST_MODULE=@0@'.format(test)],
         ),
     )
