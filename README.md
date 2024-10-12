@@ -8,13 +8,19 @@
 
 Custom vulkan renderer, with eventually no major dependencies
 
-**Dependencies to remove**
+## features
+- Render Graph
+- Editor
+- Scene manager
+- ECS
+
+## dependencies to remove
 - SPIRV-Reflect
 - Boost.Describe (C++26?)
 - Vulkan Memory Allocator
 - ImGui
 
-## Contributing
+## contributing
 
 Send patches to the [mailing list](https://lists.sr.ht/~tmayoff/wren-devel), report bugs on the [issue tracker](https://todo.sr.ht/~tmayoff/wren).
 
