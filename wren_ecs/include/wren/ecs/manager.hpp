@@ -53,7 +53,8 @@ auto Manager::has_component(Entity entity) const {
 
 template <typename T, typename... Args>
 auto Manager::add_component(Entity entity, Args&&... args) {
-  auto ptr = std::shared_ptr<Component>(new T(std::forward<Args>(args)...));
+  const auto ptr =
+      std::shared_ptr<Component>(new T(std::forward<Args>(args)...));
 
   auto& e = entities_.at(entity);
   if (e.contains(typeid(T))) {
@@ -87,9 +88,8 @@ auto Manager::each() {
                      std::vector<std::pair<Entity, Component::Ptr>>>
       filtered;
 
-  //TODO get a filtered list of all entities with all the components requested
+  // TODO get a filtered list of all entities with all the components requested
   for (const auto component : components) {
-    // components_.at(component)
   }
 
   return list;
