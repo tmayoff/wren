@@ -4,7 +4,6 @@
 
 #include <toml++/toml.hpp>
 
-#include "scene/components/tag.hpp"
 #include "scene/components/transform.hpp"
 #include "scene/entity.hpp"
 
@@ -21,24 +20,10 @@ auto serialize(const std::shared_ptr<Scene>& scene,
       {"version", "0.1"},
   };
 
-  // for (const auto& [handle, tag, transform] :
-  //      scene->world()
-  //          .view<components::Tag, components::Transform>()
-  //          .each()) {
-  //   toml::table entity_tbl;
-  //   entity_tbl.emplace("tag", tag.tag);
+  std::ofstream out(out_file);
+  out << scene->world().to_json();
 
-  //   serialize_transform(entity_tbl, transform);
-
-  //   // Mesh renderer
-
-  //   entities.emplace(std::to_string(static_cast<uint32_t>(handle)), entity_tbl);
-  // }
-
-  // std::ofstream out(out_file);
-  // out << entities;
-
-  // out.close();
+  out.close();
 
   return {};
 }

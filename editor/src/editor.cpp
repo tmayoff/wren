@@ -17,6 +17,7 @@
 
 #include "inspector_panel.hpp"
 #include "scene_panel.hpp"
+#include "filesystem_panel.hpp"
 #include "ui.hpp"
 #include "wren/scene/components/transform.hpp"
 #include "wren/scene/serialization.hpp"
@@ -186,9 +187,7 @@ void Editor::on_update() {
 
   render_inspector_panel(scene_, selected_entity_);
 
-  ImGui::Begin("Filesystem");
-
-  ImGui::End();
+  render_filesystem_panel(project_path_);
 
   ImGui::End();
   ImGui::PopStyleVar();

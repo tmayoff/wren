@@ -7,6 +7,7 @@ executable(
     'src/ui.cpp',
     'src/scene_panel.cpp',
     'src/inspector_panel.cpp',
+    'src/filesystem_panel.cpp',
     dependencies: deps,
     install: true,
 )
