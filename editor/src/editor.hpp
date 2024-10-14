@@ -43,7 +43,7 @@ class Editor {
   Camera camera_;
 
   // Panels
-  std::optional<entt::entity> selected_entity_;
+  std::optional<flecs::entity> selected_entity_;
 
   // Scene management
   std::shared_ptr<wren::ecs::Manager> ecs_;

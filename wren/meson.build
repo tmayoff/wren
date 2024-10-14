@@ -17,7 +17,7 @@ wren = library(
 
     include_directories: ['include', 'include/wren'],
     dependencies: [
-        entt,
+        flecs,
         vulkan,
         wren_vk_dep,
         wren_reflect_dep,
@@ -33,7 +33,7 @@ wren_dep = declare_dependency(
     include_directories: 'include',
     link_with: wren,
     dependencies: [
-        entt,
+        flecs,
         vulkan,
         wren_vk_dep,
         wren_reflect_dep,

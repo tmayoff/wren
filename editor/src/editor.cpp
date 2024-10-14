@@ -207,13 +207,20 @@ auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
     -> wren::expected<wren::GraphBuilder> {
   wren::GraphBuilder builder(ctx);
 
+  auto render_query =
+      scene_->world()
+          .query_builder<const wren::scene::components::Transform,
+                         const wren::scene::components::MeshRenderer>()
+          .build();
+
   builder
       .add_pass("mesh",
                 {{
                      {"mesh", mesh_shader_},
                  },
                  "scene_viewer"},
-                [this, ctx](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
+                [this, ctx, render_query](wren::RenderPass &pass,
+                                          ::vk::CommandBuffer &cmd) {
                   pass.bind_pipeline("mesh");
 
                   struct GLOBALS {
@@ -222,42 +229,28 @@ auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
                   };
                   GLOBALS ubo{};
 
-                  // ubo.view =
-                  // wren::math::look_at(wren::math::Vec3f(2.0f, 2.0f, 2.0f),
-                  //                                wren::math::Vec3f(0.0f,
-                  //                                0.0f, 0.0f),
-                  //                                wren::math::Vec3f::UnitZ());
-
+                  // ubo.view = this->camera_.position().matrix();
                   ubo.proj = this->camera_.projection();
 
                   pass.write_scratch_buffer(cmd, 0, 0, ubo);
 
-                  for (const auto &[entity, transform, mesh_renderer] :
-                       scene_->registry()
-                           .view<wren::scene::components::Transform,
-                                 wren::scene::components::MeshRenderer>()
-                           .each()) {
-                    struct LOCALS {
-                      wren::math::Mat4f model;
-                    };
-                    LOCALS ubo{};
+                  render_query.each(
+                      [cmd, &pass](
+                          const wren::scene::components::Transform &transform,
+                          const wren::scene::components::MeshRenderer
+                              &mesh_renderer) {
+                        struct LOCALS {
+                          wren::math::Mat4f model;
+                        };
+                        LOCALS ubo{};
 
-                    // static auto start_time =
-                    //     std::chrono::high_resolution_clock::now();
-                    // auto current_time =
-                    // std::chrono::high_resolution_clock::now(); float time =
-                    //     std::chrono::duration<float,
-                    //     std::chrono::seconds::period>(
-                    //         current_time - start_time)
-                    //         .count();
+                        ubo.model = transform.matrix();
 
-                    ubo.model = transform.matrix();
+                        pass.write_scratch_buffer(cmd, 0, 1, ubo);
 
-                    pass.write_scratch_buffer(cmd, 0, 1, ubo);
-
-                    mesh_renderer.mesh.bind(cmd);
-                    mesh_renderer.mesh.draw(cmd);
-                  }
+                        mesh_renderer.mesh.bind(cmd);
+                        mesh_renderer.mesh.draw(cmd);
+                      });
                 })
       .add_pass("ui", {{}, "swapchain_target"},
                 [](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {

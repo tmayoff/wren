@@ -3,16 +3,18 @@
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 
+#include <wren/scene/components/mesh.hpp>
 #include <wren/scene/components/tag.hpp>
 #include <wren/scene/components/transform.hpp>
 #include <wren/scene/entity.hpp>
 
+void draw_component(wren::scene::components::MeshRenderer& mesh_renderer);
 void draw_component(wren::scene::components::Transform& transform);
 void draw_component(const std::string_view& tag, wren::math::Vec3f& vec);
 
 void render_inspector_panel(
     const std::shared_ptr<wren::scene::Scene>& scene,
-    const std::optional<entt::entity>& selected_entity) {
+    const std::optional<flecs::entity>& selected_entity) {
   ImGui::Begin("Inspector");
 
   if (!selected_entity.has_value()) {
@@ -22,24 +24,28 @@ void render_inspector_panel(
 
   wren::scene::Entity entity{selected_entity.value(), scene};
 
-  auto& tag = entity.get_component<wren::scene::components::Tag>();
-  ImGui::InputText("Name", &tag.tag);
+  // Edit name
+  auto name = std::string(selected_entity->name());
+  ImGui::InputText("Name", &name);
+  selected_entity->set_name(name.c_str());
 
-  auto& transform = entity.get_component<wren::scene::components::Transform>();
-  draw_component(transform);
-
-  // // TODO list all components of this entity and draw
-  // for (auto&& curr : scene->registry().storage()) {
-  //   entt::id_type id = curr.first;
-  //   const auto& storage = curr.second;
-  //   entt::type_info info = storage.type();
-
-  //   if (storage.contains(selected_entity)) {
-  //     ImGui::Text("Component: %s", info.name().data());
-  //   }
-  // }
+  // Iterate all components
+  selected_entity->each([selected_entity](flecs::id id) {
+    if (id == selected_entity->world()
+                  .component<wren::scene::components::Transform>()
+                  .id()) {
+      draw_component(
+          *selected_entity->get_mut<wren::scene::components::Transform>());
+    } else {
+      ImGui::Text("Can't inspect component type: %s", id.str().c_str());
+    }
+  });
 
   ImGui::End();
+}
+
+void draw_component(wren::scene::components::MeshRenderer& mesh_renderer) {
+  ImGui::Text("Mesh Renderer");
 }
 
 void draw_component(wren::scene::components::Transform& transform) {

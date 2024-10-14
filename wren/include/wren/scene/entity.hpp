@@ -1,6 +1,6 @@
 #pragma once
 
-#include <entt/entt.hpp>
+#include <flecs.h>
 
 #include "scene.hpp"
 
@@ -10,7 +10,7 @@ class Scene;
 
 class Entity {
  public:
-  Entity(entt::entity entity, const std::shared_ptr<Scene>& scene)
+  Entity(flecs::entity entity, const std::shared_ptr<Scene>& scene)
       : entity_(entity), scene_(scene) {}
 
   template <typename T>
@@ -23,24 +23,25 @@ class Entity {
   void add_component(Args&&... args);
 
  private:
-  entt::entity entity_;
+  flecs::entity entity_;
 
   std::shared_ptr<Scene> scene_;
 };
 
 template <typename T>
 auto Entity::has_component() const -> bool {
-  return scene_->registry().all_of<T>();
+  // return scene_->world().all_of<T>();
 }
 
 template <typename T>
 auto Entity::get_component() -> T& {
-  return scene_->registry().get<T>(entity_);
+  return scene_->world().get<T>(entity_);
 }
 
 template <typename T, typename... Args>
 void Entity::add_component(Args&&... args) {
-  scene_->registry().emplace<T>(entity_, std::forward<Args>(args)...);
+  entity_.add<T>();
+  entity_.set<T>(T(std::forward<Args>(args)...));
 }
 
 }  // namespace wren::scene

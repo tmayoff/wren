@@ -7,9 +7,9 @@
 namespace wren::scene {
 
 auto Scene::create_entity(const std::string& name) -> Entity {
-  auto entity = Entity{registry_.create(), shared_from_this()};
+  auto entity = Entity{ecs_.entity(name.c_str()), shared_from_this()};
 
-  entity.add_component<components::Tag>(name);
+  // entity.add_component<components::Tag>(name);
   entity.add_component<components::Transform>();
 
   return entity;

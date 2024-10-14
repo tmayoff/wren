@@ -15,7 +15,7 @@ struct Transform {
   math::Vec3f rotation{};
   math::Vec3f scale;
 
-  auto matrix() {
+  auto matrix() const {
     math::Mat4f translate = math::translate(math::Mat4f::identity(), position);
     math::Mat4f rotate = math::Quaternionf(rotation).to_mat();
     // math::Mat4f scale{};

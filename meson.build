@@ -19,7 +19,7 @@ expected = dependency('tl-expected', modules: ['tl::expected'])
 spirv = dependency('SPIRV-Headers')
 tracy = dependency('tracy')
 imgui = dependency('imgui_docking')
-entt = dependency('entt')
+flecs = dependency('flecs')
 toml = dependency('tomlplusplus')
 
 add_project_arguments(

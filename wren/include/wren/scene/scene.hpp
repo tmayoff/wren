@@ -1,6 +1,7 @@
 #pragma once
 
-#include <entt/entt.hpp>
+#include <flecs.h>
+
 #include <memory>
 
 namespace wren::scene {
@@ -13,13 +14,13 @@ class Scene : public std::enable_shared_from_this<Scene> {
 
   auto create_entity(const std::string& name = "entity") -> Entity;
 
-  auto registry() const -> const entt::registry& { return registry_; }
-  auto registry() -> entt::registry& { return registry_; }
+  auto world() const -> const flecs::world& { return ecs_; }
+  auto world() -> flecs::world& { return ecs_; }
 
  private:
   Scene() = default;
 
-  entt::registry registry_;
+  flecs::world ecs_;
 };
 
 }  // namespace wren::scene

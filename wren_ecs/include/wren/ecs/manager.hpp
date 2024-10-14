@@ -1,20 +1,41 @@
 #pragma once
 
-#include <typeindex>
 #include <unordered_map>
 #include <vector>
 
+#include "archetype.hpp"
 #include "component.hpp"
 #include "entity.hpp"
 
 namespace wren::ecs {
 
+struct Archetype;
+
+struct Column {
+  void* elements;
+  size_t element_size;
+  size_t count;
+};
+
+struct ArchetypeEdge {
+  Archetype& add;
+  Archetype& remove;
+};
+
+struct Record {
+  Archetype& archetype;
+  size_t row;
+};
+
+// Record in component index with component column for archetype
+struct ArchetypeRecord {
+  std::size_t column;
+};
+
 class Manager {
  public:
   auto create_entity() {
     const auto handle = current_entity_++;
-    entities_.insert({handle, {}});
-
     return handle;
   }
 
@@ -34,21 +55,16 @@ class Manager {
   auto each();
 
  private:
-  std::unordered_map<Entity,
-                     std::unordered_map<std::type_index, Component::Ptr>>
-      entities_;
-
-  std::unordered_map<std::type_index,
-                     std::vector<std::pair<Entity, Component::Ptr>>>
-      components_;
+  // Find the archetype for an entity
+  std::unordered_map<Entity, Archetype&> entity_index_;
 
   Entity current_entity_ = 0;
 };
 
 template <typename T>
 auto Manager::has_component(Entity entity) const {
-  const auto& e = entities_.at(entity);
-  return e.contains(typeid(T));
+  Archetype& archetype = entity_index_.at(entity);
+  // return archetype.type_set.count(get_copmonent_id(T{})) != 0;
 }
 
 template <typename T, typename... Args>
@@ -56,43 +72,43 @@ auto Manager::add_component(Entity entity, Args&&... args) {
   const auto ptr =
       std::shared_ptr<Component>(new T(std::forward<Args>(args)...));
 
-  auto& e = entities_.at(entity);
-  if (e.contains(typeid(T))) {
-    // TODO Return an error
-    return;
-  }
+  // auto& e = entities_.at(entity);
+  // if (e.contains(typeid(T))) {
+  //   // TODO Return an error
+  //   return;
+  // }
 
-  e.insert({typeid(T), ptr});
+  // e.insert({typeid(T), ptr});
 }
 
 template <typename T>
 auto Manager::get_component(Entity entity) const {
-  const auto& e = entities_.at(entity).at(typeid(T));
-  return *e.get();
+  // const auto& e = entities_.at(entity).at(typeid(T));
+  // return *e.get();
 }
 
 template <typename T>
 auto Manager::get_component(Entity entity) -> T& {
-  const auto& e =
-      std::dynamic_pointer_cast<T>(entities_.at(entity).at(typeid(T)));
-  return *e.get();
+  // const auto& e =
+  //     std::dynamic_pointer_cast<T>(entities_.at(entity).at(typeid(T)));
+  // return *e.get();
 }
 
 template <typename... Components>
 auto Manager::each() {
-  const auto components = {std::type_index(typeid(Components))...};
+  // const auto components = {std::type_index(typeid(Components))...};
 
-  std::vector<std::tuple<Entity, Components...>> list;
+  // std::vector<std::tuple<Entity, Components...>> list;
 
-  std::unordered_map<std::type_index,
-                     std::vector<std::pair<Entity, Component::Ptr>>>
-      filtered;
+  // std::unordered_map<std::type_index,
+  //                    std::vector<std::pair<Entity, Component::Ptr>>>
+  //     filtered;
 
-  // TODO get a filtered list of all entities with all the components requested
-  for (const auto component : components) {
-  }
+  // // TODO get a filtered list of all entities with all the components
+  // requested for (const auto component : components) {
+  // }
 
-  return list;
+  // return list;
 }
 
 }  // namespace wren::ecs
