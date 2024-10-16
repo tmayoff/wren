@@ -19,6 +19,7 @@
 #include "scene_panel.hpp"
 #include "ui.hpp"
 #include "wren/scene/components/transform.hpp"
+#include "wren/scene/deserialization.hpp"
 #include "wren/scene/serialization.hpp"
 
 namespace editor {
@@ -38,12 +39,12 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app,
                                wren::shaders::kMeshVertShader.data(),
                                wren::shaders::kMeshFragShader.data()));
 
-  wren::Mesh m(ctx->graphics_context->Device(),
-               ctx->graphics_context->allocator());
-  m.shader(editor->mesh_shader_);
-  auto mesh = editor->scene_->create_entity();
-  mesh.add_component<wren::scene::components::MeshRenderer>(m);
-  editor->scene_->create_entity("OTHER ENTITY");
+  // wren::Mesh m(ctx->graphics_context->Device(),
+  //              ctx->graphics_context->allocator());
+  // m.shader(editor->mesh_shader_);
+  // auto mesh = editor->scene_->create_entity();
+  // mesh.add_component<wren::scene::components::MeshRenderer>(m);
+  // editor->scene_->create_entity("OTHER ENTITY");
 
   TRY_RESULT(const auto graph, editor->build_render_graph(app->context()));
   app->context()->renderer->set_graph_builder(graph);
@@ -201,6 +202,8 @@ void Editor::on_update() {
 auto Editor::load_scene() -> wren::expected<void> {
   // Deserialize project
   std::string scene_name;
+
+  wren::scene::deserialize(editor_context_.project_path, "scene.wren", scene_);
 
   return {};
 }

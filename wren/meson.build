@@ -10,6 +10,7 @@ wren = library(
         'src/pipeline.cpp',
         'src/render_pass.cpp',
         'src/renderer.cpp',
+        'src/scene/deserialization.cpp',
         'src/scene/scene.cpp',
         'src/scene/serialization.cpp',
         'src/utils/device.cpp',
