@@ -67,7 +67,7 @@ void draw_component(const editor::Context& ctx,
     if (payload != nullptr) {
       std::string new_file(static_cast<const char*>(payload->Data),
                            payload->DataSize);
-      mesh_renderer.update_mesh(ctx.project_path / new_file);
+      mesh_renderer.update_mesh(ctx.project_path, new_file);
     }
 
     ImGui::EndDragDropTarget();

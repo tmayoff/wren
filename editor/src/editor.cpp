@@ -43,6 +43,7 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app,
   m.shader(editor->mesh_shader_);
   auto mesh = editor->scene_->create_entity();
   mesh.add_component<wren::scene::components::MeshRenderer>(m);
+  editor->scene_->create_entity("OTHER ENTITY");
 
   TRY_RESULT(const auto graph, editor->build_render_graph(app->context()));
   app->context()->renderer->set_graph_builder(graph);
