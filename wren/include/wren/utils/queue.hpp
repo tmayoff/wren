@@ -4,7 +4,7 @@
 #include <optional>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_handles.hpp>
-#include <wren_utils/errors.hpp>
+#include <wren/utils/errors.hpp>
 
 namespace wren::vulkan {
 
@@ -15,9 +15,9 @@ struct QueueFamilyIndices {
 
 class Queue {
  public:
-  static auto FindQueueFamilyIndices(
+  static auto find_queue_family_indices(
       const ::vk::PhysicalDevice &physical_device,
-      std::optional<::vk::SurfaceKHR> const &surface = {})
+      const std::optional<::vk::SurfaceKHR> &surface = {})
       -> expected<QueueFamilyIndices>;
 };
 

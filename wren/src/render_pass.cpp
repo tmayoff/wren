@@ -3,7 +3,7 @@
 #include <tl/expected.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
-#include <wren_utils/errors.hpp>
+#include <wren/utils/errors.hpp>
 #include <wren_vk/errors.hpp>
 
 #include "wren/context.hpp"

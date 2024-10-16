@@ -10,7 +10,7 @@
 #include <wren/context.hpp>
 #include <wren/graph.hpp>
 #include <wren/shaders/mesh.hpp>
-#include <wren_utils/format.hpp>
+#include <wren/utils/format.hpp>
 
 #include "editor.hpp"
 

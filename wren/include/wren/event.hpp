@@ -4,7 +4,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <vector>
-#include <wren_utils/enums.hpp>
+#include <wren/utils/enums.hpp>
 
 #include "keycode.hpp"
 

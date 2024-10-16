@@ -5,8 +5,8 @@
 #include <boost/algorithm/string/split.hpp>
 #include <span>
 #include <wren/gltf/gltf.hpp>
-#include <wren_utils/binray_reader.hpp>
-#include <wren_utils/filesystem.hpp>
+#include <wren/utils/binray_reader.hpp>
+#include <wren/utils/filesystem.hpp>
 
 namespace wren {
 

@@ -11,9 +11,9 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
+#include <wren/utils/errors.hpp>
 #include <wren_math/vector.hpp>
 #include <wren_reflect/parser.hpp>
-#include <wren_utils/errors.hpp>
 
 DEFINE_ERROR_IMPL("shaderc", shaderc_compilation_status)
 BOOST_DESCRIBE_ENUM(shaderc_compilation_status,

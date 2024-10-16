@@ -5,7 +5,7 @@
 
 #include <memory>
 #include <tl/expected.hpp>
-#include <wren_utils/errors.hpp>
+#include <wren/utils/errors.hpp>
 
 #include "wren/context.hpp"
 #include "wren/event.hpp"

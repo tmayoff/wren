@@ -45,7 +45,7 @@ namespace wren::vulkan {
           ::vk::Result::eErrorExtensionNotPresent)); \
   }
 
-auto LoadFunctions(::vk::Instance const &instance)
+auto load_functions(::vk::Instance const &instance)
     -> expected<void> {
   LOAD_VULKAN_PFN(pfnVkCmdPushConstants, vkCmdPushConstants);
   LOAD_VULKAN_PFN(pfnVkCreateDebugUtilsMessengerEXT,
@@ -53,7 +53,7 @@ auto LoadFunctions(::vk::Instance const &instance)
   return {};
 }
 
-auto DebugCallback(
+auto debug_callback(
     VkDebugUtilsMessageSeverityFlagBitsEXT severity,
     VkDebugUtilsMessageTypeFlagsEXT type,
     VkDebugUtilsMessengerCallbackDataEXT const *msg_data,
@@ -85,7 +85,7 @@ auto DebugCallback(
   return VK_TRUE;
 }
 
-auto GetSwapchainSupportDetails(
+auto get_swapchain_support_details(
     ::vk::PhysicalDevice const &physical_device,
     ::vk::SurfaceKHR const &surface)
     -> expected<SwapchainSupportDetails> {

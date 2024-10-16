@@ -5,7 +5,7 @@ utils = library(
         'src/errors.cpp',
         'src/string.cpp',
     ),
-    include_directories: ['include', 'include/wren_utils'],
+    include_directories: ['include', 'include/wren/utils'],
     dependencies: [fmt, boost, expected],
 )
 wren_utils_dep = declare_dependency(

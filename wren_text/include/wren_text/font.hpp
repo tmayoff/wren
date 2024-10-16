@@ -3,7 +3,7 @@
 #include <array>
 #include <filesystem>
 #include <string_view>
-#include <wren_utils/errors.hpp>
+#include <wren/utils/errors.hpp>
 
 namespace wren::text {
 

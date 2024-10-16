@@ -213,7 +213,7 @@ auto Renderer::recreate_swapchain() -> expected<void> {
       format.colorSpace, swapchain_extent, 1,
       ::vk::ImageUsageFlagBits::eColorAttachment);
 
-  auto queue_families = vulkan::Queue::FindQueueFamilyIndices(
+  auto queue_families = vulkan::Queue::find_queue_family_indices(
       ctx_->graphics_context->PhysicalDevice(),
       ctx_->graphics_context->Surface());
   if (!queue_families.has_value())

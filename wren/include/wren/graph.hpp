@@ -5,7 +5,7 @@
 #include <tl/expected.hpp>
 #include <vector>
 #include <vulkan/vulkan.hpp>
-#include <wren_utils/errors.hpp>
+#include <wren/utils/errors.hpp>
 #include <wren_vk/image.hpp>
 
 #include "render_pass.hpp"

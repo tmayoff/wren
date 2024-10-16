@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 #include <utility>
-#include <wren_utils/errors.hpp>
+#include <wren/utils/errors.hpp>
 #include <wren_vk/shader.hpp>
 
 namespace wren {

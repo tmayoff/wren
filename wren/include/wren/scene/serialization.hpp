@@ -3,7 +3,7 @@
 #include <filesystem>
 
 #include "scene.hpp"
-#include "wren_utils/errors.hpp"
+#include "wren/utils/errors.hpp"
 
 namespace wren::scene {
 

@@ -3,8 +3,8 @@
 #include <vk_mem_alloc.h>
 
 #include <vulkan/vulkan.hpp>
+#include <wren/utils/errors.hpp>
 #include <wren_math/vector.hpp>
-#include <wren_utils/errors.hpp>
 
 namespace wren::vk {
 

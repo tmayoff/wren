@@ -6,8 +6,8 @@
 #include <wren/ecs/manager.hpp>
 #include <wren/mesh.hpp>
 #include <wren/scene/scene.hpp>
+#include <wren/utils/errors.hpp>
 #include <wren_math/vector.hpp>
-#include <wren_utils/errors.hpp>
 
 #include "camera.hpp"
 #include "context.hpp"
