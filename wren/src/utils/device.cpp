@@ -6,7 +6,7 @@
 #include <tl/expected.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
-#include <wren_vk/errors.hpp>
+#include <wren/vk/errors.hpp>
 
 #include "wren/utils/queue.hpp"
 
@@ -41,8 +41,8 @@ auto Device::create_device(const ::vk::Instance &instance,
             .getFeatures2< ::vk::PhysicalDeviceFeatures2,
                            ::vk::PhysicalDeviceImagelessFramebufferFeatures>();
 
-    ::vk::DeviceCreateInfo create_info({}, queue_create_info, {}, extensions, {},
-                                      &features2);
+    ::vk::DeviceCreateInfo create_info({}, queue_create_info, {}, extensions,
+                                       {}, &features2);
     auto res = physical_device.createDevice(create_info);
     if (res.result != ::vk::Result::eSuccess)
       return tl::make_unexpected(make_error_code(res.result));

@@ -6,8 +6,8 @@
 #include <vulkan/vulkan.hpp>
 #include <wren_math/matrix.hpp>
 #include <wren_math/vector.hpp>
-#include <wren_vk/buffer.hpp>
-#include <wren_vk/shader.hpp>
+#include <wren/vk/buffer.hpp>
+#include <wren/vk/shader.hpp>
 
 #include "utils/device.hpp"
 

@@ -2,7 +2,7 @@
 
 #include <tl/expected.hpp>
 #include <wren/utils/errors.hpp>
-#include <wren_vk/image.hpp>
+#include <wren/vk/image.hpp>
 
 #include "wren/context.hpp"
 #include "wren/renderer.hpp"

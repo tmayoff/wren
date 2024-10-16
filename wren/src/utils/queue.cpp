@@ -3,7 +3,7 @@
 #include <optional>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan_enums.hpp>
-#include <wren_vk/errors.hpp>
+#include <wren/vk/errors.hpp>
 
 #include "vulkan/vulkan.hpp"
 #include "vulkan/vulkan_handles.hpp"

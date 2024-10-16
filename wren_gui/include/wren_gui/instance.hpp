@@ -2,8 +2,8 @@
 
 #include <queue>
 #include <vulkan/vulkan.hpp>
-#include <wren_vk/buffer.hpp>
-#include <wren_vk/shader.hpp>
+#include <wren/vk/buffer.hpp>
+#include <wren/vk/shader.hpp>
 #include <wren_math/matrix.hpp>
 #include <wren_math/vector.hpp>
 
@@ -21,8 +21,8 @@ struct Window {
   wren::math::vec2f mouse_offset;
 };
 
-static std::size_t const MAX_VERTICES = 10000;
-static std::size_t const MAX_INDICES = MAX_VERTICES * 10;
+static const std::size_t MAX_VERTICES = 10000;
+static const std::size_t MAX_INDICES = MAX_VERTICES * 10;
 
 struct Vertex {
   wren::math::vec2f pos;
@@ -44,35 +44,33 @@ struct Inputs {
 
 class Instance {
  public:
-  Instance(std::shared_ptr<vk::Shader> const& shader,
-           ::vk::Device const& device, VmaAllocator const& allocator,
-           ::vk::CommandPool const& command_pool,
-           ::vk::Queue const& graphics_queue);
+  Instance(const std::shared_ptr<vk::Shader>& shader,
+           const ::vk::Device& device, const VmaAllocator& allocator,
+           const ::vk::CommandPool& command_pool,
+           const ::vk::Queue& graphics_queue);
 
   [[nodiscard]] auto shader() const { return shader_; }
 
-  void bind(::vk::CommandBuffer const& cmd);
-  void flush(::vk::CommandBuffer const& cmd);
+  void bind(const ::vk::CommandBuffer& cmd);
+  void flush(const ::vk::CommandBuffer& cmd);
 
-  void resize_viewport(::vk::Extent2D const& size) {
-    this->output_size = size;
-  }
+  void resize_viewport(const ::vk::Extent2D& size) { this->output_size = size; }
 
   void Begin();
   void End();
 
-  auto BeginWindow(std::string const& name, wren::math::vec2f const& size)
+  auto BeginWindow(const std::string& name, const wren::math::vec2f& size)
       -> bool;
   void EndWindow();
 
   auto IO() -> Inputs& { return io; }
 
  private:
-  void draw_quad(wren::math::vec2f const& pos, wren::math::vec2f const& size,
-                 wren::math::Vec4f const& colour);
+  void draw_quad(const wren::math::vec2f& pos, const wren::math::vec2f& size,
+                 const wren::math::Vec4f& colour);
 
-  auto point_in_bounds(wren::math::vec2f const& p, wren::math::vec2f const& pos,
-                       wren::math::vec2f const& size) -> bool;
+  auto point_in_bounds(const wren::math::vec2f& p, const wren::math::vec2f& pos,
+                       const wren::math::vec2f& size) -> bool;
 
   std::shared_ptr<vk::Shader> shader_;
   std::shared_ptr<wren::vk::Buffer> index_buffer;

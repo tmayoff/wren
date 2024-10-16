@@ -4,9 +4,9 @@
 #include <string>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
-#include <wren_vk/buffer.hpp>
-#include <wren_vk/image.hpp>
-#include <wren_vk/shader.hpp>
+#include <wren/vk/buffer.hpp>
+#include <wren/vk/image.hpp>
+#include <wren/vk/shader.hpp>
 
 #include "render_target.hpp"
 #include "wren/context.hpp"

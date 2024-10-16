@@ -4,7 +4,7 @@
 #include <string>
 #include <utility>
 #include <wren/utils/errors.hpp>
-#include <wren_vk/shader.hpp>
+#include <wren/vk/shader.hpp>
 
 namespace wren {
 

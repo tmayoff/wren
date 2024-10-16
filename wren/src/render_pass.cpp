@@ -4,7 +4,7 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
 #include <wren/utils/errors.hpp>
-#include <wren_vk/errors.hpp>
+#include <wren/vk/errors.hpp>
 
 #include "wren/context.hpp"
 #include "wren/renderer.hpp"

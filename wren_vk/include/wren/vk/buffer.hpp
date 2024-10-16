@@ -7,7 +7,7 @@
 #include <span>
 #include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
-#include <wren_vk/errors.hpp>
+#include <wren/vk/errors.hpp>
 
 namespace wren::vk {
 

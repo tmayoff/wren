@@ -7,7 +7,7 @@ wren_vk = library(
     'src/memory.cpp',
     'src/vulkan.cpp',
 
-    include_directories: ['include', 'include/wren_vk'],
+    include_directories: ['include', 'include/wren/vk'],
     dependencies: [
         wren_utils_dep,
         wren_reflect_dep,

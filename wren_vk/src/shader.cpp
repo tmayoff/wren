@@ -1,4 +1,4 @@
-#include "wren_vk/shader.hpp"
+#include "shader.hpp"
 
 #include <shaderc/shaderc.h>
 #include <shaderc/status.h>
@@ -11,7 +11,7 @@
 #include <vulkan/vulkan_handles.hpp>
 #include <wren_math/vector.hpp>
 #include <wren_reflect/parser.hpp>
-#include <wren_vk/errors.hpp>
+#include <wren/vk/errors.hpp>
 
 #include "vulkan/vulkan_structs.hpp"
 
