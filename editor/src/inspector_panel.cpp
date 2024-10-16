@@ -8,11 +8,16 @@
 #include <wren/scene/components/transform.hpp>
 #include <wren/scene/entity.hpp>
 
-void draw_component(wren::scene::components::MeshRenderer& mesh_renderer);
+#define CHECK_ID_IS_COMPONENT(id, component_type) \
+  id == selected_entity->world().component<component_type>().id()
+
+void draw_component(const editor::Context& ctx,
+                    wren::scene::components::MeshRenderer& mesh_renderer);
 void draw_component(wren::scene::components::Transform& transform);
 void draw_component(const std::string_view& tag, wren::math::Vec3f& vec);
 
 void render_inspector_panel(
+    const editor::Context& ctx,
     const std::shared_ptr<wren::scene::Scene>& scene,
     const std::optional<flecs::entity>& selected_entity) {
   ImGui::Begin("Inspector");
@@ -30,12 +35,17 @@ void render_inspector_panel(
   selected_entity->set_name(name.c_str());
 
   // Iterate all components
-  selected_entity->each([selected_entity](flecs::id id) {
-    if (id == selected_entity->world()
-                  .component<wren::scene::components::Transform>()
-                  .id()) {
+  selected_entity->each([selected_entity, ctx](flecs::id id) {
+    ImGui::Separator();
+
+    if (CHECK_ID_IS_COMPONENT(id, wren::scene::components::Transform)) {
       draw_component(
           *selected_entity->get_mut<wren::scene::components::Transform>());
+    } else if (CHECK_ID_IS_COMPONENT(id,
+                                     wren::scene::components::MeshRenderer)) {
+      draw_component(
+          ctx,
+          *selected_entity->get_mut<wren::scene::components::MeshRenderer>());
     } else {
       ImGui::Text("Can't inspect component type: %s", id.str().c_str());
     }
@@ -44,8 +54,24 @@ void render_inspector_panel(
   ImGui::End();
 }
 
-void draw_component(wren::scene::components::MeshRenderer& mesh_renderer) {
+void draw_component(const editor::Context& ctx,
+                    wren::scene::components::MeshRenderer& mesh_renderer) {
   ImGui::Text("Mesh Renderer");
+
+  auto mesh_filename = mesh_renderer.mesh_file.filename().string();
+
+  ImGui::InputText("file", &mesh_filename);
+
+  if (ImGui::BeginDragDropTarget()) {
+    const auto* payload = ImGui::AcceptDragDropPayload("FILESYSTEM_BROWSER");
+    if (payload != nullptr) {
+      std::string new_file(static_cast<const char*>(payload->Data),
+                           payload->DataSize);
+      mesh_renderer.update_mesh(ctx.project_path / new_file);
+    }
+
+    ImGui::EndDragDropTarget();
+  }
 }
 
 void draw_component(wren::scene::components::Transform& transform) {

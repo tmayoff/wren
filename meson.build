@@ -21,6 +21,7 @@ tracy = dependency('tracy')
 imgui = dependency('imgui_docking')
 flecs = dependency('flecs')
 toml = dependency('tomlplusplus')
+json = dependency('nlohmann_json')
 
 add_project_arguments(
     '-DVULKAN_HPP_NO_EXCEPTIONS',
@@ -48,6 +49,7 @@ subdir('wren_math')
 subdir('wren_reflect')
 subdir('wren_text')
 subdir('wren_vk')
+subdir('wren_gltf')
 subdir('wren_gui')
 subdir('wren')
 subdir('wren_ecs')

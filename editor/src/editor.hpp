@@ -10,6 +10,7 @@
 #include <wren_utils/errors.hpp>
 
 #include "camera.hpp"
+#include "context.hpp"
 
 namespace wren {
 struct Context;
@@ -37,7 +38,7 @@ class Editor {
       -> wren::expected<wren::GraphBuilder>;
 
   // Project
-  std::filesystem::path project_path_;
+  Context editor_context_;
 
   // Editor camera
   Camera camera_;
@@ -49,7 +50,7 @@ class Editor {
   std::shared_ptr<wren::ecs::Manager> ecs_;
   std::shared_ptr<wren::scene::Scene> scene_;
 
-  std::shared_ptr<wren::Context> ctx_;
+  std::shared_ptr<wren::Context> wren_ctx_;
 
   std::shared_ptr<wren::vk::Shader> mesh_shader_;
 

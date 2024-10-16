@@ -41,18 +41,26 @@ class Mesh {
   Mesh() = default;
 
   Mesh(const vulkan::Device& device, VmaAllocator allocator);
+  Mesh(const std::vector<Vertex>& vertices,
+       const std::vector<uint16_t>& indices);
+
+  void load(const vulkan::Device& device, VmaAllocator allocator);
 
   void shader(const std::shared_ptr<vk::Shader>& shader) { shader_ = shader; }
   void draw(const ::vk::CommandBuffer& cmd) const;
   void bind(const ::vk::CommandBuffer& cmd) const;
 
+  [[nodiscard]] auto loaded() const { return loaded_; }
+
  private:
+  bool loaded_ = false;
+
   std::shared_ptr<vk::Shader> shader_;
   std::vector<Vertex> vertices_;
   std::vector<uint16_t> indices_;
-  std::shared_ptr<vk::Buffer> index_buffer;
-  std::shared_ptr<vk::Buffer> vertex_buffer;
-  std::shared_ptr<vk::Buffer> uniform_buffer;
+  std::shared_ptr<vk::Buffer> index_buffer_;
+  std::shared_ptr<vk::Buffer> vertex_buffer_;
+  std::shared_ptr<vk::Buffer> uniform_buffer_;
 };
 
 }  // namespace wren

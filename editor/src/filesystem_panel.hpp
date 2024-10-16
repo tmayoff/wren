@@ -1,6 +1,5 @@
 #pragma once
 
-#include <imgui.h>
-#include <filesystem>
+#include "context.hpp"
 
-void render_filesystem_panel(const std::filesystem::path& project_root);
+void render_filesystem_panel(const editor::Context& ctx);

@@ -109,6 +109,7 @@
           SDL2
           spdlog
           tl-expected
+          nlohmann_json
           tomlplusplus
 
           vulkan-headers

@@ -127,6 +127,7 @@ struct vec2f : Vec<float, 2> {
 
 struct Vec3f : Vec<float, 3> {
   Vec3f() : Vec<float, 3>() {}
+  Vec3f(float scalar): Vec<float, 3> ({scalar, scalar, scalar}){}
   Vec3f(float x, float y, float z) : Vec<float, 3>({x, y, z}) {}
   Vec3f(const Vec<float, 3>& other) : Vec<float, 3>(other) {}
 

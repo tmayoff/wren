@@ -1,12 +1,35 @@
 #include "filesystem_panel.hpp"
 
-void render_filesystem_panel(const std::filesystem::path& project_root) {
+#include <imgui.h>
+
+#include "context.hpp"
+
+void render_filesystem_panel(const editor::Context& ctx) {
   ImGui::Begin("Filesystem");
 
-  ImGui::Text("Project root: %s", project_root.c_str());
+  ImGui::Text("Project root: %s", ctx.project_path.c_str());
 
-  for (const auto& file : std::filesystem::directory_iterator(project_root)) {
-    ImGui::Text("%s", file.path().c_str());
+  for (const auto& file :
+       std::filesystem::directory_iterator(ctx.project_path)) {
+    const auto f = std::filesystem::relative(file, ctx.project_path);
+
+    int flags = ImGuiTreeNodeFlags_SpanAvailWidth;
+    if (!file.is_directory()) flags |= ImGuiTreeNodeFlags_Leaf;
+
+    if (ImGui::TreeNodeEx(f.c_str(), flags)) {
+      // Get children
+
+      ImGui::TreePop();
+    }
+
+    auto filename = f.string();
+
+    if (ImGui::BeginDragDropSource()) {
+      ImGui::SetTooltip("%s", filename.c_str());
+      ImGui::SetDragDropPayload("FILESYSTEM_BROWSER", filename.c_str(),
+                                filename.size() + 1, ImGuiCond_Once);
+      ImGui::EndDragDropSource();
+    }
   }
 
   ImGui::End();

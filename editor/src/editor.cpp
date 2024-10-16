@@ -15,9 +15,9 @@
 #include <wren/shaders/mesh.hpp>
 #include <wren_math/geometry.hpp>
 
+#include "filesystem_panel.hpp"
 #include "inspector_panel.hpp"
 #include "scene_panel.hpp"
-#include "filesystem_panel.hpp"
 #include "ui.hpp"
 #include "wren/scene/components/transform.hpp"
 #include "wren/scene/serialization.hpp"
@@ -30,7 +30,7 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app,
   const auto &ctx = app->context();
 
   auto editor = std::make_shared<Editor>(app->context());
-  editor->project_path_ = project_path;
+  editor->editor_context_.project_path = project_path;
   editor->load_scene();
 
   TRY_RESULT(
@@ -75,18 +75,18 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app,
 Editor::Editor(const std::shared_ptr<wren::Context> &ctx)
     : camera_(45.F, 16.f / 9.f, 0.1, 1000.0),
       scene_(wren::scene::Scene::create()),
-      ctx_(ctx) {}
+      wren_ctx_(ctx) {}
 
 void Editor::on_update() {
   ZoneScoped;  // NOLINT
 
   if (scene_resized_.has_value()) {
     const auto &mesh_pass =
-        ctx_->renderer->get_graph().node_by_name("mesh")->render_pass;
+        wren_ctx_->renderer->get_graph().node_by_name("mesh")->render_pass;
 
     mesh_pass->resize_target(scene_resized_.value());
 
-    const auto scene_view = ctx_->renderer->get_graph()
+    const auto scene_view = wren_ctx_->renderer->get_graph()
                                 .node_by_name("mesh")
                                 ->render_pass->target()
                                 ->image_view;
@@ -103,7 +103,7 @@ void Editor::on_update() {
 
   editor::ui::begin();
 
-  // ImGui::ShowDemoWindow();
+  ImGui::ShowDemoWindow();
 
   static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
   ImGuiWindowFlags window_flags =
@@ -125,7 +125,7 @@ void Editor::on_update() {
       if (ImGui::MenuItem("Save")) {
         // SAVE the scene
 
-        auto file = project_path_ / "scene.wren";
+        auto file = editor_context_.project_path / "scene.wren";
         wren::scene::serialize(scene_, file);
       }
 
@@ -150,17 +150,20 @@ void Editor::on_update() {
                                 dockspace_flags | ImGuiDockNodeFlags_DockSpace);
       ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
 
-      const auto dockspace_id_bottom = ImGui::DockBuilderSplitNode(
-          dockspace_id, ImGuiDir_Down, 0.25, nullptr, &dockspace_id);
-
-      const auto dockspace_id_right = ImGui::DockBuilderSplitNode(
+      const auto inspector = ImGui::DockBuilderSplitNode(
           dockspace_id, ImGuiDir_Right, 0.25F, nullptr, &dockspace_id);
-      const auto dockspace_id_left = ImGui::DockBuilderSplitNode(
-          dockspace_id, ImGuiDir_Left, 0.25F, nullptr, &dockspace_id);
 
-      ImGui::DockBuilderDockWindow("Inspector", dockspace_id_right);
-      ImGui::DockBuilderDockWindow("Viewer", dockspace_id);
-      ImGui::DockBuilderDockWindow("Scene", dockspace_id_left);
+      ImGuiID viewer = 0;
+      const auto left = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left,
+                                                    0.25F, nullptr, &viewer);
+
+      ImGuiID scene = 0;
+      const auto dockspace_id_bottom = ImGui::DockBuilderSplitNode(
+          left, ImGuiDir_Down, 0.25, nullptr, &scene);
+
+      ImGui::DockBuilderDockWindow("Inspector", inspector);
+      ImGui::DockBuilderDockWindow("Viewer", viewer);
+      ImGui::DockBuilderDockWindow("Scene", scene);
       ImGui::DockBuilderDockWindow("Filesystem", dockspace_id_bottom);
 
       ImGui::DockBuilderFinish(dockspace_id_bottom);
@@ -185,9 +188,9 @@ void Editor::on_update() {
                           static_cast<float>(last_scene_size_.y())});
   ImGui::End();
 
-  render_inspector_panel(scene_, selected_entity_);
+  render_inspector_panel(editor_context_, scene_, selected_entity_);
 
-  render_filesystem_panel(project_path_);
+  render_filesystem_panel(editor_context_);
 
   ImGui::End();
   ImGui::PopStyleVar();
@@ -209,48 +212,53 @@ auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
   auto render_query =
       scene_->world()
           .query_builder<const wren::scene::components::Transform,
-                         const wren::scene::components::MeshRenderer>()
+                         wren::scene::components::MeshRenderer>()
           .build();
 
   builder
-      .add_pass("mesh",
-                {{
-                     {"mesh", mesh_shader_},
-                 },
-                 "scene_viewer"},
-                [this, ctx, render_query](wren::RenderPass &pass,
-                                          ::vk::CommandBuffer &cmd) {
-                  pass.bind_pipeline("mesh");
+      .add_pass(
+          "mesh",
+          {{
+               {"mesh", mesh_shader_},
+           },
+           "scene_viewer"},
+          [this, ctx, render_query](wren::RenderPass &pass,
+                                    ::vk::CommandBuffer &cmd) {
+            pass.bind_pipeline("mesh");
 
-                  struct GLOBALS {
-                    wren::math::Mat4f view = wren::math::Mat4f::identity();
-                    wren::math::Mat4f proj = wren::math::Mat4f::identity();
+            struct GLOBALS {
+              wren::math::Mat4f view = wren::math::Mat4f::identity();
+              wren::math::Mat4f proj = wren::math::Mat4f::identity();
+            };
+            GLOBALS ubo{};
+
+            // ubo.view = this->camera_.position().matrix();
+            ubo.proj = this->camera_.projection();
+
+            pass.write_scratch_buffer(cmd, 0, 0, ubo);
+
+            render_query.each(
+                [cmd, &pass, ctx](
+                    const wren::scene::components::Transform &transform,
+                    wren::scene::components::MeshRenderer &mesh_renderer) {
+                  struct LOCALS {
+                    wren::math::Mat4f model;
                   };
-                  GLOBALS ubo{};
+                  LOCALS ubo{};
 
-                  // ubo.view = this->camera_.position().matrix();
-                  ubo.proj = this->camera_.projection();
+                  if (!mesh_renderer.mesh.loaded()) {
+                    mesh_renderer.mesh.load(ctx->graphics_context->Device(),
+                                            ctx->graphics_context->allocator());
+                  }
 
-                  pass.write_scratch_buffer(cmd, 0, 0, ubo);
+                  ubo.model = transform.matrix();
 
-                  render_query.each(
-                      [cmd, &pass](
-                          const wren::scene::components::Transform &transform,
-                          const wren::scene::components::MeshRenderer
-                              &mesh_renderer) {
-                        struct LOCALS {
-                          wren::math::Mat4f model;
-                        };
-                        LOCALS ubo{};
+                  pass.write_scratch_buffer(cmd, 0, 1, ubo);
 
-                        ubo.model = transform.matrix();
-
-                        pass.write_scratch_buffer(cmd, 0, 1, ubo);
-
-                        mesh_renderer.mesh.bind(cmd);
-                        mesh_renderer.mesh.draw(cmd);
-                      });
-                })
+                  mesh_renderer.mesh.bind(cmd);
+                  mesh_renderer.mesh.draw(cmd);
+                });
+          })
       .add_pass("ui", {{}, "swapchain_target"},
                 [](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
                   editor::ui::flush(cmd);
