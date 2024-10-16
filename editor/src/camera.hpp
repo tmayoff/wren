@@ -1,9 +1,8 @@
 #pragma once
 
-#include <glm/gtx/transform.hpp>
-#include <wren_math/geometry.hpp>
-#include <wren_math/matrix.hpp>
-#include <wren_math/vector.hpp>
+#include <wren/math/geometry.hpp>
+#include <wren/math/matrix.hpp>
+#include <wren/math/vector.hpp>
 
 namespace editor {
 class Camera {

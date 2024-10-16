@@ -12,7 +12,7 @@
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
 #include <wren/utils/errors.hpp>
-#include <wren_math/vector.hpp>
+#include <wren/math/vector.hpp>
 #include <wren_reflect/parser.hpp>
 
 DEFINE_ERROR_IMPL("shaderc", shaderc_compilation_status)

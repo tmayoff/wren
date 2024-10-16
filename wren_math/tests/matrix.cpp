@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
-#include <wren_math/matrix.hpp>
-#include <wren_math/utils.hpp>
+#include <wren/math/matrix.hpp>
+#include <wren/math/utils.hpp>
 
 BOOST_AUTO_TEST_SUITE(MATRIX)
 

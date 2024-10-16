@@ -4,14 +4,13 @@
 
 #include <boost/algorithm/string/split.hpp>
 #include <span>
-#include <wren/gltf/gltf.hpp>
 #include <wren/utils/binray_reader.hpp>
 #include <wren/utils/filesystem.hpp>
 
 namespace wren {
 
 auto load_glb_mesh(const std::filesystem::path& glb_path) -> Mesh {
-  gltf::load_mesh(glb_path);
+  // gltf::load_mesh(glb_path);
 
   std::vector<Vertex> vertices;
   std::vector<uint16_t> indices;

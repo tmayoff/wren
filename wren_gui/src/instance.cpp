@@ -3,8 +3,8 @@
 #include <spdlog/spdlog.h>
 
 #include <wren/vk/buffer.hpp>
-#include <wren_math/geometry.hpp>
-#include <wren_math/vector.hpp>
+#include <wren/math/geometry.hpp>
+#include <wren/math/vector.hpp>
 #include <wren_text/font.hpp>
 
 namespace wren::gui {

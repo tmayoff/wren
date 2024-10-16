@@ -105,7 +105,6 @@
 
           boost185
 
-          glm
           SDL2
           spdlog
           tl-expected

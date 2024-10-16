@@ -4,16 +4,15 @@
 #include <imgui_impl_vulkan.h>
 #include <imgui_internal.h>
 
-#include <glm/glm.hpp>
 #include <tracy/Tracy.hpp>
 #include <wren/application.hpp>
 #include <wren/context.hpp>
+#include <wren/math/geometry.hpp>
 #include <wren/renderer.hpp>
 #include <wren/scene/components/mesh.hpp>
 #include <wren/scene/components/tag.hpp>
 #include <wren/scene/entity.hpp>
 #include <wren/shaders/mesh.hpp>
-#include <wren_math/geometry.hpp>
 
 #include "filesystem_panel.hpp"
 #include "inspector_panel.hpp"

@@ -4,8 +4,8 @@
 #include <vulkan/vulkan_core.h>
 
 #include <vulkan/vulkan.hpp>
-#include <wren_math/matrix.hpp>
-#include <wren_math/vector.hpp>
+#include <wren/math/matrix.hpp>
+#include <wren/math/vector.hpp>
 #include <wren/vk/buffer.hpp>
 #include <wren/vk/shader.hpp>
 

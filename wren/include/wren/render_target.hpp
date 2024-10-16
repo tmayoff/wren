@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_handles.hpp>
-#include <wren_math/vector.hpp>
+#include <wren/math/vector.hpp>
 
 namespace wren {
 

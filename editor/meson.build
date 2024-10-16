@@ -1,4 +1,4 @@
-deps = [wren_dep, ecs_dep, backward_dep, imgui, tracy]
+deps = [wren_dep, backward_dep, imgui, tracy]
 
 executable(
     'wren_editor',

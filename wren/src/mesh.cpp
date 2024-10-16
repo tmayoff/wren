@@ -1,8 +1,8 @@
 #include "mesh.hpp"
 
 #include <vulkan/vulkan.hpp>
-#include <wren_math/geometry.hpp>
-#include <wren_math/vector.hpp>
+#include <wren/math/geometry.hpp>
+#include <wren/math/vector.hpp>
 
 namespace wren {
 

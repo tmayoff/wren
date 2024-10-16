@@ -1,11 +1,11 @@
 #include <boost/test/unit_test.hpp>
-#include <wren_math/utils.hpp>
-#include <wren_math/vector.hpp>
+#include <wren/math/utils.hpp>
+#include <wren/math/vector.hpp>
 
 BOOST_AUTO_TEST_SUITE(VECTOR)
 
 BOOST_AUTO_TEST_CASE(ADD_SUB) {
-  enum class OP { ADD, SUB };
+  enum class OP { kAdd, kSub };
 
   struct Test {
     wren::math::vec2f a;
@@ -13,21 +13,21 @@ BOOST_AUTO_TEST_CASE(ADD_SUB) {
 
     wren::math::vec2f expected;
 
-    OP op = OP::ADD;
+    OP op = OP::kAdd;
   };
 
   std::array tests = {
       Test{{5.0f, 5.0f}, {10.0f, 10.0f}, {15.0f, 15.0f}},
-      Test{{5.0f, 5.0f}, {10.0f, 10.0f}, {-5.0f, -5.0f}, OP::SUB},
+      Test{{5.0f, 5.0f}, {10.0f, 10.0f}, {-5.0f, -5.0f}, OP::kSub},
   };
 
   for (auto const& test : tests) {
     wren::math::vec2f c;
     switch (test.op) {
-      case OP::ADD:
+      case OP::kAdd:
         c = test.a + test.b;
         break;
-      case OP::SUB:
+      case OP::kSub:
         c = test.a - test.b;
         break;
     }

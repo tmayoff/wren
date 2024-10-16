@@ -3,11 +3,10 @@
 #include <filesystem>
 #include <memory>
 #include <vulkan/vulkan.hpp>
-#include <wren/ecs/manager.hpp>
+#include <wren/math/vector.hpp>
 #include <wren/mesh.hpp>
 #include <wren/scene/scene.hpp>
 #include <wren/utils/errors.hpp>
-#include <wren_math/vector.hpp>
 
 #include "camera.hpp"
 #include "context.hpp"
@@ -47,7 +46,6 @@ class Editor {
   std::optional<flecs::entity> selected_entity_;
 
   // Scene management
-  std::shared_ptr<wren::ecs::Manager> ecs_;
   std::shared_ptr<wren::scene::Scene> scene_;
 
   std::shared_ptr<wren::Context> wren_ctx_;

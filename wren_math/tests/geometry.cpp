@@ -1,8 +1,8 @@
 #include <boost/test/unit_test.hpp>
-#include <wren_math/geometry.hpp>
-#include <wren_math/matrix.hpp>
-#include <wren_math/utils.hpp>
-#include <wren_math/vector.hpp>
+#include <wren/math/geometry.hpp>
+#include <wren/math/matrix.hpp>
+#include <wren/math/utils.hpp>
+#include <wren/math/vector.hpp>
 
 BOOST_AUTO_TEST_SUITE(GEOMETRY)
 

@@ -9,9 +9,9 @@
 #include <shaderc/shaderc.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
-#include <wren_math/vector.hpp>
-#include <wren_reflect/parser.hpp>
+#include <wren/math/vector.hpp>
 #include <wren/vk/errors.hpp>
+#include <wren_reflect/parser.hpp>
 
 #include "vulkan/vulkan_structs.hpp"
 
