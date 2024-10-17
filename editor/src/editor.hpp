@@ -51,6 +51,7 @@ class Editor {
   std::shared_ptr<wren::Context> wren_ctx_;
 
   std::shared_ptr<wren::vk::Shader> mesh_shader_;
+  std::shared_ptr<wren::vk::Shader> viewer_shader_;
 
   // Scene viewer
   std::vector<VkDescriptorSet> dset_{};

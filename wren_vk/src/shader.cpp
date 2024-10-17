@@ -27,17 +27,25 @@ auto ShaderModule::get_vertex_input_bindings() const
     -> std::vector<::vk::VertexInputBindingDescription> {
   uint32_t count = 0;
   reflection->EnumerateInputVariables(&count, nullptr);
+  if (count == 0) return {};
+
   std::vector<SpvReflectInterfaceVariable *> input_variables(count);
   reflection->EnumerateInputVariables(&count, input_variables.data());
 
   uint32_t offset = 0;
+  std::vector<::vk::VertexInputBindingDescription> bindings;
+  bindings.reserve(count);
   for (const auto &input : input_variables) {
+    if (input->built_in < 6021) continue;
+
     const auto width = input->numeric.scalar.width / 8;
     const auto count = input->numeric.vector.component_count;
     offset += width * count;
+
+    bindings.emplace_back(0, offset);
   }
 
-  return {{0, offset}};
+  return bindings;
 }
 
 auto ShaderModule::get_vertex_input_attributes() const

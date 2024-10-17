@@ -17,6 +17,7 @@
 #include "filesystem_panel.hpp"
 #include "inspector_panel.hpp"
 #include "scene_panel.hpp"
+#include "shaders/editor_scene.hpp"
 #include "ui.hpp"
 #include "wren/scene/components/transform.hpp"
 #include "wren/scene/deserialization.hpp"
@@ -27,24 +28,23 @@ namespace editor {
 auto Editor::create(const std::shared_ptr<wren::Application> &app,
                     const std::filesystem::path &project_path)
     -> wren::expected<std::shared_ptr<Editor>> {
-  const auto &ctx = app->context();
+  // const auto &ctx = app->context();
 
   auto editor = std::make_shared<Editor>(app->context());
   editor->editor_context_.project_path = project_path;
   editor->load_scene();
 
   TRY_RESULT(
+      editor->viewer_shader_,
+      wren::vk::Shader::create(app->context()->graphics_context->Device().get(),
+                               wren::shaders::kEditorVertShader.data(),
+                               wren::shaders::kEditorFragShader.data()));
+
+  TRY_RESULT(
       editor->mesh_shader_,
       wren::vk::Shader::create(app->context()->graphics_context->Device().get(),
                                wren::shaders::kMeshVertShader.data(),
                                wren::shaders::kMeshFragShader.data()));
-
-  // wren::Mesh m(ctx->graphics_context->Device(),
-  //              ctx->graphics_context->allocator());
-  // m.shader(editor->mesh_shader_);
-  // auto mesh = editor->scene_->create_entity();
-  // mesh.add_component<wren::scene::components::MeshRenderer>(m);
-  // editor->scene_->create_entity("OTHER ENTITY");
 
   TRY_RESULT(const auto graph, editor->build_render_graph(app->context()));
   app->context()->renderer->set_graph_builder(graph);
@@ -222,13 +222,12 @@ auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
       .add_pass(
           "mesh",
           {{
+               {"viewer", viewer_shader_},
                {"mesh", mesh_shader_},
            },
            "scene_viewer"},
           [this, ctx, render_query](wren::RenderPass &pass,
                                     ::vk::CommandBuffer &cmd) {
-            pass.bind_pipeline("mesh");
-
             struct GLOBALS {
               wren::math::Mat4f view = wren::math::Mat4f::identity();
               wren::math::Mat4f proj = wren::math::Mat4f::identity();
@@ -238,6 +237,13 @@ auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
             // ubo.view = this->camera_.position().matrix();
             ubo.proj = this->camera_.projection();
 
+            pass.bind_pipeline("viewer");
+
+            pass.write_scratch_buffer(cmd, 0, 0, ubo);
+
+            cmd.draw(6, 1, 0, 0);
+
+            pass.bind_pipeline("mesh");
             pass.write_scratch_buffer(cmd, 0, 0, ubo);
 
             render_query.each(

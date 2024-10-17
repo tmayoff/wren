@@ -71,6 +71,7 @@ class RenderPass {
 
   std::string name_;
   PassResources resources_;
+  std::shared_ptr<vk::Shader> last_bound_shader_;
 
   execute_fn_t execute_fn_;
 
@@ -109,8 +110,7 @@ void RenderPass::write_scratch_buffer(const ::vk::CommandBuffer& cmd,
       {}, binding, 0, ::vk::DescriptorType::eUniformBuffer, {}, buffer_info}};
 
   cmd.pushDescriptorSetKHR(::vk::PipelineBindPoint::eGraphics,
-                           resources_.shaders.at("mesh")->pipeline_layout(),
-                           set, writes);
+                           last_bound_shader_->pipeline_layout(), set, writes);
 }
 
 }  // namespace wren

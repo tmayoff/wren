@@ -202,6 +202,7 @@ void RenderPass::bind_pipeline(const std::string& pipeline_name) {
   const auto pipeline = resources_.shaders.at(pipeline_name)->get_pipeline();
 
   cmd.bindPipeline(::vk::PipelineBindPoint::eGraphics, pipeline);
+  last_bound_shader_ = resources_.shaders.at(pipeline_name);
 }
 
 RenderPass::RenderPass(const std::shared_ptr<Context>& ctx, std::string name,
