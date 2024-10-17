@@ -1,4 +1,8 @@
-deps = [wren_dep, backward_dep, imgui, tracy]
+deps = [wren_dep, imgui, tracy]
+
+if buildtype == 'debug'
+    deps += backward_dep
+endif
 
 executable(
     'wren_editor',

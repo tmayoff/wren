@@ -32,29 +32,18 @@
         };
 
         imgui_patched = pkgs.stdenv.mkDerivation rec {
-          name = "imgui";
-          version = "1.89.9";
-          srcs = [
-            (pkgs.fetchFromGitHub {
-              name = "imgui";
-              owner = "ocornut";
-              repo = "imgui";
-              rev = "v${version}";
-              hash = "sha256-0k9jKrJUrG9piHNFQaBBY3zgNIKM23ZA879NY+MNYTU=";
-            })
-            (pkgs.fetchzip {
-              name = "imgui-meson-patch";
-              url = "https://wrapdb.mesonbuild.com/v2/imgui_${version}-1/get_patch.zip";
-              hash = "sha256-ZTs7rqoASbMP7qsDb8G/q4IiLX+aPct2Nwyv16oulfk=";
-            })
-          ];
+          name = "imgui-docking";
+          version = "1.91.0";
+          archive = pkgs.fetchurl {
+            url = "https://github.com/ocornut/imgui/archive/refs/tags/v${version}.tar.gz";
+            hash = "sha256-bmLIclLms3JbpHihwE3GBKoKrux4/tz0AR8eUlSPTMk=";
+          };
 
-          sourceRoot = ".";
+          phases = ["installPhase"];
 
           installPhase = ''
             mkdir -p $out
-            cp -r imgui/* $out
-            cp -r imgui-meson-patch/* $out
+            cp -r $archive $out/${name}-${version}.tar.gz
           '';
         };
 
@@ -94,15 +83,15 @@
 
         rawNativeBuildInputs = with pkgs; [
           pkg-config
-          unstable.meson
+          meson
           cmake
           ninja
+
+          doxygen
+          graphviz
         ];
 
         rawBuildInputs = with pkgs; [
-          doxygen
-          graphviz
-
           boost185
 
           SDL2
@@ -111,18 +100,20 @@
           nlohmann_json
           tomlplusplus
 
+          # vulkan / shaders
           vulkan-headers
           vulkan-loader
-          tracy
           vma
           shaderc
           spirv-headers
-          fontconfig
+
+          tracy
+
+          # backward-cpp
           binutils
           elfutils
           libdwarf
           backward-cpp
-          entt
         ];
         vulkan_layer_path = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d:${pkgs.renderdoc}/share/vulkan/implicit_layer.d";
       in {
@@ -136,18 +127,19 @@
             nativeBuildInputs = rawNativeBuildInputs;
             buildInputs = rawBuildInputs;
 
-            # patchPhase = ''
-            #   mkdir -p subprojects
-            #   cp -r ${imgui_patched} subprojects/imgui-${imgui_patched.version}
-            #   ls -ls subprojects
-            # '';
+            mesonFlags = [
+              "-Dwrap_mode=default"
+            ];
 
-            # mesonFlags = [
-            #   "-Dauto_features=disabled"
-            # ];
+            patchPhase = ''
+              mkdir -p subprojects/packagecache/
+              cp -r ${imgui_patched}/* subprojects/packagecache/
+              tar -xvf subprojects/packagecache/${imgui_patched}/*
+              ls -ls subprojects/packagecache
+            '';
 
-            # BOOST_INCLUDEDIR = "${pkgs.lib.getDev pkgs.boost}/include";
-            # BOOST_LIBRARYDIR = "${pkgs.lib.getLib pkgs.boost}/lib";
+            BOOST_INCLUDEDIR = "${pkgs.lib.getDev pkgs.boost}/include";
+            BOOST_LIBRARYDIR = "${pkgs.lib.getLib pkgs.boost}/lib";
           };
 
           default = wren_editor;

@@ -1,11 +1,13 @@
-project('wren', 'cpp', version: '0.0.1', default_options: 'cpp_std=c++26')
+project('wren', 'cpp', version: '0.0.1', default_options: 'cpp_std=c++23')
 
 cpp = meson.get_compiler('cpp')
+
+buildtype = get_option('buildtype')
 
 fmt = dependency('fmt')
 spdlog = dependency('spdlog')
 vulkan = dependency('vulkan')
-fontconfig = dependency('Fontconfig')
+# fontconfig = dependency('Fontconfig')
 vma = dependency(
     'VulkanMemoryAllocator',
     modules: ['GPUOpen::VulkanMemoryAllocator'],
@@ -17,11 +19,11 @@ boost = dependency('boost')
 boost_test = dependency('boost', modules: ['unit_test_framework'])
 expected = dependency('tl-expected', modules: ['tl::expected'])
 spirv = dependency('SPIRV-Headers')
-tracy = dependency('tracy')
+tracy = dependency('tracy', required: false)
 imgui = dependency('imgui_docking')
 flecs = dependency('flecs')
 toml = dependency('tomlplusplus')
-json = dependency('nlohmann_json')
+# json = dependency('nlohmann_json')
 
 add_project_arguments(
     '-DVULKAN_HPP_NO_EXCEPTIONS',
