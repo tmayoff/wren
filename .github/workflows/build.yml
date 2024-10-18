@@ -16,7 +16,7 @@ jobs:
     - uses: actions/checkout@v4
 
     # Nix
-    - uses: DeterminateSystems/nix-installer-action@v9
+    - uses: DeterminateSystems/nix-installer-action@v14
     - uses: DeterminateSystems/flake-checker-action@v9
     - uses: cachix/cachix-action@v15
       with:
