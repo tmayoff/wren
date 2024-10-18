@@ -234,7 +234,7 @@ auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
             };
             GLOBALS ubo{};
 
-            // ubo.view = this->camera_.position().matrix();
+            ubo.view = this->camera_.transform().matrix();
             ubo.proj = this->camera_.projection();
 
             pass.bind_pipeline("viewer");

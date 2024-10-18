@@ -6,6 +6,7 @@
 #include <vulkan/vulkan_core.h>
 #include <wren_reflect/spirv_reflect.h>
 
+#include <cstdint>
 #include <shaderc/shaderc.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
@@ -36,16 +37,18 @@ auto ShaderModule::get_vertex_input_bindings() const
   std::vector<::vk::VertexInputBindingDescription> bindings;
   bindings.reserve(count);
   for (const auto &input : input_variables) {
-    if (input->built_in < 6021) continue;
+    if (static_cast<uint32_t>(input->built_in) != UINT32_MAX) continue;
 
     const auto width = input->numeric.scalar.width / 8;
     const auto count = input->numeric.vector.component_count;
     offset += width * count;
-
-    bindings.emplace_back(0, offset);
   }
 
-  return bindings;
+  if (offset == 0) {
+    return {};
+  }
+
+  return {{0, offset}};
 }
 
 auto ShaderModule::get_vertex_input_attributes() const
@@ -151,6 +154,7 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
     -> expected<void> {
   ::vk::Result res = ::vk::Result::eSuccess;
 
+  // Descriptor Sets
   const auto bindings =
       vertex_shader_module_.get_descriptor_set_layout_bindings();
   ::vk::DescriptorSetLayoutCreateInfo dl_create_info(
@@ -164,9 +168,12 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
   if (res != ::vk::Result::eSuccess)
     return tl::make_unexpected(make_error_code(res));
 
+  // Dynamic states
   std::array dynamic_states = {::vk::DynamicState::eViewport,
                                ::vk::DynamicState::eScissor};
   ::vk::PipelineDynamicStateCreateInfo dynamic_state({}, dynamic_states);
+
+  // Input binding/attributes
   const auto input_bindings = vertex_shader_module_.get_vertex_input_bindings();
   const auto input_attributes =
       vertex_shader_module_.get_vertex_input_attributes();
@@ -177,6 +184,7 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
   ::vk::PipelineInputAssemblyStateCreateInfo input_assembly(
       {}, ::vk::PrimitiveTopology::eTriangleList, false);
 
+  // Viewport
   ::vk::Viewport viewport{
       0, 0, static_cast<float>(size.x()), static_cast<float>(size.y()), 1, 0};
   ::vk::Rect2D scissor{
@@ -191,8 +199,9 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
   ::vk::PipelineMultisampleStateCreateInfo multisample{
       {}, ::vk::SampleCountFlagBits::e1, false};
 
+  // Colour blending
   ::vk::PipelineColorBlendAttachmentState colour_blend_attachment{
-      false,
+      true,
       ::vk::BlendFactor::eSrcAlpha,
       ::vk::BlendFactor::eOneMinusSrcAlpha,
       ::vk::BlendOp::eAdd,
@@ -203,9 +212,10 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
       ::vk::ColorComponentFlagBits::eR | ::vk::ColorComponentFlagBits::eG |
       ::vk::ColorComponentFlagBits::eB | ::vk::ColorComponentFlagBits::eA);
   ::vk::PipelineColorBlendStateCreateInfo colour_blend(
-      {}, false, ::vk::LogicOp::eCopy, colour_blend_attachment,
+      {}, true, ::vk::LogicOp::eCopy, colour_blend_attachment,
       {0.0, 0.0, 0.0, 0.0});
 
+  // Stages
   auto v_stage_create_info = ::vk::PipelineShaderStageCreateInfo(
       {}, ::vk::ShaderStageFlagBits::eVertex, vertex_shader_module_.module,
       "main");
