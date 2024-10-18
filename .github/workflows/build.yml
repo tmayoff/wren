@@ -1,4 +1,4 @@
-name: Build
+name: build
 
 on:
   push:
@@ -8,8 +8,10 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    env:
+      SCCACHE_GHA_ENABLED: on
 
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - uses: DeterminateSystems/nix-installer-action@v9
