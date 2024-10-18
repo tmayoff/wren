@@ -212,7 +212,7 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
       ::vk::ColorComponentFlagBits::eR | ::vk::ColorComponentFlagBits::eG |
       ::vk::ColorComponentFlagBits::eB | ::vk::ColorComponentFlagBits::eA);
   ::vk::PipelineColorBlendStateCreateInfo colour_blend(
-      {}, true, ::vk::LogicOp::eCopy, colour_blend_attachment,
+      {}, false, ::vk::LogicOp::eCopy, colour_blend_attachment,
       {0.0, 0.0, 0.0, 0.0});
 
   // Stages

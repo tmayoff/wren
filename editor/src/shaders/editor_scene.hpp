@@ -48,7 +48,7 @@ layout(location = 2) in vec3 far_point;
 
 void main() {
     float t = -near_point.y / (far_point.y - near_point.y);
-    out_colour = vec4(1.0, 0.0, 0.0, 1.0 * float(t > 0));
+    // out_colour = vec4(1.0, 0.0, 0.0, 1.0 * float(t > 0));
     out_colour = vec4(1.0, 0.0, 0.0, t);
 }
 

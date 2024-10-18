@@ -1,0 +1,10 @@
+##type vertex
+
+layout(binding = 0) uniform GLOBALS {
+    mat4 view;
+    mat4 proj;
+} globals;
+
+#version 450
+
+##type fragment

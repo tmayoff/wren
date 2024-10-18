@@ -1,0 +1,9 @@
+[[language]]
+name = "glsl"
+scope = "source.glsl"
+file-types = ["glsl", "vert", "tesc", "tese", "geom", "frag", "comp", "wren_shader" ]
+comment-token = "//"
+block-comment-tokens = { start = "/*", end = "*/" }
+indent = { tab-width = 4, unit = "    " }
+language-servers = [ "glsl_analyzer" ]
+injection-regex = "glsl"

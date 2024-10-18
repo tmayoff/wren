@@ -27,7 +27,6 @@ auto load_stl_mesh(const std::filesystem::path& stl_path) -> Mesh {
   reader.skip(80);
 
   const auto triangles = reader.read<uint32_t>();
-  spdlog::info("Triangle count: {}", triangles);
 
   std::vector<Vertex> vertices;
   vertices.reserve(triangles * 3);
