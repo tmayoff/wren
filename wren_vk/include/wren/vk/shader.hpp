@@ -28,6 +28,8 @@ BOOST_DESCRIBE_ENUM(shaderc_compilation_status,
 
 namespace wren::vk {
 
+DESCRIBED_ENUM(ShaderType, Vertex, Fragment)
+
 struct ShaderModule {
   reflect::spirv_t spirv;
   ::vk::ShaderModule module;
@@ -81,7 +83,7 @@ class Shader {
 
  private:
   static auto read_wren_shader_file(const std::filesystem::path &path)
-      -> expected<std::pair<std::string, std::string>>;
+      -> expected<std::map<ShaderType, std::string>>;
 
   ::vk::DescriptorSetLayout descriptor_layout_;
   ::vk::PipelineLayout pipeline_layout_;

@@ -5,6 +5,7 @@ utils = library(
         'src/errors.cpp',
         'src/filesystem.cpp',
         'src/string.cpp',
+        'src/string_reader.cpp',
     ),
     include_directories: ['include', 'include/wren/utils'],
     dependencies: [fmt, boost, expected],
