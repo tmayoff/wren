@@ -29,6 +29,6 @@ jobs:
       uses: mozilla-actions/sccache-action@v0.0.6
 
     - run: |
-        nix develop --impure --command meson setup build
+        nix develop --impure --command meson setup build -Dwerror=true
         nix develop --impure --command meson compile -C build
         nix develop --impure --command meson test -C build
