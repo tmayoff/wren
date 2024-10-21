@@ -3,6 +3,7 @@ utils = library(
     files(
         'src/enums.cpp',
         'src/errors.cpp',
+        'src/filesystem.cpp',
         'src/string.cpp',
     ),
     include_directories: ['include', 'include/wren/utils'],

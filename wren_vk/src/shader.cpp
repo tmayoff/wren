@@ -11,6 +11,7 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <wren/math/vector.hpp>
+#include <wren/utils/filesystem.hpp>
 #include <wren/vk/errors.hpp>
 #include <wren_reflect/parser.hpp>
 
@@ -96,8 +97,7 @@ auto ShaderModule::get_descriptor_set_layout_bindings() const
 
 auto Shader::create(const ::vk::Device &device,
                     const std::string &vertex_shader,
-                    const std::string &fragment_shader)
-    -> expected<std::shared_ptr<Shader>> {
+                    const std::string &fragment_shader) -> expected<Ptr> {
   const auto shader = std::make_shared<Shader>();
 
   auto v_result =
@@ -116,6 +116,17 @@ auto Shader::create(const ::vk::Device &device,
 
   shader->vertex_shader(v_result.value());
   shader->fragment_shader(f_result.value());
+
+  return shader;
+}
+
+auto Shader::create(const ::vk::Device &device,
+                    const std::filesystem::path &shader_path) -> expected<Ptr> {
+  const auto shader = std::make_shared<Shader>();
+
+  // TODO Split shader by vertex / fragment
+
+  TRY_RESULT(auto shader_file, read_wren_shader_file(shader_path));
 
   return shader;
 }
@@ -232,6 +243,20 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
   std::tie(res, pipeline_) = device.createGraphicsPipeline({}, create_info);
   if (res != ::vk::Result::eSuccess)
     return tl::make_unexpected(make_error_code(res));
+
+  return {};
+}
+
+auto Shader::read_wren_shader_file(const std::filesystem::path &path)
+    -> expected<std::pair<std::string, std::string>> {
+  const auto shader_file = utils::fs::read_file_to_string(path);
+
+  auto it = shader_file.find("##type ") + std::string("##type ").size();
+  auto newline = shader_file.find("\n");
+
+  auto shader_type = shader_file.substr(it,  newline - it);
+
+  auto content = shader_file.substr(newline + 1);
 
   return {};
 }

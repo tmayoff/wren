@@ -2,6 +2,7 @@ wren = library(
     'wren',
     files(
         'src/application.cpp',
+        'src/assets/manager.cpp',
         'src/event.cpp',
         'src/graph.cpp',
         'src/graphics_context.cpp',

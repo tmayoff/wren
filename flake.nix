@@ -31,19 +31,33 @@
           inherit system overlays;
         };
 
-        imgui_patched = pkgs.stdenv.mkDerivation rec {
+        imgui_subproj = pkgs.stdenv.mkDerivation rec {
           name = "imgui-docking";
           version = "1.91.0";
-          archive = pkgs.fetchurl {
+          src = pkgs.fetchurl {
             url = "https://github.com/ocornut/imgui/archive/refs/tags/v${version}.tar.gz";
             hash = "sha256-bmLIclLms3JbpHihwE3GBKoKrux4/tz0AR8eUlSPTMk=";
           };
 
-          phases = ["installPhase"];
+          installPhase = ''
+            mkdir -p $out
+            cp -r ./* $out
+          '';
+        };
+
+        tracy_subproj = pkgs.stdenv.mkDerivation rec {
+          name = "imgui-docking";
+          version = "0.10";
+          src = pkgs.fetchFromGitHub {
+            owner = "wolfpld";
+            repo = "tracy";
+            rev = "v${version}";
+            hash = "sha256-HofqYJT1srDJ6Y1f18h7xtAbI/Gvvz0t9f0wBNnOZK8=";
+          };
 
           installPhase = ''
             mkdir -p $out
-            cp -r $archive $out/${name}-${version}.tar.gz
+            cp -r ./* $out
           '';
         };
 
@@ -127,15 +141,15 @@
             nativeBuildInputs = rawNativeBuildInputs;
             buildInputs = rawBuildInputs;
 
-            mesonFlags = [
-              "-Dwrap_mode=default"
-            ];
-
             patchPhase = ''
-              mkdir -p subprojects/packagecache/
-              cp -r ${imgui_patched}/* subprojects/packagecache/
-              tar -xvf subprojects/packagecache/${imgui_patched}/*
-              ls -ls subprojects/packagecache
+              mkdir -p subprojects/
+              cp -r ${imgui_subproj} subprojects/imgui-1.91.0-docking/
+              # cp -r subprojects/packagefiles/imgui-docking/* subprojects/imgui-1.91.0-docking/
+              cp -r ${tracy_subproj} subprojects/tracy-0.10/
+              ls -ls subprojects
+
+              # chmod 644 -R subprojects
+              meson subprojects packagefiles --apply
             '';
 
             BOOST_INCLUDEDIR = "${pkgs.lib.getDev pkgs.boost}/include";
