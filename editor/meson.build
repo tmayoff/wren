@@ -14,4 +14,8 @@ executable(
     'src/filesystem_panel.cpp',
     dependencies: deps,
     install: true,
+
+    cpp_args: [
+        '-DWREN_BUILD_ASSETS_DIR="@0@/assets"'.format(meson.current_source_dir()),
+    ],
 )

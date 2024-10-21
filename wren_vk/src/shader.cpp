@@ -11,6 +11,9 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <wren/math/vector.hpp>
+#include <wren/utils/enums.hpp>
+#include <wren/utils/filesystem.hpp>
+#include <wren/utils/string_reader.hpp>
 #include <wren/vk/errors.hpp>
 #include <wren_reflect/parser.hpp>
 
@@ -96,26 +99,52 @@ auto ShaderModule::get_descriptor_set_layout_bindings() const
 
 auto Shader::create(const ::vk::Device &device,
                     const std::string &vertex_shader,
-                    const std::string &fragment_shader)
-    -> expected<std::shared_ptr<Shader>> {
+                    const std::string &fragment_shader) -> expected<Ptr> {
   const auto shader = std::make_shared<Shader>();
 
-  auto v_result =
+  TRY_RESULT(
+      const auto vertex,
       compile_shader(device, shaderc_shader_kind::shaderc_glsl_vertex_shader,
-                     "vertex_shader", vertex_shader);
-  if (!v_result.has_value()) {
-    return tl::make_unexpected(v_result.error());
-  }
+                     "vertex_shader", vertex_shader));
 
-  auto f_result =
+  TRY_RESULT(
+      const auto fragment,
       compile_shader(device, shaderc_shader_kind::shaderc_glsl_fragment_shader,
-                     "fragment_shader", fragment_shader);
-  if (!f_result.has_value()) {
-    return tl::make_unexpected(f_result.error());
-  }
+                     "fragment_shader", fragment_shader));
 
-  shader->vertex_shader(v_result.value());
-  shader->fragment_shader(f_result.value());
+  shader->vertex_shader(vertex);
+  shader->fragment_shader(fragment);
+
+  return shader;
+}
+
+auto Shader::create(const ::vk::Device &device,
+                    const std::filesystem::path &shader_path) -> expected<Ptr> {
+  const auto shader = std::make_shared<Shader>();
+
+  TRY_RESULT(auto shaders, read_wren_shader_file(shader_path));
+
+  for (const auto &[type, content] : shaders) {
+    switch (type) {
+      case ShaderType::Vertex: {
+        TRY_RESULT(const auto module,
+                   compile_shader(
+                       device, shaderc_shader_kind::shaderc_glsl_vertex_shader,
+                       shader_path, content));
+        shader->vertex_shader(module);
+        break;
+      }
+      case ShaderType::Fragment: {
+        TRY_RESULT(
+            const auto module,
+            compile_shader(device,
+                           shaderc_shader_kind::shaderc_glsl_fragment_shader,
+                           shader_path, content));
+        shader->fragment_shader(module);
+        break;
+      }
+    }
+  }
 
   return shader;
 }
@@ -234,6 +263,27 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
     return tl::make_unexpected(make_error_code(res));
 
   return {};
+}
+
+auto Shader::read_wren_shader_file(const std::filesystem::path &path)
+    -> expected<std::map<ShaderType, std::string>> {
+  const auto shader_file = utils::fs::read_file_to_string(path);
+
+  utils::StringReader reader(shader_file);
+
+  std::map<ShaderType, std::string> shaders;
+  while (!reader.at_end()) {
+    reader.skip_to_text_end("##type ");
+    const auto shader_type = reader.read_to_end_line();
+
+    const auto shader_content = reader.read_to_text_start("##type ");
+
+    shaders.emplace(
+        utils::string_to_enum<ShaderType>(shader_type, true).value(),
+        shader_content);
+  }
+
+  return shaders;
 }
 
 }  // namespace wren::vk

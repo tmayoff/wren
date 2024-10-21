@@ -43,7 +43,7 @@ auto Buffer::set_data_raw(const void* data, std::size_t size)
   const auto res = static_cast<::vk::Result>(
       vmaCopyMemoryToAllocation(allocator_, data, allocation_, 0, size));
   if (res != ::vk::Result::eSuccess) {
-    throw std::runtime_error(enum_to_string(res));
+    throw std::runtime_error(utils::enum_to_string(res));
   }
 
   // VK_ERR_PROP_VOID(

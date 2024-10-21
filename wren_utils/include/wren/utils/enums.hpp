@@ -1,19 +1,50 @@
 #pragma once
 
+#include <boost/algorithm/string.hpp>
 #include <boost/describe.hpp>
 #include <string>
+
+#define DESCRIBED_ENUM(E, ...)  \
+  enum class E { __VA_ARGS__ }; \
+  BOOST_DESCRIBE_ENUM(E, __VA_ARGS__)
+
+namespace wren::utils {
 
 template <class E>
 auto enum_to_string(E e) -> std::string {
   std::string r = "(unamed)";
   boost::mp11::mp_for_each<boost::describe::describe_enumerators<E>>(
-      [&](auto D) {
-        if (e == D.value) r = std::string(D.name);
+      [&](auto d) {
+        if (e == d.value) r = std::string(d.name);
       });
   return r;
 }
 
-// NOLINTNEXTLINE
-#define DESCRIBED_ENUM(E, ...)  \
-  enum class E { __VA_ARGS__ }; \
-  BOOST_DESCRIBE_ENUM(E, __VA_ARGS__)
+template <typename E>
+auto string_to_enum(const std::string_view& name, bool case_sensitive = false)
+    -> std::optional<E> {
+  bool found = false;
+
+  E r = {};
+
+  boost::mp11::mp_for_each<boost::describe::describe_enumerators<E>>(
+      [&](auto d) {
+        if (!found) {
+          if (case_sensitive && boost::iequals(d.name, name)) {
+            found = true;
+            r = d.value;
+          } else if (!case_sensitive && std::strcmp(d.name, name.data())) {
+            found = true;
+            r = d.value;
+          }
+        }
+      });
+
+  if (found) {
+    return r;
+  }
+
+  return std::nullopt;
+}
+
+}  // namespace wren::utils

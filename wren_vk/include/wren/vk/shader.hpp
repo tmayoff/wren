@@ -4,6 +4,7 @@
 #include <shaderc/status.h>
 #include <wren_reflect/spirv_reflect.h>
 
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <tl/expected.hpp>
@@ -11,8 +12,8 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
-#include <wren/utils/errors.hpp>
 #include <wren/math/vector.hpp>
+#include <wren/utils/errors.hpp>
 #include <wren_reflect/parser.hpp>
 
 DEFINE_ERROR_IMPL("shaderc", shaderc_compilation_status)
@@ -26,6 +27,8 @@ BOOST_DESCRIBE_ENUM(shaderc_compilation_status,
                     shaderc_compilation_status_configuration_error)
 
 namespace wren::vk {
+
+DESCRIBED_ENUM(ShaderType, Vertex, Fragment)
 
 struct ShaderModule {
   reflect::spirv_t spirv;
@@ -47,10 +50,14 @@ struct ShaderModule {
 
 class Shader {
  public:
+  using Ptr = std::shared_ptr<Shader>;
+
   static auto create(const ::vk::Device &device,
                      const std::string &vertex_shader,
-                     const std::string &fragment_shader)
-      -> expected<std::shared_ptr<Shader>>;
+                     const std::string &fragment_shader) -> expected<Ptr>;
+
+  static auto create(const ::vk::Device &device,
+                     const std::filesystem::path &shader_path) -> expected<Ptr>;
 
   static auto compile_shader(const ::vk::Device &device,
                              const shaderc_shader_kind &shader_kind,
@@ -75,6 +82,9 @@ class Shader {
                                 const math::vec2i &size) -> expected<void>;
 
  private:
+  static auto read_wren_shader_file(const std::filesystem::path &path)
+      -> expected<std::map<ShaderType, std::string>>;
+
   ::vk::DescriptorSetLayout descriptor_layout_;
   ::vk::PipelineLayout pipeline_layout_;
   ::vk::Pipeline pipeline_;

@@ -1,9 +1,10 @@
 utils = library(
     'wren_utils',
     files(
-        'src/enums.cpp',
         'src/errors.cpp',
+        'src/filesystem.cpp',
         'src/string.cpp',
+        'src/string_reader.cpp',
     ),
     include_directories: ['include', 'include/wren/utils'],
     dependencies: [fmt, boost, expected],

@@ -30,7 +30,16 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app,
     -> wren::expected<std::shared_ptr<Editor>> {
   // const auto &ctx = app->context();
 
+  std::vector<std::filesystem::path> asset_paths = {
+#ifdef WREN_BUILD_ASSETS_DIR
+      WREN_BUILD_ASSETS_DIR
+#endif
+  };
+
+  wren::assets::Manager asset_manager(asset_paths, project_path);
+
   auto editor = std::make_shared<Editor>(app->context());
+  editor->editor_context_.asset_manager = asset_manager;
   editor->editor_context_.project_path = project_path;
   editor->load_scene();
 
@@ -40,11 +49,12 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app,
                                wren::shaders::kEditorVertShader.data(),
                                wren::shaders::kEditorFragShader.data()));
 
-  TRY_RESULT(
-      editor->mesh_shader_,
-      wren::vk::Shader::create(app->context()->graphics_context->Device().get(),
-                               wren::shaders::kMeshVertShader.data(),
-                               wren::shaders::kMeshFragShader.data()));
+  TRY_RESULT(editor->mesh_shader_,
+             wren::vk::Shader::create(
+                 app->context()->graphics_context->Device().get(),
+                 editor->editor_context_.asset_manager
+                     .find_asset("shaders/editor_mesh.wren_shader")
+                     .value()));
 
   TRY_RESULT(const auto graph, editor->build_render_graph(app->context()));
   app->context()->renderer->set_graph_builder(graph);
