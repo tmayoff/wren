@@ -4,7 +4,6 @@
 #include <boost/describe.hpp>
 #include <string>
 
-// NOLINTNEXTLINE
 #define DESCRIBED_ENUM(E, ...)  \
   enum class E { __VA_ARGS__ }; \
   BOOST_DESCRIBE_ENUM(E, __VA_ARGS__)
