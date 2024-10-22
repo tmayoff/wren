@@ -6,7 +6,6 @@
 #include <SDL_error.h>
 #include <SDL_mouse.h>
 
-#include <tl/expected.hpp>
 #include <tracy/Tracy.hpp>
 
 #include "keycode.hpp"
@@ -20,7 +19,7 @@ auto Window::create(const std::string &application_name) -> expected<Window> {
   ZoneScoped;
   spdlog::debug("Initializing window");
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-    return tl::make_unexpected(make_error_code(WindowErrors::SDL_INIT));
+    return std::unexpected(make_error_code(WindowErrors::SDL_INIT));
   }
 
   SDL_Window *window =
@@ -29,7 +28,7 @@ auto Window::create(const std::string &application_name) -> expected<Window> {
                        SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
   if (window == nullptr) {
     spdlog::error("Failed to create window: {}", SDL_GetError());
-    return tl::make_unexpected(make_error_code(WindowErrors::SDL_WINDOW));
+    return std::unexpected(make_error_code(WindowErrors::SDL_WINDOW));
   }
 
   return Window(window);
@@ -50,15 +49,13 @@ auto Window::get_required_vulkan_extension() const
   uint32_t count = 0;
   bool res = SDL_Vulkan_GetInstanceExtensions(window_, &count, nullptr);
   if (!res) {
-    return tl::make_unexpected(
-        make_error_code(WindowErrors::SDL_VULKAN_EXTENSION));
+    return std::unexpected(make_error_code(WindowErrors::SDL_VULKAN_EXTENSION));
   }
 
   std::vector<const char *> extensions(count);
   res = SDL_Vulkan_GetInstanceExtensions(window_, &count, extensions.data());
   if (!res) {
-    return tl::make_unexpected(
-        make_error_code(WindowErrors::SDL_VULKAN_EXTENSION));
+    return std::unexpected(make_error_code(WindowErrors::SDL_VULKAN_EXTENSION));
   }
 
   return std::vector<std::string_view>{extensions.begin(), extensions.end()};
@@ -467,8 +464,8 @@ void Window::dispatch_events(const event::Dispatcher &dispatcher) {
           break;
         }
         case SDL_TEXTINPUT: {
-            dispatcher.dispatch(event::KeyTyped{event.text.text});
-            break;
+          dispatcher.dispatch(event::KeyTyped{event.text.text});
+          break;
         }
         case SDL_KEYUP: {
           dispatcher.dispatch(

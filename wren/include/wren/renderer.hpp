@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
@@ -20,7 +19,7 @@ class Renderer {
       "swapchain_target";
 
  public:
-  static auto New(std::shared_ptr<Context> const &ctx)
+  static auto create(std::shared_ptr<Context> const &ctx)
       -> expected<std::shared_ptr<Renderer>>;
 
   void draw();

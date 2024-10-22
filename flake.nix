@@ -113,7 +113,6 @@
 
           # SDL2
           spdlog
-          tl-expected
           # nlohmann_json
           # tomlplusplus
 
@@ -162,7 +161,7 @@
           default = wren_editor;
         };
 
-        devShell = pkgs.mkShell.override {stdenv = pkgs.clangStdenv;} {
+        devShell = pkgs.mkShell.override {stdenv = unstable.llvmPackages_19.stdenv;} {
           hardeningDisable = ["all"];
           VK_LAYER_PATH = vulkan_layer_path;
 
@@ -171,7 +170,7 @@
               unstable.lua-language-server
 
               # vulkan-tools
-              # clang-tools
+              unstable.llvmPackages_19.# clang-tools
               # unstable.mesonlsp
               # sccache
               # muon

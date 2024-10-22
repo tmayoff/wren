@@ -169,7 +169,7 @@ auto Shader::compile_shader(const ::vk::Device &device,
   const auto compilation_status = compilation_result.GetCompilationStatus();
   if (compilation_status != shaderc_compilation_status_success) {
     spdlog::error("{}", compilation_result.GetErrorMessage());
-    return tl::make_unexpected(make_error_code(compilation_status));
+    return std::unexpected(make_error_code(compilation_status));
   }
 
   std::span spirv(compilation_result.cbegin(), compilation_result.cend());
@@ -177,7 +177,7 @@ auto Shader::compile_shader(const ::vk::Device &device,
 
   auto [res, module] = device.createShaderModule(create_info);
   if (res != ::vk::Result::eSuccess) {
-    return tl::make_unexpected(make_error_code(res));
+    return std::unexpected(make_error_code(res));
   }
 
   return ShaderModule{{spirv.begin(), spirv.end()}, module};
@@ -201,7 +201,7 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
   ::vk::PipelineLayoutCreateInfo layout_create({}, descriptor_layout_);
   std::tie(res, pipeline_layout_) = device.createPipelineLayout(layout_create);
   if (res != ::vk::Result::eSuccess)
-    return tl::make_unexpected(make_error_code(res));
+    return std::unexpected(make_error_code(res));
 
   // Dynamic states
   std::array dynamic_states = {::vk::DynamicState::eViewport,
@@ -266,7 +266,7 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
 
   std::tie(res, pipeline_) = device.createGraphicsPipeline({}, create_info);
   if (res != ::vk::Result::eSuccess)
-    return tl::make_unexpected(make_error_code(res));
+    return std::unexpected(make_error_code(res));
 
   return {};
 }

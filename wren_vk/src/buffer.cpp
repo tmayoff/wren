@@ -4,7 +4,6 @@
 #include <vulkan/vulkan_core.h>
 
 #include <memory>
-#include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>

@@ -6,9 +6,9 @@
 
 #include <boost/describe.hpp>
 #include <boost/preprocessor.hpp>
+#include <expected>
 #include <optional>
 #include <system_error>
-#include <tl/expected.hpp>
 
 #include "enums.hpp"  // IWYU pragma: export
 #include "macros.hpp"
@@ -46,7 +46,7 @@ class Err {
 // };
 
 template <typename T>
-using expected = tl::expected<T, Err>;
+using expected = std::expected<T, Err>;
 
 }  // namespace wren
 
@@ -57,24 +57,24 @@ struct fmt::formatter<wren::Err> : fmt::formatter<std::string> {
 
 //! @brief This macro creates the hooks into std::error_code for a
 //! given error enum.
-#define DEFINE_ERROR_IMPL(CAT_NAME, ERROR_ENUM)                           \
-  class ERROR_ENUM##_category_t : public std::error_category {            \
-   public:                                                                \
-    [[nodiscard]] auto name() const noexcept -> const char* final {       \
-      return CAT_NAME;                                                    \
-    }                                                                     \
-    [[nodiscard]] auto message(int32_t c) const -> std::string final {    \
-      auto e = static_cast<ERROR_ENUM>(c);                                \
-      using namespace boost::describe;                                    \
-      return std::string{wren::utils::enum_to_string(e)};                 \
-    }                                                                     \
-  };                                                                      \
-  inline auto ERROR_ENUM##_category() -> const ERROR_ENUM##_category_t& { \
-    static const ERROR_ENUM##_category_t kC;                              \
-    return kC;                                                            \
-  }                                                                       \
-  inline auto make_error_code(ERROR_ENUM ec) -> std::error_code {         \
-    return {static_cast<int32_t>(ec), ERROR_ENUM##_category()};           \
+#define DEFINE_ERROR_IMPL(CAT_NAME, ERROR_ENUM)                         \
+  class ERROR_ENUM##_category_t : public std::error_category {          \
+   public:                                                              \
+    [[nodiscard]] auto name() const noexcept -> const char* final {     \
+      return CAT_NAME;                                                  \
+    }                                                                   \
+    [[nodiscard]] auto message(int32_t c) const -> std::string final {  \
+      auto e = static_cast<ERROR_ENUM>(c);                              \
+      using namespace boost::describe;                                  \
+      return std::string{wren::utils::enum_to_string(e)};               \
+    }                                                                   \
+  };                                                                    \
+  inline auto ERROR_ENUM##_category()->const ERROR_ENUM##_category_t& { \
+    static const ERROR_ENUM##_category_t kC;                            \
+    return kC;                                                          \
+  }                                                                     \
+  inline auto make_error_code(ERROR_ENUM ec) -> std::error_code {       \
+    return {static_cast<int32_t>(ec), ERROR_ENUM##_category()};         \
   }
 
 /* @brief This macro defines an enum with BOOST_DEFINE_ENUM_CLASS and
@@ -93,7 +93,7 @@ struct fmt::formatter<wren::Err> : fmt::formatter<std::string> {
 
 #define TRY_RESULT_IMPL(unique, expr) \
   auto unique = (expr);               \
-  if (!(unique).has_value()) return tl::make_unexpected(unique.error());
+  if (!(unique).has_value()) return std::unexpected(unique.error());
 
 #define TRY_RESULT_1(unique, expr) TRY_RESULT_IMPL(unique, expr)
 #define TRY_RESULT_2(unique, out, expr) \

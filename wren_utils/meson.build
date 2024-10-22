@@ -7,10 +7,10 @@ utils = library(
         'src/string_reader.cpp',
     ),
     include_directories: ['include', 'include/wren/utils'],
-    dependencies: [fmt, boost, expected],
+    dependencies: [fmt, boost],
 )
 wren_utils_dep = declare_dependency(
     include_directories: 'include',
-    dependencies: [fmt, boost, expected],
+    dependencies: [fmt, boost],
     link_with: utils,
 )

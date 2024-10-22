@@ -7,7 +7,6 @@
 #include <filesystem>
 #include <memory>
 #include <string>
-#include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
