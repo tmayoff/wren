@@ -43,11 +43,12 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app,
   editor->editor_context_.project_path = project_path;
   editor->load_scene();
 
-  TRY_RESULT(
-      editor->viewer_shader_,
-      wren::vk::Shader::create(app->context()->graphics_context->Device().get(),
-                               wren::shaders::kEditorVertShader.data(),
-                               wren::shaders::kEditorFragShader.data()));
+  // TRY_RESULT(editor->viewer_shader_,
+  //            wren::vk::Shader::create(
+  //                app->context()->graphics_context->Device().get(),
+  //                editor->editor_context_.asset_manager
+  //                    .find_asset("shaders/editor_grid.wren_shader")
+  //                    .value()));
 
   TRY_RESULT(editor->mesh_shader_,
              wren::vk::Shader::create(
@@ -232,7 +233,7 @@ auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
       .add_pass(
           "mesh",
           {{
-               {"viewer", viewer_shader_},
+               // {"viewer", viewer_shader_},
                {"mesh", mesh_shader_},
            },
            "scene_viewer"},
@@ -247,11 +248,11 @@ auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
             ubo.view = this->camera_.transform().matrix();
             ubo.proj = this->camera_.projection();
 
-            pass.bind_pipeline("viewer");
+            // pass.bind_pipeline("viewer");
 
-            pass.write_scratch_buffer(cmd, 0, 0, ubo);
+            // pass.write_scratch_buffer(cmd, 0, 0, ubo);
 
-            cmd.draw(6, 1, 0, 0);
+            // cmd.draw(6, 1, 0, 0);
 
             pass.bind_pipeline("mesh");
             pass.write_scratch_buffer(cmd, 0, 0, ubo);

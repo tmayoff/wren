@@ -16,6 +16,11 @@ struct Vec {
   Vec() : data() {}
 
   Vec(std::array<T, N> data) : data(data) {}
+  Vec(float scalar) {
+    for (size_t i = 0; i < N; ++i) {
+      data.at(i) = scalar;
+    }
+  }
 
   // template <typename... Args>
   // Vec(Args&&... d) : data({{std::forward<Args>(d)...}}) {}
@@ -127,7 +132,8 @@ struct vec2f : Vec<float, 2> {
 
 struct Vec3f : Vec<float, 3> {
   Vec3f() : Vec<float, 3>() {}
-  Vec3f(float scalar): Vec<float, 3> ({scalar, scalar, scalar}){}
+  Vec3f(const auto& other) : Vec<float, 3>(other) {}
+  // Vec3f(float scalar) : Vec<float, 3>({scalar, scalar, scalar}) {}
   Vec3f(float x, float y, float z) : Vec<float, 3>({x, y, z}) {}
   Vec3f(const Vec<float, 3>& other) : Vec<float, 3>(other) {}
 
@@ -147,11 +153,12 @@ struct Vec3f : Vec<float, 3> {
 
 struct Vec4f : Vec<float, 4> {
   Vec4f() : Vec<float, 4>() {}
+  Vec4f(const auto& other) : Vec<float, 4>(other) {}
   Vec4f(float x, float y, float z, float w) : Vec<float, 4>({x, y, z, w}) {}
   Vec4f(const Vec3f& vec, float w)
       : Vec<float, 4>({vec.x(), vec.y(), vec.z(), w}) {}
   Vec4f(const Vec<float, 4>& other) : Vec<float, 4>(other) {}
-  Vec4f(std::array<float, 4> data) : Vec<float, 4>(data) {}
+  // Vec4f(std::array<float, 4> data) : Vec<float, 4>(data) {}
 
   [[nodiscard]] auto x() const { return data.at(0); }
   [[nodiscard]] auto y() const { return data.at(1); }

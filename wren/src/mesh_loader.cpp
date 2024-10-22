@@ -34,52 +34,29 @@ auto load_stl_mesh(const std::filesystem::path& stl_path) -> Mesh {
   size_t newest_index = 0;
 
   for (auto i = 0; i < triangles; ++i) {
-    reader.read_list<float, 3>();  // Skip normal
-    const auto vec1 = reader.read_list<float, 3>();
-    const auto vec2 = reader.read_list<float, 3>();
-    const auto vec3 = reader.read_list<float, 3>();
+    const auto normal_arr = reader.read_list<float, 3>();
+    const math::Vec3f normal{normal_arr.at(0), normal_arr.at(1),
+                             normal_arr.at(2)};
+
+    std::array verts = {reader.read_list<float, 3>(),
+                        reader.read_list<float, 3>(),
+                        reader.read_list<float, 3>()};
+
     reader.skip(2);
 
-    auto it = std::ranges::find_if(vertices, [vec = vec1](const auto& v) {
-      return v.pos == math::Vec3f{vec.at(0), vec.at(1), vec.at(2)};
-    });
+    for (const auto& v : verts) {
+      auto it = std::ranges::find_if(vertices, [vec = v](const auto& v) {
+        return v.pos == math::Vec3f{vec.at(0), vec.at(1), vec.at(2)};
+      });
 
-    if (it == vertices.end()) {
+      // if (it == vertices.end()) {
       // New vertex
-      vertices.emplace_back(math::Vec3f{vec1.at(0), vec1.at(1), vec1.at(2)},
-                            math::Vec3f{1.0});
+      vertices.emplace_back(math::Vec3f{v}, normal, math::Vec4f{1.0F});
       indices.push_back(newest_index++);
-    } else {
-      // Old vertex
-      indices.push_back(std::ranges::distance(vertices.begin(), it));
-    }
-
-    it = std::ranges::find_if(vertices, [vec = vec2](const auto& v) {
-      return v.pos == math::Vec3f{vec.at(0), vec.at(1), vec.at(2)};
-    });
-
-    if (it == vertices.end()) {
-      // New vertex
-      vertices.emplace_back(math::Vec3f{vec2.at(0), vec2.at(1), vec2.at(2)},
-                            math::Vec3f{1.0});
-      indices.push_back(newest_index++);
-    } else {
-      // Old vertex
-      indices.push_back(std::ranges::distance(vertices.begin(), it));
-    }
-
-    it = std::ranges::find_if(vertices, [vec = vec3](const auto& v) {
-      return v.pos == math::Vec3f{vec.at(0), vec.at(1), vec.at(2)};
-    });
-
-    if (it == vertices.end()) {
-      // New vertex
-      vertices.emplace_back(math::Vec3f{vec3.at(0), vec3.at(1), vec3.at(2)},
-                            math::Vec3f{1.0});
-      indices.push_back(newest_index++);
-    } else {
-      // Old vertex
-      indices.push_back(std::ranges::distance(vertices.begin(), it));
+      // } else {
+      //   // Old vertex
+      //   indices.push_back(std::ranges::distance(vertices.begin(), it));
+      // }
     }
   }
 

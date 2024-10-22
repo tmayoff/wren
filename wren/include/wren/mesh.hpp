@@ -19,7 +19,8 @@ struct UBO {
 
 struct Vertex {
   wren::math::Vec3f pos;
-  wren::math::Vec3f colour;
+  wren::math::Vec3f normal;
+  wren::math::Vec4f colour;
 };
 
 const std::array kTriangleVertices = {

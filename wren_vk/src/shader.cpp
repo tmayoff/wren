@@ -6,6 +6,7 @@
 #include <vulkan/vulkan_core.h>
 #include <wren_reflect/spirv_reflect.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <shaderc/shaderc.hpp>
 #include <vulkan/vulkan_enums.hpp>
@@ -60,6 +61,10 @@ auto ShaderModule::get_vertex_input_attributes() const
   reflection->EnumerateInputVariables(&count, nullptr);
   std::vector<SpvReflectInterfaceVariable *> input_variables(count);
   reflection->EnumerateInputVariables(&count, input_variables.data());
+
+  std::ranges::sort(input_variables, [](const auto &a, const auto &b) {
+    return a->location < b->location;
+  });
 
   uint32_t offset = 0;
   std::vector<::vk::VertexInputAttributeDescription> attrs;
@@ -125,6 +130,7 @@ auto Shader::create(const ::vk::Device &device,
   TRY_RESULT(auto shaders, read_wren_shader_file(shader_path));
 
   for (const auto &[type, content] : shaders) {
+    const auto p = shader_path / utils::enum_to_string(type);
     switch (type) {
       case ShaderType::Vertex: {
         TRY_RESULT(const auto module,
@@ -222,7 +228,7 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
   ::vk::PipelineViewportStateCreateInfo viewport_state{{}, viewport, scissor};
 
   ::vk::PipelineRasterizationStateCreateInfo rasterization(
-      {}, false, false, ::vk::PolygonMode::eFill, ::vk::CullModeFlagBits::eNone,
+      {}, false, false, ::vk::PolygonMode::eFill, ::vk::CullModeFlagBits::eBack,
       ::vk::FrontFace::eCounterClockwise, false, {}, {}, {}, 1.0f);
 
   ::vk::PipelineMultisampleStateCreateInfo multisample{
