@@ -3,7 +3,6 @@
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan_core.h>
 
-#include <tl/expected.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
 #include <wren/vk/errors.hpp>
@@ -18,7 +17,7 @@ auto Device::create(const ::vk::Instance &instance,
   Device device;
 
   auto res = device.create_device(instance, physical_device, surface);
-  if (!res.has_value()) return tl::make_unexpected(res.error());
+  if (!res.has_value()) return std::unexpected(res.error());
 
   return device;
 }
@@ -45,7 +44,7 @@ auto Device::create_device(const ::vk::Instance &instance,
                                        {}, &features2);
     auto res = physical_device.createDevice(create_info);
     if (res.result != ::vk::Result::eSuccess)
-      return tl::make_unexpected(make_error_code(res.result));
+      return std::unexpected(make_error_code(res.result));
     device_ = res.value;
     VULKAN_HPP_DEFAULT_DISPATCHER.init(device_);
   }

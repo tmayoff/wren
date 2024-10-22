@@ -2,7 +2,6 @@
 
 #include <vk_mem_alloc.h>
 
-#include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_handles.hpp>
 
