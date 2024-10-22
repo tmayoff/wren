@@ -34,9 +34,7 @@ auto load_stl_mesh(const std::filesystem::path& stl_path) -> Mesh {
   size_t newest_index = 0;
 
   for (auto i = 0; i < triangles; ++i) {
-    const auto normal_arr = reader.read_list<float, 3>();
-    const math::Vec3f normal{normal_arr.at(0), normal_arr.at(1),
-                             normal_arr.at(2)};
+    const math::Vec3f normal{reader.read_list<float, 3>()};
 
     std::array verts = {reader.read_list<float, 3>(),
                         reader.read_list<float, 3>(),
@@ -45,18 +43,19 @@ auto load_stl_mesh(const std::filesystem::path& stl_path) -> Mesh {
     reader.skip(2);
 
     for (const auto& v : verts) {
-      auto it = std::ranges::find_if(vertices, [vec = v](const auto& v) {
-        return v.pos == math::Vec3f{vec.at(0), vec.at(1), vec.at(2)};
-      });
+      auto it =
+          std::ranges::find_if(vertices, [vec = v, normal](const auto& v) {
+            return v.pos == math::Vec3f{vec} && v.normal == normal;
+          });
 
-      // if (it == vertices.end()) {
-      // New vertex
-      vertices.emplace_back(math::Vec3f{v}, normal, math::Vec4f{1.0F});
-      indices.push_back(newest_index++);
-      // } else {
-      //   // Old vertex
-      //   indices.push_back(std::ranges::distance(vertices.begin(), it));
-      // }
+      if (it == vertices.end()) {
+        // New vertex
+        vertices.emplace_back(math::Vec3f{v}, normal, math::Vec4f{1.0F});
+        indices.push_back(newest_index++);
+      } else {
+        // Old vertex
+        indices.push_back(std::ranges::distance(vertices.begin(), it));
+      }
     }
   }
 
