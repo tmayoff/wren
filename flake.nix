@@ -31,6 +31,8 @@
           inherit system overlays;
         };
 
+        boost = pkgs.boost185;
+
         imgui_subproj = pkgs.stdenv.mkDerivation rec {
           name = "imgui-docking";
           version = "1.91.0";
@@ -97,37 +99,38 @@
 
         rawNativeBuildInputs = with pkgs; [
           pkg-config
-          meson
-          cmake
-          ninja
+          # meson
+          # cmake
+          # ninja
+          unstable.xmake
 
-          doxygen
-          graphviz
+          # doxygen
+          # graphviz
         ];
 
         rawBuildInputs = with pkgs; [
-          boost185
+          boost.dev
 
-          SDL2
+          # SDL2
           spdlog
           tl-expected
-          nlohmann_json
-          tomlplusplus
+          # nlohmann_json
+          # tomlplusplus
 
-          # vulkan / shaders
-          vulkan-headers
-          vulkan-loader
-          vma
-          shaderc
-          spirv-headers
+          # # vulkan / shaders
+          # vulkan-headers
+          # vulkan-loader
+          # vma
+          # shaderc
+          # spirv-headers
 
-          tracy
+          # tracy
 
+          # # backward-cpp
+          # binutils
+          # elfutils
+          # libdwarf
           # backward-cpp
-          binutils
-          elfutils
-          libdwarf
-          backward-cpp
         ];
         vulkan_layer_path = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d:${pkgs.renderdoc}/share/vulkan/implicit_layer.d";
       in {
@@ -165,39 +168,41 @@
 
           nativeBuildInputs = with pkgs;
             [
-              vulkan-tools
-              clang-tools
-              unstable.mesonlsp
-              sccache
-              muon
+              unstable.lua-language-server
 
-              just
+              # vulkan-tools
+              # clang-tools
+              # unstable.mesonlsp
+              # sccache
+              # muon
 
-              gdb
+              # just
 
-              renderdoc
+              # gdb
 
-              unstable.tracy-x11 # for the profiler
-              wayland
+              # renderdoc
+
+              # unstable.tracy-x11 # for the profiler
+              # wayland
             ]
             ++ rawNativeBuildInputs;
 
           buildInputs = with pkgs;
             [
-              unstable.lldb
-              vulkan-validation-layers
+              # unstable.lldb
+              # vulkan-validation-layers
 
-              pkgs.nixgl.nixVulkanIntel
+              # pkgs.nixgl.nixVulkanIntel
             ]
             ++ rawBuildInputs;
 
-          BOOST_INCLUDEDIR = "${pkgs.lib.getDev pkgs.boost}/include";
-          BOOST_LIBRARYDIR = "${pkgs.lib.getLib pkgs.boost}/lib";
+          BOOST_INCLUDEDIR = "${pkgs.lib.getDev boost}/include";
+          BOOST_LIBRARYDIR = "${pkgs.lib.getLib boost}/lib";
 
           shellHook = ''
-            export VK_ICD_FILENAMES=$(nixVulkanIntel printenv VK_ICD_FILENAMES)
-            export LD_LIBRARY_PATH=$(nixVulkanIntel printenv LD_LIBRARY_PATH):$LD_LIBRARY_PATH
-            CXX="sccache clang++"
+            # export VK_ICD_FILENAMES=$(nixVulkanIntel printenv VK_ICD_FILENAMES)
+            # export LD_LIBRARY_PATH=$(nixVulkanIntel printenv LD_LIBRARY_PATH):$LD_LIBRARY_PATH
+            # CXX="sccache clang++"
           '';
         };
       }
