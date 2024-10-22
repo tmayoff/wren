@@ -39,7 +39,7 @@ void Mesh::load(const vulkan::Device& device, VmaAllocator allocator) {
 
   // ============== Index buffer ============== //
   {
-    std::span data{indices_.begin(), indices_.end()};
+    std::span data{indices_};
 
     auto staging_buffer = vk::Buffer::create(
         allocator, data.size_bytes(),
