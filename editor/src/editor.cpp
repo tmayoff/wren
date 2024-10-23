@@ -17,7 +17,6 @@
 #include "filesystem_panel.hpp"
 #include "inspector_panel.hpp"
 #include "scene_panel.hpp"
-#include "shaders/editor_scene.hpp"
 #include "ui.hpp"
 #include "wren/scene/components/transform.hpp"
 #include "wren/scene/deserialization.hpp"
@@ -50,12 +49,14 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app,
   //                    .find_asset("shaders/editor_grid.wren_shader")
   //                    .value()));
 
+  spdlog::info("Intializing shaders");
+
+  TRY_RESULT(auto asset_path, editor->editor_context_.asset_manager.find_asset(
+                                  "shaders/editor_mesh.wren_shader"));
+
   TRY_RESULT(editor->mesh_shader_,
              wren::vk::Shader::create(
-                 app->context()->graphics_context->Device().get(),
-                 editor->editor_context_.asset_manager
-                     .find_asset("shaders/editor_mesh.wren_shader")
-                     .value()));
+                 app->context()->graphics_context->Device().get(), asset_path));
 
   TRY_RESULT(const auto graph, editor->build_render_graph(app->context()));
   app->context()->renderer->set_graph_builder(graph);
@@ -212,6 +213,9 @@ void Editor::on_update() {
 
 auto Editor::load_scene() -> wren::expected<void> {
   // Deserialize project
+
+  spdlog::info("Loading scene");
+
   std::string scene_name;
 
   wren::scene::deserialize(editor_context_.project_path, "scene.wren", scene_);
@@ -232,11 +236,12 @@ auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
   builder
       .add_pass(
           "mesh",
-          {{
-               // {"viewer", viewer_shader_},
-               {"mesh", mesh_shader_},
-           },
-           "scene_viewer"},
+          {.shaders =
+               {
+                   // {"viewer", viewer_shader_},
+                   {"mesh", mesh_shader_},
+               },
+           .target_name = "scene_viewer"},
           [this, ctx, render_query](wren::RenderPass &pass,
                                     ::vk::CommandBuffer &cmd) {
             struct GLOBALS {
@@ -279,7 +284,7 @@ auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
                   mesh_renderer.mesh.draw(cmd);
                 });
           })
-      .add_pass("ui", {{}, "swapchain_target"},
+      .add_pass("ui", {.shaders = {}, .target_name = "swapchain_target"},
                 [](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
                   editor::ui::flush(cmd);
                 });

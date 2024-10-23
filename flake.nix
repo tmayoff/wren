@@ -114,7 +114,7 @@
 
               just
 
-              # gdb
+              gdb
 
               # renderdoc
 
@@ -139,7 +139,7 @@
           shellHook = ''
             export VK_ICD_FILENAMES=$(nixVulkanIntel printenv VK_ICD_FILENAMES)
             export LD_LIBRARY_PATH=$(nixVulkanIntel printenv LD_LIBRARY_PATH):$LD_LIBRARY_PATH
-            # CXX="sccache clang++"
+            unset LD
           '';
         };
       }
