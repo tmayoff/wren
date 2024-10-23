@@ -6,7 +6,7 @@
 #include <wren/math/vector.hpp>
 #include <wren/mesh.hpp>
 #include <wren/scene/scene.hpp>
-#include <wren/utils/errors.hpp>
+#include <wren/utils/result.hpp>
 
 #include "camera.hpp"
 #include "context.hpp"

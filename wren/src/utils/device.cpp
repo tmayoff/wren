@@ -5,7 +5,7 @@
 
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
-#include <wren/vk/errors.hpp>
+#include <wren/vk/result.hpp>
 
 #include "wren/utils/queue.hpp"
 

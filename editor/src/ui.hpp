@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wren/utils/errors.hpp>
+#include <wren/utils/result.hpp>
 
 namespace vk {
 class CommandBuffer;

@@ -1,9 +1,9 @@
 #pragma once
 
 #include <filesystem>
+#include <wren/utils/result.hpp>
 
 #include "scene.hpp"
-#include "wren/utils/errors.hpp"
 
 namespace wren::scene {
 

@@ -5,7 +5,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include <vulkan/vulkan_to_string.hpp>
-#include <wren/vk/errors.hpp>
+#include <wren/vk/result.hpp>
 
 // NOLINTBEGIN
 PFN_vkCreateDebugUtilsMessengerEXT pfnVkCreateDebugUtilsMessengerEXT = nullptr;

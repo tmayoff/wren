@@ -15,7 +15,7 @@
 #include <wren/utils/enums.hpp>
 #include <wren/utils/filesystem.hpp>
 #include <wren/utils/string_reader.hpp>
-#include <wren/vk/errors.hpp>
+#include <wren/vk/result.hpp>
 #include <wren_reflect/parser.hpp>
 
 #include "vulkan/vulkan_structs.hpp"

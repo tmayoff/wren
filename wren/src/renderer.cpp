@@ -7,7 +7,7 @@
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
 #include <vulkan/vulkan_to_string.hpp>
-#include <wren/vk/errors.hpp>
+#include <wren/vk/result.hpp>
 
 #include "utils/tracy.hpp"  // IWYU pragma: export
 #include "wren/context.hpp"

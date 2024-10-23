@@ -7,7 +7,7 @@
 #include <vulkan/vulkan.hpp>
 #include <wren/context.hpp>
 #include <wren/renderer.hpp>
-#include <wren/vk/errors.hpp>
+#include <wren/vk/result.hpp>
 
 namespace editor::ui {
 

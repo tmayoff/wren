@@ -1,4 +1,4 @@
-#include "errors.hpp"
+#include "result.hpp"
 
 #include <fmt/format.h>
 
@@ -10,9 +10,8 @@ auto fmt::formatter<wren::Err>::format(wren::Err e,
                                        fmt::format_context& ctx) const
     -> decltype(ctx.out()) {
   std::stringstream ss;
-  std::string fmt =
-      fmt::format("Error: {} {}", e.error().category().name(),
-                  e.error().message());
+  std::string fmt = fmt::format("Error: {} {}", e.error().category().name(),
+                                e.error().message());
 
   ss << fmt;
   if (e.extra_msg().has_value()) {

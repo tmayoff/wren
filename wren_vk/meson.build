@@ -1,6 +1,5 @@
 wren_vk = library(
     'wren_vk',
-    'src/errors.cpp',
     'src/buffer.cpp',
     'src/image.cpp',
     'src/shader.cpp',
