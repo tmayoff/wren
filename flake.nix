@@ -109,7 +109,7 @@
               unstable.lua-language-server
 
               # vulkan-tools
-              unstable.llvmPackages_19.unstable.llvmPackages_19.clang-tools
+              unstable.llvmPackages_19.clang-tools
               # unstable.mesonlsp
               # sccache
               # muon
