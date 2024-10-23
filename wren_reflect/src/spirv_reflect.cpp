@@ -14,7 +14,7 @@
  permissions and limitations under the License.
 */
 
-#include "wren_reflect/spirv_reflect.h"
+#include "wren/reflect/spirv_reflect.h"
 
 #include <assert.h>
 #include <stdbool.h>

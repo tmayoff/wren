@@ -2,9 +2,11 @@
 
 #include <shaderc/shaderc.h>
 #include <shaderc/status.h>
-#include <wren_reflect/spirv_reflect.h>
+#include <spirv_reflect.h>
+// #include <wren/reflect/spirv_reflect.h>
 
 #include <filesystem>
+#include <map>
 #include <memory>
 #include <string>
 #include <vulkan/vulkan.hpp>
@@ -13,7 +15,6 @@
 #include <vulkan/vulkan_structs.hpp>
 #include <wren/math/vector.hpp>
 #include <wren/utils/result.hpp>
-#include <wren_reflect/parser.hpp>
 
 DEFINE_ERROR_IMPL("shaderc", shaderc_compilation_status)
 BOOST_DESCRIBE_ENUM(shaderc_compilation_status,
@@ -25,9 +26,13 @@ BOOST_DESCRIBE_ENUM(shaderc_compilation_status,
                     shaderc_compilation_status_transformation_error,
                     shaderc_compilation_status_configuration_error)
 
+namespace wren::reflect {
+using spirv_t = std::vector<uint32_t>;
+}
+
 namespace wren::vk {
 
-DESCRIBED_ENUM(ShaderType, Vertex, Fragment)
+DESCRIBED_ENUM(ShaderType, Vertex, Fragment);
 
 struct ShaderModule {
   reflect::spirv_t spirv;

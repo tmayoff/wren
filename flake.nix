@@ -33,67 +33,17 @@
 
         boost = pkgs.boost185;
 
-        imgui_subproj = pkgs.stdenv.mkDerivation rec {
-          name = "imgui-docking";
-          version = "1.91.0";
-          src = pkgs.fetchurl {
-            url = "https://github.com/ocornut/imgui/archive/refs/tags/v${version}.tar.gz";
-            hash = "sha256-bmLIclLms3JbpHihwE3GBKoKrux4/tz0AR8eUlSPTMk=";
-          };
-
-          installPhase = ''
-            mkdir -p $out
-            cp -r ./* $out
-          '';
-        };
-
-        tracy_subproj = pkgs.stdenv.mkDerivation rec {
-          name = "imgui-docking";
-          version = "0.10";
-          src = pkgs.fetchFromGitHub {
-            owner = "wolfpld";
-            repo = "tracy";
-            rev = "v${version}";
-            hash = "sha256-HofqYJT1srDJ6Y1f18h7xtAbI/Gvvz0t9f0wBNnOZK8=";
-          };
-
-          installPhase = ''
-            mkdir -p $out
-            cp -r ./* $out
-          '';
-        };
-
-        vma = pkgs.stdenv.mkDerivation {
-          name = "VulkanMemoryAllocator";
-          src = pkgs.fetchFromGitHub {
-            owner = "GPUOpen-LibrariesAndSDKs";
-            repo = "VulkanMemoryAllocator";
-            rev = "7942b798289f752dc23b0a79516fd8545febd718";
-            hash = "sha256-x/5OECXCG4rxNtyHZKaMnrNbDjxiP9bQFtQiqEFjNKQ=";
-          };
-
-          nativeBuildInputs = with pkgs; [
-            cmake
-          ];
-        };
-
-        # spirv-reflect = pkgs.stdenv.mkDerivation {
-        #   name = "spirv-reflect";
+        # vma = pkgs.stdenv.mkDerivation {
+        #   name = "VulkanMemoryAllocator";
         #   src = pkgs.fetchFromGitHub {
-        #     owner = "KhronosGroup";
-        #     repo = "SPIRV-Reflect";
-        #     rev = "vulkan-sdk-1.3.275.0";
-        #     hash = "sha256-WnbNEyoutiWs+4Cu9Nv9KfNNmT4gKe/IzyiL/bLb3rg=";
+        #     owner = "GPUOpen-LibrariesAndSDKs";
+        #     repo = "VulkanMemoryAllocator";
+        #     rev = "7942b798289f752dc23b0a79516fd8545febd718";
+        #     hash = "sha256-x/5OECXCG4rxNtyHZKaMnrNbDjxiP9bQFtQiqEFjNKQ=";
         #   };
 
-        #   cmakeFlags = [
-        #     "-DSPIRV_REFLECT_STATIC_LIB=On"
-        #   ];
-
-        #   nativeBuildInputs = [
-        #     pkgs.meson
-        #     pkgs.cmake
-        #     pkgs.ninja
+        #   nativeBuildInputs = with pkgs; [
+        #     cmake
         #   ];
         # };
 
@@ -111,17 +61,17 @@
         rawBuildInputs = with pkgs; [
           boost.dev
 
-          # SDL2
+          SDL2
           spdlog
           # nlohmann_json
           # tomlplusplus
 
-          # # vulkan / shaders
-          # vulkan-headers
-          # vulkan-loader
+          # vulkan / shaders
+          vulkan-headers
+          vulkan-loader
           # vma
-          # shaderc
-          # spirv-headers
+          shaderc
+          spirv-headers
 
           # tracy
 
@@ -143,17 +93,6 @@
             nativeBuildInputs = rawNativeBuildInputs;
             buildInputs = rawBuildInputs;
 
-            patchPhase = ''
-              mkdir -p subprojects/
-              cp -r ${imgui_subproj} subprojects/imgui-1.91.0-docking/
-              # cp -r subprojects/packagefiles/imgui-docking/* subprojects/imgui-1.91.0-docking/
-              cp -r ${tracy_subproj} subprojects/tracy-0.10/
-              ls -ls subprojects
-
-              # chmod 644 -R subprojects
-              meson subprojects packagefiles --apply
-            '';
-
             BOOST_INCLUDEDIR = "${pkgs.lib.getDev pkgs.boost}/include";
             BOOST_LIBRARYDIR = "${pkgs.lib.getLib pkgs.boost}/lib";
           };
@@ -170,37 +109,38 @@
               unstable.lua-language-server
 
               # vulkan-tools
-              unstable.llvmPackages_19.# clang-tools
+              unstable.llvmPackages_19.clang-tools
               # unstable.mesonlsp
               # sccache
               # muon
 
-              # just
+              just
 
               # gdb
 
               # renderdoc
 
               # unstable.tracy-x11 # for the profiler
-              # wayland
+              wayland
             ]
             ++ rawNativeBuildInputs;
 
           buildInputs = with pkgs;
             [
-              # unstable.lldb
-              # vulkan-validation-layers
+              unstable.lldb
+              vulkan-validation-layers
 
-              # pkgs.nixgl.nixVulkanIntel
+              pkgs.nixgl.nixVulkanIntel
             ]
             ++ rawBuildInputs;
 
+          SPIRV_INCLUDEDIR = "${pkgs.lib.getDev pkgs.spirv-headers}";
           BOOST_INCLUDEDIR = "${pkgs.lib.getDev boost}/include";
           BOOST_LIBRARYDIR = "${pkgs.lib.getLib boost}/lib";
 
           shellHook = ''
-            # export VK_ICD_FILENAMES=$(nixVulkanIntel printenv VK_ICD_FILENAMES)
-            # export LD_LIBRARY_PATH=$(nixVulkanIntel printenv LD_LIBRARY_PATH):$LD_LIBRARY_PATH
+            export VK_ICD_FILENAMES=$(nixVulkanIntel printenv VK_ICD_FILENAMES)
+            export LD_LIBRARY_PATH=$(nixVulkanIntel printenv LD_LIBRARY_PATH):$LD_LIBRARY_PATH
             # CXX="sccache clang++"
           '';
         };
