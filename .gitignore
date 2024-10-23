@@ -7,3 +7,4 @@ result
 .fleet
 .xmake
 a.out
+compile_commands.json
