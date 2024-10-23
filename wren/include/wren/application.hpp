@@ -3,7 +3,6 @@
 #include <spdlog/spdlog.h>
 
 #include <memory>
-#include <tl/expected.hpp>
 
 #include "context.hpp"
 #include "wren/renderer.hpp"

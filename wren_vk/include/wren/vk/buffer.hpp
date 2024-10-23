@@ -5,9 +5,8 @@
 
 #include <memory>
 #include <span>
-#include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
-#include <wren/vk/errors.hpp>
+#include <wren/vk/result.hpp>
 
 namespace wren::vk {
 

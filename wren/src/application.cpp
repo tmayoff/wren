@@ -4,14 +4,13 @@
 #include <vulkan/vulkan_core.h>
 
 #include <memory>
-#include <tl/expected.hpp>
-#include <wren/utils/errors.hpp>
+#include <wren/utils/result.hpp>
 
 #include "wren/context.hpp"
 #include "wren/event.hpp"
 #include "wren/graphics_context.hpp"
 #include "wren/renderer.hpp"
-#include "wren/utils/tracy.hpp"  // IWYU pragma: export
+#include "wren/utils/tracy.hpp"  // IWYU pragma: keep
 
 namespace wren {
 
@@ -23,7 +22,7 @@ auto Application::Create(const std::string &application_name)
 
   auto window = Window::create(application_name);
   if (!window.has_value()) {
-    return tl::make_unexpected(window.error());
+    return std::unexpected(window.error());
   }
 
   TRY_RESULT(auto extensions, window->get_required_vulkan_extension());
@@ -41,7 +40,7 @@ auto Application::Create(const std::string &application_name)
   auto ctx =
       std::make_shared<Context>(*window, event::Dispatcher(), graphics_context);
 
-  TRY_RESULT(auto renderer, Renderer::New(ctx));
+  TRY_RESULT(auto renderer, Renderer::create(ctx));
 
   return std::shared_ptr<Application>(new Application(ctx, renderer));
 }

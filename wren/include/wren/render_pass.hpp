@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <string>
-#include <tl/expected.hpp>
 #include <vulkan/vulkan.hpp>
 #include <wren/vk/buffer.hpp>
 #include <wren/vk/image.hpp>

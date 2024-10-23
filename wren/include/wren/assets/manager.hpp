@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <optional>
 #include <vector>
-#include <wren/utils/errors.hpp>
+#include <wren/utils/result.hpp>
 
 namespace wren::assets {
 

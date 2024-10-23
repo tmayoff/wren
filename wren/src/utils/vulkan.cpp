@@ -4,9 +4,8 @@
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan_core.h>
 
-#include <tl/expected.hpp>
 #include <vulkan/vulkan_to_string.hpp>
-#include <wren/vk/errors.hpp>
+#include <wren/vk/result.hpp>
 
 // NOLINTBEGIN
 PFN_vkCreateDebugUtilsMessengerEXT pfnVkCreateDebugUtilsMessengerEXT = nullptr;
@@ -38,7 +37,7 @@ namespace wren::vulkan {
   if (out == nullptr) {                                                    \
     out = reinterpret_cast<PFN_##fn_name>(instance.getProcAddr(#fn_name)); \
     if (out == nullptr)                                                    \
-      return tl::make_unexpected(                                          \
+      return std::unexpected(                                              \
           make_error_code(::vk::Result::eErrorExtensionNotPresent));       \
   }
 
@@ -85,17 +84,17 @@ auto get_swapchain_support_details(const ::vk::PhysicalDevice &physical_device,
   std::tie(res, details.surface_capabilites) =
       physical_device.getSurfaceCapabilitiesKHR(surface);
   if (res != ::vk::Result::eSuccess)
-    return tl::make_unexpected(make_error_code(res));
+    return std::unexpected(make_error_code(res));
 
   std::tie(res, details.surface_formats) =
       physical_device.getSurfaceFormatsKHR(surface);
   if (res != ::vk::Result::eSuccess)
-    return tl::make_unexpected(make_error_code(res));
+    return std::unexpected(make_error_code(res));
 
   std::tie(res, details.present_modes) =
       physical_device.getSurfacePresentModesKHR(surface);
   if (res != ::vk::Result::eSuccess)
-    return tl::make_unexpected(make_error_code(res));
+    return std::unexpected(make_error_code(res));
 
   return details;
 }

@@ -3,12 +3,11 @@
 #include <spdlog/spdlog.h>
 
 #include <cstdint>
-#include <tl/expected.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
 #include <vulkan/vulkan_to_string.hpp>
-#include <wren/vk/errors.hpp>
+#include <wren/vk/result.hpp>
 
 #include "utils/tracy.hpp"  // IWYU pragma: export
 #include "wren/context.hpp"
@@ -45,7 +44,7 @@ auto Renderer::begin_frame() -> expected<uint32_t> {
         device.acquireNextImageKHR(swapchain, UINT64_MAX, image_available);
     if (res == ::vk::Result::eErrorOutOfDateKHR) {
       recreate_swapchain();
-      return tl::make_unexpected(make_error_code(res));
+      return std::unexpected(make_error_code(res));
     }
   }
 
@@ -119,7 +118,7 @@ Renderer::Renderer(const std::shared_ptr<Context> &ctx)
       [this](auto &w) { recreate_swapchain(); });
 }
 
-auto Renderer::New(const std::shared_ptr<Context> &ctx)
+auto Renderer::create(const std::shared_ptr<Context> &ctx)
     -> expected<std::shared_ptr<Renderer>> {
   ZoneScoped;
 
@@ -129,23 +128,23 @@ auto Renderer::New(const std::shared_ptr<Context> &ctx)
   ctx->renderer = renderer;
 
   auto res = renderer->recreate_swapchain();
-  if (!res.has_value()) return tl::make_unexpected(res.error());
+  if (!res.has_value()) return std::unexpected(res.error());
 
   ::vk::Result vres = ::vk::Result::eSuccess;
   std::tie(vres, renderer->in_flight_fence) = device.get().createFence(
       ::vk::FenceCreateInfo{::vk::FenceCreateFlagBits::eSignaled});
   if (vres != ::vk::Result::eSuccess)
-    return tl::make_unexpected(make_error_code(vres));
+    return std::unexpected(make_error_code(vres));
 
   std::tie(vres, renderer->image_available) =
       device.get().createSemaphore(::vk::SemaphoreCreateInfo{});
   if (vres != ::vk::Result::eSuccess)
-    return tl::make_unexpected(make_error_code(vres));
+    return std::unexpected(make_error_code(vres));
 
   std::tie(vres, renderer->render_finished) =
       device.get().createSemaphore(::vk::SemaphoreCreateInfo{});
   if (vres != ::vk::Result::eSuccess)
-    return tl::make_unexpected(make_error_code(vres));
+    return std::unexpected(make_error_code(vres));
 
   VK_TIE_RESULT(renderer->command_pool_,
                 device.get().createCommandPool(::vk::CommandPoolCreateInfo{
@@ -194,7 +193,7 @@ auto Renderer::recreate_swapchain() -> expected<void> {
   //=========== Create Swapchain
   auto swapchain_support = ctx_->graphics_context->GetSwapchainSupport();
   if (!swapchain_support.has_value())
-    return tl::make_unexpected(swapchain_support.error());
+    return std::unexpected(swapchain_support.error());
 
   auto format = choose_swapchain_format(swapchain_support->surface_formats);
   auto present_mode =
@@ -217,7 +216,7 @@ auto Renderer::recreate_swapchain() -> expected<void> {
       ctx_->graphics_context->PhysicalDevice(),
       ctx_->graphics_context->Surface());
   if (!queue_families.has_value())
-    return tl::make_unexpected(queue_families.error());
+    return std::unexpected(queue_families.error());
 
   std::array queue_indices = {queue_families->graphics_index,
                               queue_families->present_index};
@@ -237,12 +236,12 @@ auto Renderer::recreate_swapchain() -> expected<void> {
   std::tie(res, swapchain) =
       ctx_->graphics_context->Device().get().createSwapchainKHR(create_info);
   if (res != ::vk::Result::eSuccess)
-    return tl::make_unexpected(make_error_code(res));
+    return std::unexpected(make_error_code(res));
 
   std::tie(res, swapchain_images) =
       ctx_->graphics_context->Device().get().getSwapchainImagesKHR(swapchain);
   if (res != ::vk::Result::eSuccess)
-    return tl::make_unexpected(make_error_code(res));
+    return std::unexpected(make_error_code(res));
 
   swapchain_image_format = format.format;
 

@@ -4,7 +4,7 @@
 #include <optional>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_handles.hpp>
-#include <wren/utils/errors.hpp>
+#include <wren/utils/result.hpp>
 
 namespace wren::vulkan {
 

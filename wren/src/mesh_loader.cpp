@@ -74,7 +74,7 @@ auto load_mesh(const std::filesystem::path& mesh_path) -> expected<Mesh> {
     return load_stl_mesh(mesh_path);
   }
 
-  return tl::make_unexpected(
+  return std::unexpected(
       make_error_code(MeshLoaderError::ExtensionNotSupported));
 }
 

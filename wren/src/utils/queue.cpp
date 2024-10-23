@@ -1,9 +1,8 @@
 #include "wren/utils/queue.hpp"
 
 #include <optional>
-#include <tl/expected.hpp>
 #include <vulkan/vulkan_enums.hpp>
-#include <wren/vk/errors.hpp>
+#include <wren/vk/result.hpp>
 
 #include "vulkan/vulkan.hpp"
 #include "vulkan/vulkan_handles.hpp"
@@ -25,7 +24,7 @@ auto Queue::find_queue_family_indices(
     if (surface.has_value()) {
       auto res = physical_device.getSurfaceSupportKHR(i, surface.value());
       if (res.result != ::vk::Result::eSuccess)
-        return tl::make_unexpected(make_error_code(res.result));
+        return std::unexpected(make_error_code(res.result));
 
       if (res.value) {
         present_family = i;
@@ -36,15 +35,15 @@ auto Queue::find_queue_family_indices(
   }
 
   if (!graphics_family.has_value())
-    return tl::make_unexpected(
+    return std::unexpected(
         make_error_code(VulkanErrors::QueueFamilyNotSupported));
 
   if (surface.has_value())
     if (!present_family.has_value())
-      return tl::make_unexpected(
+      return std::unexpected(
           make_error_code(VulkanErrors::QueueFamilyNotSupported));
 
-  return QueueFamilyIndices{graphics_family.value()};
+  return QueueFamilyIndices{.graphics_index = graphics_family.value()};
 }
 
 }  // namespace wren::vulkan
