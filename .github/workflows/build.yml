@@ -25,4 +25,4 @@ jobs:
       uses: mozilla-actions/sccache-action@v0.0.6
 
     - name: configure
-      run: nix develop --impure --command xmake
+      run: nix develop --impure --command xmake -y
