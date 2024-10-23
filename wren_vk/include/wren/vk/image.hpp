@@ -4,7 +4,7 @@
 
 #include <vulkan/vulkan.hpp>
 #include <wren/math/vector.hpp>
-#include <wren/utils/errors.hpp>
+#include <wren/utils/result.hpp>
 
 namespace wren::vk {
 

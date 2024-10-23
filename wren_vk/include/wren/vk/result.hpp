@@ -4,7 +4,7 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_to_string.hpp>
-#include <wren/utils/errors.hpp>
+#include <wren/utils/result.hpp>
 
 namespace vk {
 

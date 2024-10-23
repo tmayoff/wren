@@ -1,6 +1,6 @@
 #include "wren/graph.hpp"
 
-#include <wren/utils/errors.hpp>
+#include <wren/utils/result.hpp>
 #include <wren/vk/image.hpp>
 
 #include "wren/renderer.hpp"

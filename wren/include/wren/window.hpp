@@ -6,7 +6,7 @@
 
 #include <boost/describe/enum.hpp>
 #include <vulkan/vulkan.hpp>
-#include <wren/utils/errors.hpp>
+#include <wren/utils/result.hpp>
 
 #include "event.hpp"
 
@@ -17,15 +17,14 @@ DEFINE_ERROR("WindowErrors", WindowErrors, SDL_INIT, SDL_WINDOW,
 
 class Window {
  public:
-  static auto create(std::string const &application_name)
-      -> expected<Window>;
+  static auto create(const std::string &application_name) -> expected<Window>;
 
   void shutdown();
 
-  auto create_surface(::vk::Instance const &instance)
+  auto create_surface(const ::vk::Instance &instance)
       -> expected<::vk::SurfaceKHR>;
 
-  void dispatch_events(event::Dispatcher const &dispatcher);
+  void dispatch_events(const event::Dispatcher &dispatcher);
 
   [[nodiscard]] auto get_required_vulkan_extension() const
       -> expected<std::vector<std::string_view>>;

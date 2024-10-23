@@ -4,13 +4,13 @@
 #include <vulkan/vulkan_core.h>
 
 #include <memory>
-#include <wren/utils/errors.hpp>
+#include <wren/utils/result.hpp>
 
 #include "wren/context.hpp"
 #include "wren/event.hpp"
 #include "wren/graphics_context.hpp"
 #include "wren/renderer.hpp"
-#include "wren/utils/tracy.hpp"  // IWYU pragma: export
+#include "wren/utils/tracy.hpp"  // IWYU pragma: keep
 
 namespace wren {
 

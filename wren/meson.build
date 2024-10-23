@@ -8,7 +8,6 @@ wren = library(
         'src/graphics_context.cpp',
         'src/mesh.cpp',
         'src/mesh_loader.cpp',
-        'src/pipeline.cpp',
         'src/render_pass.cpp',
         'src/renderer.cpp',
         'src/scene/deserialization.cpp',

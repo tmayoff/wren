@@ -1,6 +1,6 @@
 #include "filesystem.hpp"
 
-#include "errors.hpp"
+#include "result.hpp"
 
 namespace wren::utils::fs {
 

@@ -1,7 +1,7 @@
 utils = library(
     'wren_utils',
     files(
-        'src/errors.cpp',
+        'src/result.cpp',
         'src/filesystem.cpp',
         'src/string.cpp',
         'src/string_reader.cpp',
