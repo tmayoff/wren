@@ -1,6 +1,8 @@
 add_rules("mode.debug", "mode.release")
 set_languages("c++23")
 
+add_rules("plugin.compile_commands.autoupdate", {outputdir = "build"})
+
 add_requires("flecs", "vulkan-memory-allocator", "vulkan", "shaderc", "spirv-reflect", "tracy", "backward-cpp", "toml++")
 add_requires("imgui 1.91.1-docking", { config = { vulkan = true, sdl2 = true, } })
 add_requires("spdlog", "fmt", "pkgconfig::SPIRV-Headers", "sdl2", { system = true })

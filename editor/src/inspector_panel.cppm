@@ -80,7 +80,6 @@ void draw_component(const editor::Context& ctx,
   }
 }
 
-
 void draw_component(wren::scene::components::Transform& transform) {
   draw_component("pos", transform.position);
   draw_component("rot", transform.rotation);
