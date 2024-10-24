@@ -1,7 +1,3 @@
-#include <imgui.h>
-#include <imgui_impl_vulkan.h>
-#include <imgui_internal.h>
-
 #include <backward.hpp>
 #include <filesystem>
 #include <memory>
@@ -12,7 +8,7 @@
 #include <wren/shaders/mesh.hpp>
 #include <wren/utils/format.hpp>
 
-#include "editor.hpp"
+import editor;
 
 const backward::SignalHandling kSh;
 
