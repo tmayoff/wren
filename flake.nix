@@ -21,6 +21,19 @@
         overlays = [
           nixgl.overlay
           # nix-mesonlsp.overlay.default
+
+          (final: prev: {
+            xmake = prev.xmake.overrideAttrs (old: {
+              src = prev.fetchFromGitHub {
+                owner = "xmake-io";
+                repo = "xmake";
+                rev = "b3c6d968249e01ce2b00417c4d63ae524e883afd";
+                hash = "sha256-uxjxEJDdR+1QjCksjFPok3Pt6qA8tkGYA68SOdqfNfs=";
+                fetchSubmodules = true;
+              };
+              patches = [];
+            });
+          })
         ];
 
         pkgs = import nixpkgs {

@@ -1,9 +1,7 @@
 add_rules("mode.debug", "mode.release")
 set_languages("c++23")
 
--- set_toolchains("clang")
-
-add_undefines('SDL_VIDEO_DRIVER_X11')
+add_rules("plugin.compile_commands.autoupdate", {outputdir = "build"})
 
 add_requires("flecs", "vulkan-memory-allocator", "vulkan", "shaderc", "spirv-reflect", "tracy", "backward-cpp", "toml++")
 add_requires("imgui 1.91.1-docking", { config = { vulkan = true, sdl2 = true, } })
@@ -52,7 +50,7 @@ add_packages("flecs", "sdl2", "tracy", "toml++", { public = true })
 
 target("editor")
 set_kind("binary")
-add_files("editor/src/*.cpp")
+add_files("editor/src/*.cpp", "editor/src/*.cppm")
 add_deps("wren")
 add_defines("WREN_BUILD_ASSETS_DIR=\"$(projectdir)/editor/assets\"")
 add_packages("imgui", "backward-cpp", "sdl2")
