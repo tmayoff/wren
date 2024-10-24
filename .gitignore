@@ -5,3 +5,6 @@ site
 result
 .idea
 .fleet
+.xmake
+a.out
+compile_commands.json

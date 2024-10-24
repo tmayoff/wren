@@ -4,7 +4,7 @@
 #include <shaderc/status.h>
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan_core.h>
-#include <wren_reflect/spirv_reflect.h>
+// #include <wren/reflect/spirv_reflect.h>
 
 #include <algorithm>
 #include <cstdint>
@@ -16,7 +16,7 @@
 #include <wren/utils/filesystem.hpp>
 #include <wren/utils/string_reader.hpp>
 #include <wren/vk/result.hpp>
-#include <wren_reflect/parser.hpp>
+// #include <wren_reflect/parser.hpp>
 
 #include "vulkan/vulkan_structs.hpp"
 

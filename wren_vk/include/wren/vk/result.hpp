@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/describe.hpp>
 #include <boost/preprocessor.hpp>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_enums.hpp>
@@ -38,7 +39,7 @@ DEFINE_ERROR_IMPL("VulkanError", Result)
 }  // namespace vk
 
 namespace wren {
-DEFINE_ERROR("VulkanErrors", VulkanErrors, NoDevicesFound,
+DEFINE_ERROR("VulkanError", VulkanErrors, NoDevicesFound,
              QueueFamilyNotSupported)
 }
 

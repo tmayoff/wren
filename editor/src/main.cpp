@@ -51,6 +51,7 @@ auto main(int argc, char** argv) -> int {
 
   const auto res = editor::Editor::create(app, project_path.value());
   if (!res.has_value()) {
+    spdlog::error("{}", res.error());
     return EXIT_FAILURE;
   }
   const auto editor = res.value();
