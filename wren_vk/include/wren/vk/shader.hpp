@@ -2,7 +2,7 @@
 
 #include <shaderc/shaderc.h>
 #include <shaderc/status.h>
-#include <spirv_reflect.h>
+#include <wren/reflect/spirv_reflect.h>
 // #include <wren/reflect/spirv_reflect.h>
 
 #include <filesystem>

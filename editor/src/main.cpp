@@ -8,7 +8,7 @@
 #include <wren/shaders/mesh.hpp>
 #include <wren/utils/format.hpp>
 
-import editor;
+#include "editor.hpp"
 
 const backward::SignalHandling kSh;
 

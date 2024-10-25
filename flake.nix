@@ -62,9 +62,9 @@
 
         rawNativeBuildInputs = with pkgs; [
           pkg-config
-          # meson
-          # cmake
-          # ninja
+          meson
+          cmake
+          ninja
           unstable.xmake
 
           # doxygen
@@ -77,7 +77,7 @@
           SDL2
           spdlog
           # nlohmann_json
-          # tomlplusplus
+          tomlplusplus
 
           # vulkan / shaders
           vulkan-headers
@@ -123,7 +123,7 @@
 
               vulkan-tools
               unstable.llvmPackages_19.clang-tools
-              # sccache
+              sccache
 
               just
 
@@ -139,6 +139,8 @@
           buildInputs = with pkgs;
             [
               unstable.lldb
+              muon
+              unstable.mesonlsp
               vulkan-validation-layers
 
               pkgs.nixgl.nixVulkanIntel
@@ -152,7 +154,8 @@
           shellHook = ''
             export VK_ICD_FILENAMES=$(nixVulkanIntel printenv VK_ICD_FILENAMES)
             export LD_LIBRARY_PATH=$(nixVulkanIntel printenv LD_LIBRARY_PATH):$LD_LIBRARY_PATH
-            unset LD
+
+            export CXX="sccache clang++"
           '';
         };
       }

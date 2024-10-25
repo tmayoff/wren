@@ -1,12 +1,8 @@
-module;
+#include "filesystem_panel.hpp"
 
-#include <imgui.h>
+namespace editor {
 
-#include "context.hpp"
-
-export module editor:filesystem;
-
-export void render_filesystem_panel(const editor::Context& ctx) {
+void render_filesystem_panel(const editor::Context& ctx) {
   ImGui::Begin("Filesystem");
 
   ImGui::Text("Project root: %s", ctx.project_path.c_str());
@@ -36,3 +32,5 @@ export void render_filesystem_panel(const editor::Context& ctx) {
 
   ImGui::End();
 }
+
+}  // namespace editor

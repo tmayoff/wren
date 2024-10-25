@@ -1,18 +1,6 @@
-module;
+#include "inspector_panel.hpp"
 
-#include <imgui.h>
-#include <imgui_stdlib.h>
-
-#include <memory>
-#include <optional>
-#include <wren/scene/components/mesh.hpp>
-#include <wren/scene/components/transform.hpp>
-#include <wren/scene/entity.hpp>
-#include <wren/scene/scene.hpp>
-
-#include "context.hpp"
-
-export module editor:inspector;
+namespace editor {
 
 #define CHECK_ID_IS_COMPONENT(id, component_type) \
   id == selected_entity->world().component<component_type>().id()
@@ -22,7 +10,7 @@ void draw_component(const editor::Context& ctx,
 void draw_component(wren::scene::components::Transform& transform);
 void draw_component(const std::string_view& tag, wren::math::Vec3f& vec);
 
-export void render_inspector_panel(
+void render_inspector_panel(
     const editor::Context& ctx,
     const std::shared_ptr<wren::scene::Scene>& scene,
     const std::optional<flecs::entity>& selected_entity) {
@@ -56,6 +44,17 @@ export void render_inspector_panel(
       ImGui::Text("Can't inspect component type: %s", id.str().c_str());
     }
   });
+
+  if (ImGui::BeginPopupContextItem("add_component")) {
+    if (ImGui::Button("Mesh Renderer")) {
+      selected_entity->add<wren::scene::components::MeshRenderer>();
+    }
+
+    ImGui::EndPopup();
+  }
+  if (ImGui::Button("Add component")) {
+    ImGui::OpenPopup("add_component");
+  }
 
   ImGui::End();
 }
@@ -110,3 +109,5 @@ void draw_component(const std::string_view& tag, wren::math::Vec3f& vec) {
 
   ImGui::PopItemWidth();
 }
+
+}  // namespace editor
