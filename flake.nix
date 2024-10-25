@@ -123,7 +123,7 @@
 
               vulkan-tools
               unstable.llvmPackages_19.clang-tools
-              # sccache
+              sccache
 
               just
 
@@ -154,7 +154,8 @@
           shellHook = ''
             export VK_ICD_FILENAMES=$(nixVulkanIntel printenv VK_ICD_FILENAMES)
             export LD_LIBRARY_PATH=$(nixVulkanIntel printenv LD_LIBRARY_PATH):$LD_LIBRARY_PATH
-            unset LD
+
+            export CXX="sccache clang++"
           '';
         };
       }

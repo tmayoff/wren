@@ -24,7 +24,9 @@ jobs:
     - name: Setup sccache
       uses: mozilla-actions/sccache-action@v0.0.6
 
+    - name: configure
+      run: nix develop --command just configure
     - name: build
-      run: nix develop --impure --command xmake -y
+      run: nix develop --command just build
     - name: test
-      run: nix develop --impure --command xmake test
+      run: nix develop --command just test
