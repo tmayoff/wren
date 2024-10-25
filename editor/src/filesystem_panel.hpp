@@ -1,12 +1,10 @@
-module;
+#pragma once
 
 #include <imgui.h>
 
 #include "context.hpp"
 
-export module editor:filesystem;
-
-export void render_filesystem_panel(const editor::Context& ctx) {
+void render_filesystem_panel(const editor::Context& ctx) {
   ImGui::Begin("Filesystem");
 
   ImGui::Text("Project root: %s", ctx.project_path.c_str());

@@ -1,7 +1,7 @@
-module;
+#pragma once
 
 #include <imgui.h>
-#include <imgui_stdlib.h>
+#include <misc/cpp/imgui_stdlib.h>
 
 #include <memory>
 #include <optional>
@@ -12,8 +12,6 @@ module;
 
 #include "context.hpp"
 
-export module editor:inspector;
-
 #define CHECK_ID_IS_COMPONENT(id, component_type) \
   id == selected_entity->world().component<component_type>().id()
 
@@ -22,7 +20,7 @@ void draw_component(const editor::Context& ctx,
 void draw_component(wren::scene::components::Transform& transform);
 void draw_component(const std::string_view& tag, wren::math::Vec3f& vec);
 
-export void render_inspector_panel(
+void render_inspector_panel(
     const editor::Context& ctx,
     const std::shared_ptr<wren::scene::Scene>& scene,
     const std::optional<flecs::entity>& selected_entity) {

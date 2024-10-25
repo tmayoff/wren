@@ -1,16 +1,16 @@
 default: build
 
-# configure:
-#     meson setup build
+configure:
+    meson setup build
 
-# reconfigure:
-#     meson setup build --wipe
+reconfigure:
+    meson setup build --wipe
 
 build:
-    xmake
+    meson compile -C build
 
 run: build
-    xmake run editor ~/Documents/wren_game/
+    ./build/editor/wren_editor ~/Documents/wren_game
 
 test: build
     

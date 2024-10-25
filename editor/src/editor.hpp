@@ -1,4 +1,4 @@
-module;
+#pragma once
 
 #include <imgui.h>
 #include <imgui_impl_vulkan.h>
@@ -19,17 +19,14 @@ module;
 
 #include "camera.hpp"
 #include "context.hpp"
+#include "filesystem_panel.hpp"
+#include "inspector_panel.hpp"
 #include "scene_panel.hpp"
 #include "ui.hpp"
 
-export module editor;
-
-import :filesystem;
-import :inspector;
-
 namespace editor {
 
-export class Editor {
+class Editor {
  public:
   static auto create(const std::shared_ptr<wren::Application> &app,
                      const std::filesystem::path &project_path)

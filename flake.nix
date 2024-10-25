@@ -62,9 +62,9 @@
 
         rawNativeBuildInputs = with pkgs; [
           pkg-config
-          # meson
-          # cmake
-          # ninja
+          meson
+          cmake
+          ninja
           unstable.xmake
 
           # doxygen
@@ -77,7 +77,7 @@
           SDL2
           spdlog
           # nlohmann_json
-          # tomlplusplus
+          tomlplusplus
 
           # vulkan / shaders
           vulkan-headers
@@ -139,6 +139,8 @@
           buildInputs = with pkgs;
             [
               unstable.lldb
+              muon
+              unstable.mesonlsp
               vulkan-validation-layers
 
               pkgs.nixgl.nixVulkanIntel
