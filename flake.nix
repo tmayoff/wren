@@ -62,6 +62,25 @@
           spirv-headers
         ];
       in {
+        packages.default = pkgs.llvmPackages_19.stdenv.mkDerivation {
+          name = "wren";
+          src = ./.;
+
+          nativeBuildInputs = [
+            pkgs.xmake
+            pkgs.llvmPackages_19.clangUseLLVM
+          ];
+
+          buildPhase = ''
+            xmake -D -v
+          '';
+
+          installPhase = ''
+            mkdir $out
+            xmake install -o $out
+          '';
+        };
+
         devShell = pkgs.mkShell.override {stdenv = pkgs.llvmPackages_19.stdenv;} {
           hardeningDisable = ["all"];
 

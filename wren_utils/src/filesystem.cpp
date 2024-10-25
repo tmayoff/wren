@@ -23,7 +23,7 @@ auto file_exists_in_dir(const std::filesystem::path& root,
 
 auto read_file_to_string(const std::filesystem::path& path) -> std::string {
   std::ifstream file(path);
-  std::stringstream result;
+  std::stringstream result{};
   result << file.rdbuf();
   return result.str();
 }
