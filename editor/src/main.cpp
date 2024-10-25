@@ -1,7 +1,6 @@
-#include <backward.hpp>
 #include <filesystem>
 #include <memory>
-#include <tracy/Tracy.hpp>
+// #include <tracy/Tracy.hpp>
 #include <wren/application.hpp>
 #include <wren/context.hpp>
 #include <wren/graph.hpp>
@@ -9,8 +8,6 @@
 #include <wren/utils/format.hpp>
 
 import editor;
-
-const backward::SignalHandling kSh;
 
 auto main(int argc, char** argv) -> int {
   spdlog::set_level(spdlog::level::debug);

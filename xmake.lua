@@ -1,20 +1,23 @@
+-- Initial rules
 add_rules("mode.debug", "mode.release")
+add_rules("plugin.compile_commands.autoupdate", { outputdir = "build" })
+
 set_languages("c++23")
+set_toolchains("clang")
 
-add_rules("plugin.compile_commands.autoupdate", {outputdir = "build"})
-
-add_requires("flecs", "vulkan-memory-allocator", "vulkan", "shaderc", "spirv-reflect", "tracy", "backward-cpp", "toml++")
+-- Dependencies
+add_requires("flecs", "vulkan-memory-allocator", "shaderc", "spirv-reflect", "tracy")
 add_requires("imgui 1.91.1-docking", { config = { vulkan = true, sdl2 = true, } })
-add_requires("spdlog", "fmt", "pkgconfig::SPIRV-Headers", "sdl2", { system = true })
+add_requires("spdlog", "fmt", "sdl2", "boost", "tomlplusplus", "pkgconfig::SPIRV-Headers", { system = true })
 
-local boost_inc = os.getenv("BOOST_INCLUDEDIR")
+-- local boost_inc = os.getenv("BOOST_INCLUDEDIR")
 
 target("wren_utils")
 set_kind("static")
-add_includedirs("wren_utils/include", boost_inc, { public = true })
+add_includedirs("wren_utils/include", { public = true })
 add_includedirs("wren_utils/include/wren/utils")
 add_files("wren_utils/src/*.cpp")
-add_packages("spdlog", "fmt", { public = true })
+add_packages("spdlog", "fmt", "boost", { public = true })
 
 target("wren_math")
 set_kind("static")
@@ -53,4 +56,4 @@ set_kind("binary")
 add_files("editor/src/*.cpp", "editor/src/*.cppm")
 add_deps("wren")
 add_defines("WREN_BUILD_ASSETS_DIR=\"$(projectdir)/editor/assets\"")
-add_packages("imgui", "backward-cpp", "sdl2")
+add_packages("imgui", "sdl2")

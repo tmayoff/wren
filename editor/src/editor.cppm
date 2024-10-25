@@ -6,7 +6,7 @@ module;
 
 #include <filesystem>
 #include <memory>
-#include <tracy/Tracy.hpp>
+// #include <tracy/Tracy.hpp>
 #include <vulkan/vulkan.hpp>
 #include <wren/application.hpp>
 #include <wren/math/vector.hpp>
@@ -162,7 +162,7 @@ void Editor::on_update() {
 
   editor::ui::begin();
 
-  // ImGui::ShowDemoWindow();
+  ImGui::ShowDemoWindow();
 
   static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
   ImGuiWindowFlags window_flags =
@@ -317,17 +317,22 @@ auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
                   };
                   LOCALS ubo{};
 
-                  if (!mesh_renderer.mesh.loaded()) {
-                    mesh_renderer.mesh.load(ctx->graphics_context->Device(),
-                                            ctx->graphics_context->allocator());
+                  if (!mesh_renderer.mesh.has_value()) {
+                    return;
+                  }
+
+                  if (!mesh_renderer.mesh->loaded()) {
+                    mesh_renderer.mesh->load(
+                        ctx->graphics_context->Device(),
+                        ctx->graphics_context->allocator());
                   }
 
                   ubo.model = transform.matrix();
 
                   pass.write_scratch_buffer(cmd, 0, 1, ubo);
 
-                  mesh_renderer.mesh.bind(cmd);
-                  mesh_renderer.mesh.draw(cmd);
+                  mesh_renderer.mesh->bind(cmd);
+                  mesh_renderer.mesh->draw(cmd);
                 });
           })
       .add_pass("ui", {.shaders = {}, .target_name = "swapchain_target"},
