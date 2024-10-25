@@ -1,13 +1,14 @@
 #pragma once
 
 #include <filesystem>
+#include <optional>
 #include <wren/mesh.hpp>
 #include <wren/mesh_loader.hpp>
 
 namespace wren::scene::components {
 
 struct MeshRenderer {
-  Mesh mesh;
+  std::optional<Mesh> mesh;
 
   std::filesystem::path mesh_file;
 
