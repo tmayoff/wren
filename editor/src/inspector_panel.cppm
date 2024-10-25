@@ -57,6 +57,17 @@ export void render_inspector_panel(
     }
   });
 
+  if (ImGui::BeginPopupContextItem("add_component")) {
+    if (ImGui::Button("Mesh Renderer")) {
+      selected_entity->add<wren::scene::components::MeshRenderer>();
+    }
+
+    ImGui::EndPopup();
+  }
+  if (ImGui::Button("Add component")) {
+    ImGui::OpenPopup("add_component");
+  }
+
   ImGui::End();
 }
 

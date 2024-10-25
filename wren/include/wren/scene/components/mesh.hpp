@@ -7,7 +7,7 @@
 namespace wren::scene::components {
 
 struct MeshRenderer {
-  Mesh mesh;
+  std::optional<::wren::Mesh> mesh;
 
   std::filesystem::path mesh_file;
 

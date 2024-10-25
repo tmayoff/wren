@@ -12,9 +12,11 @@ build:
 run: build
     xmake run editor ~/Documents/wren_game/
 
+debug: build
+    xmake run -d editor ~/Documents/wren_game
+
 test: build
     
-
 clean:
     ninja -C build clean
 
