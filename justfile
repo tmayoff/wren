@@ -12,9 +12,12 @@ build:
 run: build
     ./build/editor/wren_editor ~/Documents/wren_game
 
-test: build
-    
+debug: build
+    lldb ./build/editor/wren_editor ~/Documents/wren_game
 
+test: build
+    meson test -C build --print-errorlogs
+    
 clean:
     ninja -C build clean
 

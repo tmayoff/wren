@@ -60,8 +60,9 @@ void serialize_id(toml::table& table, const flecs::entity& entity,
 
 void serialize(toml::table& table,
                const components::MeshRenderer& mesh_renderer) {
-  table.insert("mesh_renderer",
-               toml::table{{"path", mesh_renderer.mesh_file.string().c_str()}});
+  table.insert(
+      "mesh_renderer",
+      toml::table{{"path", mesh_renderer.mesh_file().string().c_str()}});
 }
 
 void serialize(toml::table& table, const components::Transform& transform) {
