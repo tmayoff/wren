@@ -41,7 +41,7 @@ auto Renderer::begin_frame() -> expected<uint32_t> {
   {
     ZoneScopedN("device.acquireNextImageKHR()");
     std::tie(res, image_index) =
-        device.acquireNextImageKHR(swapchain, UINT64_MAX, image_available);
+        device.acquireNextImageKHR(swapchain_, UINT64_MAX, image_available);
     if (res == ::vk::Result::eErrorOutOfDateKHR) {
       recreate_swapchain();
       return std::unexpected(make_error_code(res));
@@ -75,7 +75,7 @@ void Renderer::end_frame(uint32_t image_index) {
     spdlog::warn("{}", ::vk::to_string(res));
   }
 
-  ::vk::PresentInfoKHR present_info{render_finished, swapchain, image_index};
+  ::vk::PresentInfoKHR present_info{render_finished, swapchain_, image_index};
   res = ctx_->graphics_context->Device().get_present_queue().presentKHR(
       present_info);
   if (res == ::vk::Result::eErrorOutOfDateKHR ||
@@ -188,7 +188,7 @@ auto Renderer::recreate_swapchain() -> expected<void> {
     swapchain_image_views_.clear();
   }
 
-  device.get().destroySwapchainKHR(swapchain);
+  device.get().destroySwapchainKHR(swapchain_);
 
   //=========== Create Swapchain
   auto swapchain_support = ctx_->graphics_context->GetSwapchainSupport();
@@ -233,20 +233,20 @@ auto Renderer::recreate_swapchain() -> expected<void> {
   create_info.setPresentMode(present_mode);
   create_info.setClipped(true);
 
-  std::tie(res, swapchain) =
+  std::tie(res, swapchain_) =
       ctx_->graphics_context->Device().get().createSwapchainKHR(create_info);
   if (res != ::vk::Result::eSuccess)
     return std::unexpected(make_error_code(res));
 
-  std::tie(res, swapchain_images) =
-      ctx_->graphics_context->Device().get().getSwapchainImagesKHR(swapchain);
+  std::tie(res, swapchain_images_) =
+      ctx_->graphics_context->Device().get().getSwapchainImagesKHR(swapchain_);
   if (res != ::vk::Result::eSuccess)
     return std::unexpected(make_error_code(res));
 
   swapchain_image_format = format.format;
 
-  swapchain_image_views_.reserve(swapchain_images.size());
-  for (const auto &swapchain_image : swapchain_images) {
+  swapchain_image_views_.reserve(swapchain_images_.size());
+  for (const auto &swapchain_image : swapchain_images_) {
     ::vk::ImageViewCreateInfo create_info(
         {}, swapchain_image, ::vk::ImageViewType::e2D, swapchain_image_format,
         {},

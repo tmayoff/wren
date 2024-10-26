@@ -10,11 +10,11 @@ namespace wren {
 DESCRIBED_ENUM(RenderTargetType, kColour, kDepth)
 
 struct RenderTarget {
-  math::vec2i size;
+  math::vec2f size;
 
-  ::vk::Format format;
   ::vk::SampleCountFlagBits sample_count;
 
+  ::vk::Format format;
   vk::Image image;
   ::vk::ImageView view;
 

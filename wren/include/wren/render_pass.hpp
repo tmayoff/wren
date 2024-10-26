@@ -22,8 +22,7 @@ class Buffer;
 struct PassResources {
   std::unordered_map<std::string, std::shared_ptr<vk::Shader>> shaders;
   std::string target_name;
-  RenderTarget colour_target;
-  RenderTarget depth_target;
+  std::vector<RenderTargetType> types;
 };
 
 class RenderPass {
@@ -32,8 +31,7 @@ class RenderPass {
 
   static auto create(const std::shared_ptr<Context>& ctx,
                      const std::string& name, const PassResources& resources,
-                     const execute_fn_t& fn,
-                     const std::optional<vk::Image>& image)
+                     const execute_fn_t& fn)
       -> expected<std::shared_ptr<RenderPass>>;
 
   void execute();
@@ -82,8 +80,8 @@ class RenderPass {
   ::vk::CommandPool command_pool_;
   std::vector<::vk::CommandBuffer> command_buffers_;
 
-  // std::optional<vk::Image> target_image_;
-  // std::shared_ptr<RenderTarget> target_;
+  std::shared_ptr<RenderTarget> colour_target_;
+  std::shared_ptr<RenderTarget> depth_target_;
 
   ::vk::Framebuffer framebuffer_;
 

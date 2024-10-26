@@ -33,8 +33,9 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app,
 
   spdlog::info("Intializing shaders");
 
-  TRY_RESULT(const auto asset_path, editor->editor_context_.asset_manager.find_asset(
-                                  "shaders/editor_mesh.wren_shader"));
+  TRY_RESULT(const auto asset_path,
+             editor->editor_context_.asset_manager.find_asset(
+                 "shaders/editor_mesh.wren_shader"));
 
   TRY_RESULT(editor->mesh_shader_,
              wren::vk::Shader::create(
@@ -52,14 +53,14 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app,
   editor->texture_sampler_ = t.value;
 
   editor->dset_.resize(1);
-  const auto scene_view = app->context()
-                              ->renderer->get_graph()
-                              .node_by_name("mesh")
-                              ->render_pass->target()
-                              ->image_view;
-  editor->dset_[0] =
-      ImGui_ImplVulkan_AddTexture(editor->texture_sampler_, scene_view,
-                                  VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+  // const auto scene_view = app->context()
+  //                             ->renderer->get_graph()
+  //                             .node_by_name("mesh")
+  //                             ->render_pass->target()
+  //                             ->image_view;
+  // editor->dset_[0] =
+  // ImGui_ImplVulkan_AddTexture(editor->texture_sampler_, scene_view,
+  //                             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
   app->add_callback_to_phase(wren::CallbackPhase::Update,
                              [editor]() { editor->on_update(); });
@@ -81,14 +82,15 @@ void Editor::on_update() {
 
     mesh_pass->resize_target(scene_resized_.value());
 
-    const auto scene_view = wren_ctx_->renderer->get_graph()
-                                .node_by_name("mesh")
-                                ->render_pass->target()
-                                ->image_view;
+    // const auto scene_view = wren_ctx_->renderer->get_graph()
+    //                             .node_by_name("mesh")
+    //                             ->render_pass->target()
+    //                             ->image_view;
 
     ImGui_ImplVulkan_RemoveTexture(dset_[0]);
-    dset_[0] = ImGui_ImplVulkan_AddTexture(
-        texture_sampler_, scene_view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    // dset_[0] = ImGui_ImplVulkan_AddTexture(
+    //     texture_sampler_, scene_view,
+    //     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
     camera_.aspect(static_cast<float>(scene_resized_->x()) /
                    static_cast<float>(scene_resized_->y()));
@@ -223,7 +225,9 @@ auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
                    // {"viewer", viewer_shader_},
                    {"mesh", mesh_shader_},
                },
-           .target_name = "scene_viewer"},
+           .target_name = "scene_viewer",
+           .types = {wren::RenderTargetType::kColour,
+                     wren::RenderTargetType::kDepth}},
           [this, ctx, render_query](wren::RenderPass &pass,
                                     ::vk::CommandBuffer &cmd) {
             struct GLOBALS {
@@ -252,7 +256,10 @@ auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
                                      transform.matrix());
                 });
           })
-      .add_pass("ui", {.shaders = {}, .target_name = "swapchain_target"},
+      .add_pass("ui",
+                {.shaders = {},
+                 .target_name = "swapchain_target",
+                 .types = {wren::RenderTargetType::kColour}},
                 [](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
                   editor::ui::flush(cmd);
                 });

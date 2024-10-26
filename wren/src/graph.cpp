@@ -25,25 +25,22 @@ auto GraphBuilder::compile() const -> expected<Graph> {
 
     const auto &targets = ctx_->renderer->render_targets();
 
-    std::optional<vk::Image> image;
+    // if (pass_resources.render_target == nullptr) {
+    //   if (targets.contains(pass_resources.target_name)) {
+    //     // Resolve target names
+    //     pass_resources.render_target =
+    //         ctx_->renderer->render_targets().at(pass_resources.target_name);
+    //   } else {
+    //     // Create the target
 
-    if (pass_resources.render_target == nullptr) {
-      if (targets.contains(pass_resources.target_name)) {
-        // Resolve target names
-        pass_resources.render_target =
-            ctx_->renderer->render_targets().at(pass_resources.target_name);
-      } else {
-        // Create the target
+    //     TRY_RESULT(pass_resources.render_target, create_target());
 
-        TRY_RESULT(pass_resources.render_target, create_target());
+    //     pass_resources.render_target->final_layout =
+    //         ::vk::ImageLayout::eShaderReadOnlyOptimal;
+    //   }
+    // }
 
-        pass_resources.render_target->final_layout =
-            ::vk::ImageLayout::eShaderReadOnlyOptimal;
-      }
-    }
-
-    TRY_RESULT(auto pass,
-               RenderPass::create(ctx_, name, pass_resources, fn, image));
+    TRY_RESULT(auto pass, RenderPass::create(ctx_, name, pass_resources, fn));
     node_t n = std::make_shared<Node>(name, pass);
 
     graph.nodes.push_back(n);
@@ -61,36 +58,40 @@ auto GraphBuilder::create_target() const
           ::vk::ImageUsageFlagBits::eSampled);
 
   {
-    Attachment colour;
-    TRY_RESULT(
-        colour.image,
-        vk::Image::create(ctx_->graphics_context->Device().get(),
-                          ctx_->graphics_context->allocator(), target->format,
-                          target->size, target->image_usage));
+    // Attachment colour;
+    // TRY_RESULT(
+    //     colour.image,
+    //     vk::Image::create(ctx_->graphics_context->Device().get(),
+    //                       ctx_->graphics_context->allocator(),
+    //                       target->format, target->size,
+    //                       target->image_usage));
 
-    // transition image
-    TRY_RESULT(ctx_->renderer->submit_command_buffer(
-        [&image = colour.image](const ::vk::CommandBuffer &cmd_buf) {
-          ::vk::ImageMemoryBarrier barrier(
-              ::vk::AccessFlagBits::eTransferRead,
-              ::vk::AccessFlagBits::eMemoryRead, ::vk::ImageLayout::eUndefined,
-              ::vk::ImageLayout::eShaderReadOnlyOptimal,
-              VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED, image.get(),
-              ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor, 0,
-                                          1, 0, 1));
+    // // transition image
+    // TRY_RESULT(ctx_->renderer->submit_command_buffer(
+    //     [&image = colour.image](const ::vk::CommandBuffer &cmd_buf) {
+    //       ::vk::ImageMemoryBarrier barrier(
+    //           ::vk::AccessFlagBits::eTransferRead,
+    //           ::vk::AccessFlagBits::eMemoryRead,
+    //           ::vk::ImageLayout::eUndefined,
+    //           ::vk::ImageLayout::eShaderReadOnlyOptimal,
+    //           VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED, image.get(),
+    //           ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor,
+    //           0,
+    //                                       1, 0, 1));
 
-          cmd_buf.pipelineBarrier(::vk::PipelineStageFlagBits::eTransfer,
-                                  ::vk::PipelineStageFlagBits::eTransfer,
-                                  ::vk::DependencyFlags(), {}, {}, barrier);
-        }));
+    //       cmd_buf.pipelineBarrier(::vk::PipelineStageFlagBits::eTransfer,
+    //                               ::vk::PipelineStageFlagBits::eTransfer,
+    //                               ::vk::DependencyFlags(), {}, {}, barrier);
+    //     }));
 
-    ::vk::ImageViewCreateInfo image_view_info(
-        {}, colour.image.get(), ::vk::ImageViewType::e2D, target->format, {},
-        ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor, 0, 1, 0,
-                                    1));
-    VK_TIE_RESULT(colour.view,
-                  ctx_->graphics_context->Device().get().createImageView(
-                      image_view_info));
+    // ::vk::ImageViewCreateInfo image_view_info(
+    //     {}, colour.image.get(), ::vk::ImageViewType::e2D, target->format, {},
+    //     ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor, 0, 1,
+    //     0,
+    //                                 1));
+    // VK_TIE_RESULT(colour.view,
+    //               ctx_->graphics_context->Device().get().createImageView(
+    //                   image_view_info));
   }
 
   // {

@@ -19,32 +19,33 @@ class Renderer {
       "swapchain_target";
 
  public:
-  static auto create(std::shared_ptr<Context> const &ctx)
+  static auto create(const std::shared_ptr<Context> &ctx)
       -> expected<std::shared_ptr<Renderer>>;
 
   void draw();
 
-  auto set_graph_builder(GraphBuilder const &builder) {
+  auto set_graph_builder(const GraphBuilder &builder) {
     render_graph = builder.compile().value();
   }
   auto get_graph() const { return render_graph; }
 
-  auto swapchain_images_views() const {
-    return swapchain_image_views_;
-  }
+  auto swapchain_images_views() const { return swapchain_image_views_; }
 
+  /* @brief The Swapchain render_targets
+   *
+   */
   auto render_targets() const { return render_targets_; }
-  auto add_target(std::string const &name,
-                  std::shared_ptr<RenderTarget> const &target) {
+  auto add_target(const std::string &name,
+                  const std::shared_ptr<RenderTarget> &target) {
     render_targets_.emplace(name, target);
   }
 
   auto submit_command_buffer(
-      std::function<void(::vk::CommandBuffer &)> const &cmd_buf)
+      const std::function<void(::vk::CommandBuffer &)> &cmd_buf)
       -> expected<void>;
 
  private:
-  explicit Renderer(std::shared_ptr<Context> const &ctx);
+  explicit Renderer(const std::shared_ptr<Context> &ctx);
 
   auto begin_frame() -> expected<uint32_t>;
   void end_frame(uint32_t image_index);
@@ -52,20 +53,18 @@ class Renderer {
   auto recreate_swapchain() -> expected<void>;
 
   auto choose_swapchain_format(
-      std::vector<::vk::SurfaceFormatKHR> const &formats)
+      const std::vector<::vk::SurfaceFormatKHR> &formats)
       -> ::vk::SurfaceFormatKHR;
   auto choose_swapchain_presentation_mode(
-      std::vector<::vk::PresentModeKHR> const &formats)
-      -> ::vk::PresentModeKHR;
+      const std::vector<::vk::PresentModeKHR> &formats) -> ::vk::PresentModeKHR;
   auto choose_swapchain_extent(
-      ::vk::SurfaceCapabilitiesKHR const &surface_capabilities)
+      const ::vk::SurfaceCapabilitiesKHR &surface_capabilities)
       -> ::vk::Extent2D;
 
-  std::unordered_map<std::string, std::shared_ptr<Pipeline>>
-      pipelines;
+  std::unordered_map<std::string, std::shared_ptr<Pipeline>> pipelines_;
   std::shared_ptr<Context> ctx_;
-  ::vk::SwapchainKHR swapchain;
-  std::vector<::vk::Image> swapchain_images;
+  ::vk::SwapchainKHR swapchain_;
+  std::vector<::vk::Image> swapchain_images_;
   std::vector<::vk::ImageView> swapchain_image_views_;
 
   std::unordered_map<std::string, std::shared_ptr<RenderTarget>>
