@@ -30,9 +30,6 @@
           meson
           cmake
           ninja
-
-          # doxygen
-          # graphviz
         ];
 
         rawBuildInputs = with pkgs; [
@@ -93,8 +90,8 @@
 
               renderdoc
 
-              tracy-x11 # for the profiler
-              wayland
+              doxygen
+              graphviz
             ]
             ++ rawNativeBuildInputs;
 
