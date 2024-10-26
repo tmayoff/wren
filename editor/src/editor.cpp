@@ -33,7 +33,7 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app,
 
   spdlog::info("Intializing shaders");
 
-  TRY_RESULT(auto asset_path, editor->editor_context_.asset_manager.find_asset(
+  TRY_RESULT(const auto asset_path, editor->editor_context_.asset_manager.find_asset(
                                   "shaders/editor_mesh.wren_shader"));
 
   TRY_RESULT(editor->mesh_shader_,

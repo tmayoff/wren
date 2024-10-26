@@ -83,7 +83,7 @@ class Shader {
 
   auto create_graphics_pipeline(const ::vk::Device &device,
                                 const ::vk::RenderPass &render_pass,
-                                const math::vec2i &size) -> expected<void>;
+                                const math::vec2f &size) -> expected<void>;
 
  private:
   static auto read_wren_shader_file(const std::filesystem::path &path)

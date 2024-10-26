@@ -52,7 +52,7 @@
 
           # tracy
 
-          # # backward-cpp
+          # backward-cpp
           # binutils
           # elfutils
           # libdwarf

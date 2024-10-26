@@ -22,7 +22,8 @@ class Buffer;
 struct PassResources {
   std::unordered_map<std::string, std::shared_ptr<vk::Shader>> shaders;
   std::string target_name;
-  std::shared_ptr<RenderTarget> render_target;
+  RenderTarget colour_target;
+  RenderTarget depth_target;
 };
 
 class RenderPass {
@@ -47,7 +48,7 @@ class RenderPass {
 
   void on_resource_resized(const std::pair<float, float>& size);
 
-  auto current_target_size() { return resources_.render_target->size; }
+  auto output_size() { return size_; }
 
   [[nodiscard]] auto get_command_buffers() const { return command_buffers_; }
 
@@ -59,7 +60,7 @@ class RenderPass {
 
   [[nodiscard]] auto get() const { return render_pass_; }
 
-  [[nodiscard]] auto target() const { return target_; }
+  // [[nodiscard]] auto target() const { return target_; }
 
  private:
   RenderPass(const std::shared_ptr<Context>& ctx, std::string name,
@@ -72,6 +73,8 @@ class RenderPass {
   PassResources resources_;
   std::shared_ptr<vk::Shader> last_bound_shader_;
 
+  math::vec2f size_{};
+
   execute_fn_t execute_fn_;
 
   ::vk::RenderPass render_pass_;
@@ -79,8 +82,9 @@ class RenderPass {
   ::vk::CommandPool command_pool_;
   std::vector<::vk::CommandBuffer> command_buffers_;
 
-  std::optional<vk::Image> target_image_;
-  std::shared_ptr<RenderTarget> target_;
+  // std::optional<vk::Image> target_image_;
+  // std::shared_ptr<RenderTarget> target_;
+
   ::vk::Framebuffer framebuffer_;
 
   std::map<std::pair<uint32_t, uint32_t>, std::shared_ptr<vk::Buffer>> ubos_;

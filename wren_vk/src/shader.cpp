@@ -185,7 +185,7 @@ auto Shader::compile_shader(const ::vk::Device &device,
 
 auto Shader::create_graphics_pipeline(const ::vk::Device &device,
                                       const ::vk::RenderPass &render_pass,
-                                      const math::vec2i &size)
+                                      const math::vec2f &size)
     -> expected<void> {
   ::vk::Result res = ::vk::Result::eSuccess;
 
