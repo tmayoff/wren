@@ -2,9 +2,7 @@
   description = "Wren game engine";
 
   inputs = {
-    # nix-mesonlsp.url = "https://flakehub.com/f/tmayoff/nix-mesonlsp/0.1.7.tar.gz";
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     nixgl.url = "github:nix-community/nixGL";
   };
@@ -12,7 +10,6 @@
   outputs = {
     self,
     nixpkgs,
-    nixpkgs-unstable,
     nixgl,
     flake-utils,
   }:
@@ -20,32 +17,13 @@
       system: let
         overlays = [
           nixgl.overlay
-          # nix-mesonlsp.overlay.default
         ];
 
         pkgs = import nixpkgs {
           inherit system overlays;
         };
 
-        unstable = import nixpkgs-unstable {
-          inherit system overlays;
-        };
-
         boost = pkgs.boost185;
-
-        # vma = pkgs.stdenv.mkDerivation {
-        #   name = "VulkanMemoryAllocator";
-        #   src = pkgs.fetchFromGitHub {
-        #     owner = "GPUOpen-LibrariesAndSDKs";
-        #     repo = "VulkanMemoryAllocator";
-        #     rev = "7942b798289f752dc23b0a79516fd8545febd718";
-        #     hash = "sha256-x/5OECXCG4rxNtyHZKaMnrNbDjxiP9bQFtQiqEFjNKQ=";
-        #   };
-
-        #   nativeBuildInputs = with pkgs; [
-        #     cmake
-        #   ];
-        # };
 
         rawNativeBuildInputs = with pkgs; [
           pkg-config
@@ -68,7 +46,7 @@
           # vulkan / shaders
           vulkan-headers
           vulkan-loader
-          # vma
+          vulkan-memory-allocator
           shaderc
           spirv-headers
 
@@ -99,16 +77,14 @@
           default = wren_editor;
         };
 
-        devShell = pkgs.mkShell.override {stdenv = unstable.llvmPackages_19.stdenv;} {
+        devShell = pkgs.mkShell.override {stdenv = pkgs.llvmPackages_19.stdenv;} {
           hardeningDisable = ["all"];
           VK_LAYER_PATH = vulkan_layer_path;
 
           nativeBuildInputs = with pkgs;
             [
-              unstable.lua-language-server
-
               vulkan-tools
-              unstable.llvmPackages_19.clang-tools
+              llvmPackages_19.clang-tools
               sccache
 
               just
@@ -117,16 +93,16 @@
 
               renderdoc
 
-              # unstable.tracy-x11 # for the profiler
+              tracy-x11 # for the profiler
               wayland
             ]
             ++ rawNativeBuildInputs;
 
           buildInputs = with pkgs;
             [
-              unstable.lldb
+              lldb
               muon
-              unstable.mesonlsp
+              mesonlsp
               vulkan-validation-layers
 
               pkgs.nixgl.nixVulkanIntel
