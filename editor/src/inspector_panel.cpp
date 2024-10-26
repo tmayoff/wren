@@ -63,7 +63,7 @@ void draw_component(const editor::Context& ctx,
                     wren::scene::components::MeshRenderer& mesh_renderer) {
   ImGui::Text("Mesh Renderer");
 
-  auto mesh_filename = mesh_renderer.mesh_file.filename().string();
+  auto mesh_filename = mesh_renderer.mesh_file().filename().string();
 
   ImGui::InputText("file", &mesh_filename);
 

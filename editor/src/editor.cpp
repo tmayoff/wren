@@ -245,28 +245,11 @@ auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
             pass.write_scratch_buffer(cmd, 0, 0, ubo);
 
             render_query.each(
-                [cmd, &pass, ctx](
+                [cmd, ctx, this](
                     const wren::scene::components::Transform &transform,
                     wren::scene::components::MeshRenderer &mesh_renderer) {
-                  struct LOCALS {
-                    wren::math::Mat4f model;
-                  };
-                  LOCALS ubo{};
-
-                  if (!mesh_renderer.mesh.has_value()) return;
-
-                  if (!mesh_renderer.mesh->loaded()) {
-                    mesh_renderer.mesh->load(
-                        ctx->graphics_context->Device(),
-                        ctx->graphics_context->allocator());
-                  }
-
-                  ubo.model = transform.matrix();
-
-                  pass.write_scratch_buffer(cmd, 0, 1, ubo);
-
-                  mesh_renderer.mesh->bind(cmd);
-                  mesh_renderer.mesh->draw(cmd);
+                  mesh_renderer.bind(ctx, mesh_shader_, cmd,
+                                     transform.matrix());
                 });
           })
       .add_pass("ui", {.shaders = {}, .target_name = "swapchain_target"},
