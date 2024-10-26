@@ -25,7 +25,9 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
       - name: build docs
-        run: nix develop --command just build_docs
+        run: |
+          mkdir build/docs
+          nix develop --command just build_docs
       - name: upload artifacts
         uses: actions/upload-pages-artifact@v3
         with:
