@@ -79,7 +79,9 @@ class RenderPass {
 
   void on_resource_resized(const std::pair<float, float>& size);
 
-  auto output_size() { return size_; }
+  auto output_size() const { return size_; }
+
+  auto resources() const { return resources_; }
 
   [[nodiscard]] auto get_command_buffers() const { return command_buffers_; }
 
@@ -90,8 +92,6 @@ class RenderPass {
   void bind_pipeline(const std::string& pipeline_name);
 
   [[nodiscard]] auto get() const { return render_pass_; }
-
-  // [[nodiscard]] auto target() const { return target_; }
 
  private:
   RenderPass(const std::shared_ptr<Context>& ctx, std::string name,

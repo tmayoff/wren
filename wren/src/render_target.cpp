@@ -28,7 +28,7 @@ auto RenderTarget::create(const std::shared_ptr<Context> &ctx)
             ::vk::AccessFlagBits::eTransferRead,
             ::vk::AccessFlagBits::eMemoryRead, ::vk::ImageLayout::eUndefined,
             ::vk::ImageLayout::eShaderReadOnlyOptimal, VK_QUEUE_FAMILY_IGNORED,
-            VK_QUEUE_FAMILY_IGNORED, image.get(),
+            VK_QUEUE_FAMILY_IGNORED, image->get(),
             ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor, 0, 1,
                                         0, 1));
 
@@ -38,7 +38,7 @@ auto RenderTarget::create(const std::shared_ptr<Context> &ctx)
       }));
 
   ::vk::ImageViewCreateInfo image_view_info(
-      {}, target->image_.get(), ::vk::ImageViewType::e2D, target->format_, {},
+      {}, target->image_->get(), ::vk::ImageViewType::e2D, target->format_, {},
       ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor, 0, 1, 0,
                                   1));
   VK_TIE_RESULT(
@@ -67,37 +67,38 @@ auto RenderTarget::resize(const std::shared_ptr<Context> &ctx,
                           const math::Vec2f &new_size) -> expected<void> {
   size_ = new_size;
 
-  // Delete image
+  if (image_.has_value()) {
+    // @todo  Delete image
 
-  // Create a new image
+    // Create a new image
+    TRY_RESULT(image_, vk::Image::create(ctx->graphics_context->Device().get(),
+                                         ctx->graphics_context->allocator(),
+                                         format_, size_, image_usage_));
 
-  TRY_RESULT(image_, vk::Image::create(ctx->graphics_context->Device().get(),
-                                       ctx->graphics_context->allocator(),
-                                       format_, size_, image_usage_));
+    // transition image
+    TRY_RESULT(ctx->renderer->submit_command_buffer(
+        [this](const ::vk::CommandBuffer &cmd_buf) {
+          ::vk::ImageMemoryBarrier barrier(
+              ::vk::AccessFlagBits::eTransferRead,
+              ::vk::AccessFlagBits::eMemoryRead, ::vk::ImageLayout::eUndefined,
+              ::vk::ImageLayout::eShaderReadOnlyOptimal,
+              VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED, image_->get(),
+              ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor, 0,
+                                          1, 0, 1));
 
-  // transition image
-  TRY_RESULT(ctx->renderer->submit_command_buffer(
-      [this](const ::vk::CommandBuffer &cmd_buf) {
-        ::vk::ImageMemoryBarrier barrier(
-            ::vk::AccessFlagBits::eTransferRead,
-            ::vk::AccessFlagBits::eMemoryRead, ::vk::ImageLayout::eUndefined,
-            ::vk::ImageLayout::eShaderReadOnlyOptimal, VK_QUEUE_FAMILY_IGNORED,
-            VK_QUEUE_FAMILY_IGNORED, image_.get(),
-            ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor, 0, 1,
-                                        0, 1));
+          cmd_buf.pipelineBarrier(::vk::PipelineStageFlagBits::eTransfer,
+                                  ::vk::PipelineStageFlagBits::eTransfer,
+                                  ::vk::DependencyFlags(), {}, {}, barrier);
+        }));
 
-        cmd_buf.pipelineBarrier(::vk::PipelineStageFlagBits::eTransfer,
-                                ::vk::PipelineStageFlagBits::eTransfer,
-                                ::vk::DependencyFlags(), {}, {}, barrier);
-      }));
+    ::vk::ImageViewCreateInfo image_view_info(
+        {}, image_->get(), ::vk::ImageViewType::e2D, format_, {},
+        ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor, 0, 1, 0,
+                                    1));
 
-  ::vk::ImageViewCreateInfo image_view_info(
-      {}, image_.get(), ::vk::ImageViewType::e2D, format_, {},
-      ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor, 0, 1, 0,
-                                  1));
-
-  VK_TIE_RESULT(view_, ctx->graphics_context->Device().get().createImageView(
-                           image_view_info));
+    VK_TIE_RESULT(view_, ctx->graphics_context->Device().get().createImageView(
+                             image_view_info));
+  }
 
   return {};
 }

@@ -115,7 +115,17 @@ Renderer::Renderer(const std::shared_ptr<Context> &ctx)
     : ctx_(ctx),
       m(ctx->graphics_context->Device(), ctx->graphics_context->allocator()) {
   ctx->event_dispatcher.on<event::WindowResized>(
-      [this](auto &w) { recreate_swapchain(); });
+      [this](const event::WindowResized &w) {
+        recreate_swapchain();
+
+        // Resize the 'swapchain_target' render pass and it's targets
+        for (const auto &n : render_graph) {
+          if (n->render_pass->resources().target_prefix() ==
+              "swapchain_target") {
+            n->render_pass->resize_target({w.width, w.height});
+          }
+        }
+      });
 }
 
 auto Renderer::create(const std::shared_ptr<Context> &ctx)

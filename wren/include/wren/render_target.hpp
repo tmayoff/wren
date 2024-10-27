@@ -41,6 +41,8 @@ class RenderTarget {
   [[nodiscard]] auto final_layout() const { return final_layout_; }
   auto final_layout(const ::vk::ImageLayout& layout) { final_layout_ = layout; }
 
+  [[nodiscard]] auto usage() const { return image_usage_; }
+
  private:
   RenderTarget() = default;
 
@@ -51,7 +53,7 @@ class RenderTarget {
 
   ::vk::Format format_;
 
-  vk::Image image_;
+  std::optional<vk::Image> image_;
   ::vk::ImageView view_;
 
   ::vk::ImageUsageFlags image_usage_;

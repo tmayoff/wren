@@ -78,27 +78,27 @@ Editor::Editor(const std::shared_ptr<wren::Context> &ctx)
 void Editor::on_update() {
   ZoneScoped;  // NOLINT
 
-  if (scene_resized_.has_value()) {
-    const auto &mesh_pass =
-        wren_ctx_->renderer->get_graph().node_by_name("mesh")->render_pass;
+  // if (scene_resized_.has_value()) {
+  //   const auto &mesh_pass =
+  //       wren_ctx_->renderer->get_graph().node_by_name("mesh")->render_pass;
 
-    mesh_pass->resize_target(scene_resized_.value());
+  //   mesh_pass->resize_target(scene_resized_.value());
 
-    // const auto scene_view = wren_ctx_->renderer->get_graph()
-    //                             .node_by_name("mesh")
-    //                             ->render_pass->target()
-    //                             ->image_view;
+  //   // const auto scene_view = wren_ctx_->renderer->get_graph()
+  //   //                             .node_by_name("mesh")
+  //   //                             ->render_pass->target()
+  //   //                             ->image_view;
 
-    ImGui_ImplVulkan_RemoveTexture(dset_[0]);
-    // dset_[0] = ImGui_ImplVulkan_AddTexture(
-    //     texture_sampler_, scene_view,
-    //     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+  //   ImGui_ImplVulkan_RemoveTexture(dset_[0]);
+  //   // dset_[0] = ImGui_ImplVulkan_AddTexture(
+  //   //     texture_sampler_, scene_view,
+  //   //     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-    camera_.aspect(static_cast<float>(scene_resized_->x()) /
-                   static_cast<float>(scene_resized_->y()));
+  //   camera_.aspect(static_cast<float>(scene_resized_->x()) /
+  //                  static_cast<float>(scene_resized_->y()));
 
-    scene_resized_.reset();
-  }
+  //   scene_resized_.reset();
+  // }
 
   editor::ui::begin();
 
@@ -175,15 +175,15 @@ void Editor::on_update() {
   render_scene_panel(scene_, selected_entity_);
 
   ImGui::Begin("Viewer");
-  auto curr_size = ImGui::GetContentRegionAvail();
-  auto curr_size_vec = wren::math::Vec2f{curr_size.x, curr_size.y};
-  if (curr_size_vec != last_scene_size_) {
-    scene_resized_ = curr_size_vec;
-    last_scene_size_ = curr_size_vec;
-  }
+  // auto curr_size = ImGui::GetContentRegionAvail();
+  // auto curr_size_vec = wren::math::Vec2f{curr_size.x, curr_size.y};
+  // if (curr_size_vec != last_scene_size_) {
+  //   scene_resized_ = curr_size_vec;
+  //   last_scene_size_ = curr_size_vec;
+  // }
 
-  ImGui::Image(dset_[0], {static_cast<float>(last_scene_size_.x()),
-                          static_cast<float>(last_scene_size_.y())});
+  // ImGui::Image(dset_[0], {static_cast<float>(last_scene_size_.x()),
+  //                         static_cast<float>(last_scene_size_.y())});
   ImGui::End();
 
   render_inspector_panel(editor_context_, scene_, selected_entity_);
@@ -219,40 +219,40 @@ auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
           .build();
 
   builder
-      .add_pass(
-          "mesh",
-          wren::PassResources("scene_viewer")
-              .add_shader("mesh", mesh_shader_)
-              .add_colour_target()
-              .add_depth_target(),
-          [this, ctx, render_query](wren::RenderPass &pass,
-                                    ::vk::CommandBuffer &cmd) {
-            struct GLOBALS {
-              wren::math::Mat4f view = wren::math::Mat4f::identity();
-              wren::math::Mat4f proj = wren::math::Mat4f::identity();
-            };
-            GLOBALS ubo{};
+      // .add_pass(
+      //     "mesh",
+      //     wren::PassResources("scene_viewer")
+      //         .add_shader("mesh", mesh_shader_)
+      //         .add_colour_target()
+      //         .add_depth_target(),
+      //     [this, ctx, render_query](wren::RenderPass &pass,
+      //                               ::vk::CommandBuffer &cmd) {
+      //       struct GLOBALS {
+      //         wren::math::Mat4f view = wren::math::Mat4f::identity();
+      //         wren::math::Mat4f proj = wren::math::Mat4f::identity();
+      //       };
+      //       GLOBALS ubo{};
 
-            ubo.view = this->camera_.transform().matrix();
-            ubo.proj = this->camera_.projection();
+      //       ubo.view = this->camera_.transform().matrix();
+      //       ubo.proj = this->camera_.projection();
 
-            // pass.bind_pipeline("viewer");
+      //       // pass.bind_pipeline("viewer");
 
-            // pass.write_scratch_buffer(cmd, 0, 0, ubo);
+      //       // pass.write_scratch_buffer(cmd, 0, 0, ubo);
 
-            // cmd.draw(6, 1, 0, 0);
+      //       // cmd.draw(6, 1, 0, 0);
 
-            pass.bind_pipeline("mesh");
-            pass.write_scratch_buffer(cmd, 0, 0, ubo);
+      //       pass.bind_pipeline("mesh");
+      //       pass.write_scratch_buffer(cmd, 0, 0, ubo);
 
-            render_query.each(
-                [cmd, ctx, this](
-                    const wren::scene::components::Transform &transform,
-                    wren::scene::components::MeshRenderer &mesh_renderer) {
-                  mesh_renderer.bind(ctx, mesh_shader_, cmd,
-                                     transform.matrix());
-                });
-          })
+      //       render_query.each(
+      //           [cmd, ctx, this](
+      //               const wren::scene::components::Transform &transform,
+      //               wren::scene::components::MeshRenderer &mesh_renderer) {
+      //             mesh_renderer.bind(ctx, mesh_shader_, cmd,
+      //                                transform.matrix());
+      //           });
+      //     })
       .add_pass("ui", wren::PassResources("swapchain_target"),
                 [](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
                   editor::ui::flush(cmd);

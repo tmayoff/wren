@@ -62,9 +62,10 @@ auto RenderPass::create(const std::shared_ptr<Context>& ctx,
   pass->render_pass_ = renderpass;
 
   math::Vec2f size{512, 512};
+  pass->size_ = size;
 
-  // Pipelines
-  for (auto [_, shader] : resources.shaders()) {
+  // ===== create pipelines
+  for (const auto& [_, shader] : resources.shaders()) {
     TRY_RESULT(
         shader->create_graphics_pipeline(device.get(), renderpass, size));
   }
@@ -98,6 +99,8 @@ auto RenderPass::create(const std::shared_ptr<Context>& ctx,
 }
 
 auto RenderPass::resize_target(const math::Vec2f& new_size) -> expected<void> {
+  size_ = new_size;
+
   if (colour_target_ != nullptr) {
     colour_target_->resize(ctx_, new_size);
   }
@@ -121,14 +124,29 @@ void RenderPass::on_resource_resized(const std::pair<float, float>& size) {
 }
 
 void RenderPass::recreate_framebuffers(const ::vk::Device& device) {
+  // Framebuffers here are created using the imageless framebuffer extension
+  // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_imageless_framebuffer.html
+
   if (colour_target_ != nullptr) {
-    std::vector<::vk::ImageView> attachements = {colour_target_->view()};
-    if (depth_target_ != nullptr) attachements.push_back(depth_target_->view());
+    auto col_format = colour_target_->format();
+    std::vector<::vk::FramebufferAttachmentImageInfo> infos = {
+        ::vk::FramebufferAttachmentImageInfo{
+            {},
+            colour_target_->usage(),
+            static_cast<uint32_t>(colour_target_->size().x()),
+            static_cast<uint32_t>(colour_target_->size().y()),
+            1,
+            col_format}};
+    if (depth_target_ != nullptr) {
+      // @todo add depth target
+    }
+
+    ::vk::FramebufferAttachmentsCreateInfo attachements(infos);
 
     ::vk::FramebufferCreateInfo create_info(
-        ::vk::FramebufferCreateFlagBits::eImageless, render_pass_, attachements,
+        ::vk::FramebufferCreateFlagBits::eImageless, render_pass_, 1, {},
         static_cast<uint32_t>(colour_target_->size().x()),
-        static_cast<uint32_t>(colour_target_->size().y()), 1);
+        static_cast<uint32_t>(colour_target_->size().y()), 1, &attachements);
 
     auto [res, fb] = device.createFramebuffer(create_info);
     if (res != ::vk::Result::eSuccess) {
@@ -151,20 +169,22 @@ void RenderPass::execute() {
   const auto extent = ::vk::Extent2D{static_cast<uint32_t>(output_size().x()),
                                      static_cast<uint32_t>(output_size().y())};
 
-  const auto view = colour_target_->view();
-  ::vk::RenderPassAttachmentBeginInfo attachment_begin(view);
-  ::vk::RenderPassBeginInfo rp_begin(render_pass_, framebuffer_, {{}, extent},
-                                     clear_value, &attachment_begin);
+  if (colour_target_ != nullptr) {
+    const auto view = colour_target_->view();
+    ::vk::RenderPassAttachmentBeginInfo attachment_begin(view);
+    ::vk::RenderPassBeginInfo rp_begin(render_pass_, framebuffer_, {{}, extent},
+                                       clear_value, &attachment_begin);
 
-  cmd.beginRenderPass(rp_begin, ::vk::SubpassContents::eInline);
+    cmd.beginRenderPass(rp_begin, ::vk::SubpassContents::eInline);
 
-  cmd.setViewport(0, ::vk::Viewport{0, 0, static_cast<float>(extent.width),
-                                    static_cast<float>(extent.height)});
-  cmd.setScissor(0, ::vk::Rect2D{{0, 0}, extent});
+    cmd.setViewport(0, ::vk::Viewport{0, 0, static_cast<float>(extent.width),
+                                      static_cast<float>(extent.height)});
+    cmd.setScissor(0, ::vk::Rect2D{{0, 0}, extent});
 
-  if (execute_fn_) execute_fn_(*this, cmd);
+    if (execute_fn_) execute_fn_(*this, cmd);
 
-  cmd.endRenderPass();
+    cmd.endRenderPass();
+  }
 
   res = cmd.end();
   if (res != ::vk::Result::eSuccess) {
