@@ -15,7 +15,7 @@ namespace wren {
 struct Context;
 
 class Renderer {
-  static constexpr std::string_view SWAPCHAIN_RENDERTARGET_NAME =
+  static constexpr std::string_view kSwapchainRendertargetName =
       "swapchain_target";
 
  public:
@@ -31,9 +31,8 @@ class Renderer {
 
   auto swapchain_images_views() const { return swapchain_image_views_; }
 
-  /* @brief The Swapchain render_targets
-   *
-   */
+  //! @brief Get the swapchain's targets
+  //! @returns The Swapchain's render_targets
   auto render_targets() const { return render_targets_; }
   auto add_target(const std::string &name,
                   const std::shared_ptr<RenderTarget> &target) {
@@ -70,8 +69,8 @@ class Renderer {
   std::unordered_map<std::string, std::shared_ptr<RenderTarget>>
       render_targets_;
 
-  ::vk::Format swapchain_image_format = ::vk::Format::eB8G8R8Srgb;
-  ::vk::Extent2D swapchain_extent;
+  ::vk::Format swapchain_image_format_ = ::vk::Format::eB8G8R8Srgb;
+  ::vk::Extent2D swapchain_extent_;
 
   ::vk::Semaphore image_available;
   ::vk::Semaphore render_finished;

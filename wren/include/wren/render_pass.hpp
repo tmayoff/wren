@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vulkan/vulkan.hpp>
 #include <wren/vk/buffer.hpp>
 #include <wren/vk/image.hpp>
@@ -19,10 +20,40 @@ namespace vk {
 class Buffer;
 }
 
-struct PassResources {
-  std::unordered_map<std::string, std::shared_ptr<vk::Shader>> shaders;
-  std::string target_name;
-  std::vector<RenderTargetType> types;
+class PassResources {
+ public:
+  PassResources(std::string target_prefix)
+      : target_prefix_(std::move(target_prefix)) {}
+
+  auto add_shader(const std::string& name,
+                  const std::shared_ptr<vk::Shader>& shader) -> PassResources& {
+    shaders_.insert({name, shader});
+    return *this;
+  }
+
+  auto add_colour_target() -> PassResources& {
+    colour_target_ = true;
+    return *this;
+  }
+
+  auto add_depth_target() -> PassResources& {
+    depth_target_ = true;
+    return *this;
+  }
+
+  auto has_colour_target() const { return colour_target_; }
+  auto has_depth_target() const { return depth_target_; }
+
+  auto target_prefix() const { return target_prefix_; }
+  auto shaders() const { return shaders_; }
+
+ private:
+  std::string target_prefix_;
+
+  bool colour_target_ = false;
+  bool depth_target_ = false;
+
+  std::unordered_map<std::string, std::shared_ptr<vk::Shader>> shaders_;
 };
 
 class RenderPass {
@@ -31,6 +62,8 @@ class RenderPass {
 
   static auto create(const std::shared_ptr<Context>& ctx,
                      const std::string& name, const PassResources& resources,
+                     const std::shared_ptr<RenderTarget>& colour_target,
+                     const std::shared_ptr<RenderTarget>& depth_target,
                      const execute_fn_t& fn)
       -> expected<std::shared_ptr<RenderPass>>;
 
@@ -42,7 +75,7 @@ class RenderPass {
   [[nodiscard]] auto get_scratch_buffer(uint32_t set, uint32_t binding,
                                         size_t size) -> void*;
 
-  auto resize_target(const math::vec2i& new_size) -> expected<void>;
+  auto resize_target(const math::Vec2f& new_size) -> expected<void>;
 
   void on_resource_resized(const std::pair<float, float>& size);
 
@@ -62,8 +95,10 @@ class RenderPass {
 
  private:
   RenderPass(const std::shared_ptr<Context>& ctx, std::string name,
-             PassResources resources, execute_fn_t fn,
-             const std::optional<vk::Image>& image);
+             PassResources resources,
+             const std::shared_ptr<RenderTarget>& colour_target,
+             const std::shared_ptr<RenderTarget>& depth_target,
+             execute_fn_t fn);
 
   std::shared_ptr<Context> ctx_;
 
@@ -71,7 +106,7 @@ class RenderPass {
   PassResources resources_;
   std::shared_ptr<vk::Shader> last_bound_shader_;
 
-  math::vec2f size_{};
+  math::Vec2f size_{};
 
   execute_fn_t execute_fn_;
 

@@ -8,10 +8,10 @@ BOOST_AUTO_TEST_CASE(ADD_SUB) {
   enum class OP { kAdd, kSub };
 
   struct Test {
-    wren::math::vec2f a;
-    wren::math::vec2f b;
+    wren::math::Vec2f a;
+    wren::math::Vec2f b;
 
-    wren::math::vec2f expected;
+    wren::math::Vec2f expected;
 
     OP op = OP::kAdd;
   };
@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE(ADD_SUB) {
   };
 
   for (auto const& test : tests) {
-    wren::math::vec2f c;
+    wren::math::Vec2f c;
     switch (test.op) {
       case OP::kAdd:
         c = test.a + test.b;
@@ -38,10 +38,10 @@ BOOST_AUTO_TEST_CASE(ADD_SUB) {
 
 BOOST_AUTO_TEST_CASE(MUL) {
   struct Test {
-    wren::math::vec2f a;
+    wren::math::Vec2f a;
     float scalar = 1;
 
-    wren::math::vec2f expected;
+    wren::math::Vec2f expected;
   };
 
   std::array tests = {
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(MUL) {
   };
 
   for (auto const& test : tests) {
-    wren::math::vec2f c = test.a * test.scalar;
+    wren::math::Vec2f c = test.a * test.scalar;
     BOOST_TEST(c == test.expected);
   }
 }

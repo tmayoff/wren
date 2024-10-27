@@ -48,8 +48,8 @@ auto Renderer::begin_frame() -> expected<uint32_t> {
     }
   }
 
-  render_targets_.at(SWAPCHAIN_RENDERTARGET_NAME.data())->image_view =
-      swapchain_image_views_.at(image_index);
+  render_targets_.at(kSwapchainRendertargetName.data())
+      ->view(swapchain_image_views_.at(image_index));
 
   return image_index;
 }
@@ -182,7 +182,7 @@ auto Renderer::recreate_swapchain() -> expected<void> {
   // for (auto const &fb : fbs) device.get().destroyFramebuffer(fb);
   // }
 
-  if (render_targets_.contains(SWAPCHAIN_RENDERTARGET_NAME.data())) {
+  if (render_targets_.contains(kSwapchainRendertargetName.data())) {
     for (const auto &iv : swapchain_image_views_)
       device.get().destroyImageView(iv);
     swapchain_image_views_.clear();
@@ -198,7 +198,7 @@ auto Renderer::recreate_swapchain() -> expected<void> {
   auto format = choose_swapchain_format(swapchain_support->surface_formats);
   auto present_mode =
       choose_swapchain_presentation_mode(swapchain_support->present_modes);
-  swapchain_extent =
+  swapchain_extent_ =
       choose_swapchain_extent(swapchain_support->surface_capabilites);
 
   auto image_count = swapchain_support->surface_capabilites.minImageCount + 1;
@@ -209,7 +209,7 @@ auto Renderer::recreate_swapchain() -> expected<void> {
 
   ::vk::SwapchainCreateInfoKHR create_info(
       {}, ctx_->graphics_context->Surface(), image_count, format.format,
-      format.colorSpace, swapchain_extent, 1,
+      format.colorSpace, swapchain_extent_, 1,
       ::vk::ImageUsageFlagBits::eColorAttachment);
 
   auto queue_families = vulkan::Queue::find_queue_family_indices(
@@ -243,12 +243,12 @@ auto Renderer::recreate_swapchain() -> expected<void> {
   if (res != ::vk::Result::eSuccess)
     return std::unexpected(make_error_code(res));
 
-  swapchain_image_format = format.format;
+  swapchain_image_format_ = format.format;
 
   swapchain_image_views_.reserve(swapchain_images_.size());
   for (const auto &swapchain_image : swapchain_images_) {
     ::vk::ImageViewCreateInfo create_info(
-        {}, swapchain_image, ::vk::ImageViewType::e2D, swapchain_image_format,
+        {}, swapchain_image, ::vk::ImageViewType::e2D, swapchain_image_format_,
         {},
         ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor, 0, 1, 0,
                                     1));
@@ -261,21 +261,22 @@ auto Renderer::recreate_swapchain() -> expected<void> {
     swapchain_image_views_.push_back(image_view);
   }
 
-  if (!render_targets_.contains(SWAPCHAIN_RENDERTARGET_NAME.data())) {
-    render_targets_.emplace(
-        SWAPCHAIN_RENDERTARGET_NAME.data(),
-        std::make_shared<RenderTarget>(
-            math::vec2i{static_cast<int32_t>(swapchain_extent.width),
-                        static_cast<int32_t>(swapchain_extent.height)},
-            swapchain_image_format, ::vk::SampleCountFlagBits::e1,
-            swapchain_image_views_.front(),
-            ::vk::ImageUsageFlagBits::eColorAttachment));
+  if (!render_targets_.contains(kSwapchainRendertargetName.data())) {
+    TRY_RESULT(auto target,
+               RenderTarget::create(
+                   math::Vec2f{static_cast<float>(swapchain_extent_.width),
+                               static_cast<float>(swapchain_extent_.height)},
+                   swapchain_image_format_, ::vk::SampleCountFlagBits::e1,
+                   swapchain_image_views_.front(),
+                   ::vk::ImageUsageFlagBits::eColorAttachment));
+
+    render_targets_.emplace(kSwapchainRendertargetName.data(), target);
   } else {
-    const auto &target = render_targets_.at(SWAPCHAIN_RENDERTARGET_NAME.data());
-    target->size = {static_cast<int32_t>(swapchain_extent.width),
-                    static_cast<int32_t>(swapchain_extent.height)};
-    target->format = swapchain_image_format;
-    target->image_view = swapchain_image_views_.front();
+    const auto &target = render_targets_.at(kSwapchainRendertargetName.data());
+    target->size({static_cast<float>(swapchain_extent_.width),
+                  static_cast<float>(swapchain_extent_.height)});
+    target->format(swapchain_image_format_);
+    target->view(swapchain_image_views_.front());
   }
 
   for (const auto &g : render_graph)

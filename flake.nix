@@ -91,6 +91,7 @@
               renderdoc
 
               doxygen
+              doxygen_gui
               graphviz
             ]
             ++ rawNativeBuildInputs;
