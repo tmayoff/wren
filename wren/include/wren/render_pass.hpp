@@ -81,6 +81,7 @@ class RenderPass {
 
   auto output_size() const { return size_; }
 
+  auto colour_target() const { return colour_target_; }
   auto resources() const { return resources_; }
 
   [[nodiscard]] auto get_command_buffers() const { return command_buffers_; }

@@ -24,7 +24,6 @@ auto RenderPass::create(const std::shared_ptr<Context>& ctx,
 
   std::vector<::vk::AttachmentDescription> attachments;
   std::vector<::vk::AttachmentReference> colour_attachments;
-  std::optional<::vk::AttachmentReference> depth_attachment;
 
   // Setup attachments
   if (colour_target != nullptr) {
@@ -38,17 +37,21 @@ auto RenderPass::create(const std::shared_ptr<Context>& ctx,
                                     ::vk::ImageLayout::eColorAttachmentOptimal);
   }
 
-  if (depth_target != nullptr) {
-    // TODO Attach depth
-    depth_attachment =
-        ::vk::AttachmentReference{static_cast<uint32_t>(attachments.size() - 1),
-                                  ::vk::ImageLayout::eDepthAttachmentOptimal};
-  }
-
   ::vk::SubpassDescription subpass({}, ::vk::PipelineBindPoint::eGraphics, {},
                                    colour_attachments, {});
-  if (depth_attachment.has_value()) {
-    subpass.setPDepthStencilAttachment(&depth_attachment.value());
+
+  if (depth_target != nullptr) {
+    ::vk::AttachmentDescription attachment(
+        {}, depth_target->format(), depth_target->sample_count(),
+        ::vk::AttachmentLoadOp::eClear, ::vk::AttachmentStoreOp::eStore,
+        ::vk::AttachmentLoadOp::eDontCare, ::vk::AttachmentStoreOp::eDontCare,
+        ::vk::ImageLayout::eUndefined, depth_target->final_layout());
+
+    const auto depth_attachment = ::vk::AttachmentReference{
+        1, ::vk::ImageLayout::eDepthStencilAttachmentOptimal};
+    subpass.setPDepthStencilAttachment(&depth_attachment);
+
+    attachments.push_back(attachment);
   }
 
   ::vk::SubpassDependency dependency(
@@ -66,8 +69,8 @@ auto RenderPass::create(const std::shared_ptr<Context>& ctx,
 
   // ===== create pipelines
   for (const auto& [_, shader] : resources.shaders()) {
-    TRY_RESULT(
-        shader->create_graphics_pipeline(device.get(), renderpass, size));
+    TRY_RESULT(shader->create_graphics_pipeline(device.get(), renderpass, size,
+                                                depth_target != nullptr));
   }
 
   ::vk::Viewport viewport(0, 0, size.x(), size.y(), 1, 0);
@@ -139,13 +142,21 @@ void RenderPass::recreate_framebuffers(const ::vk::Device& device) {
             col_format}};
     if (depth_target_ != nullptr) {
       // @todo add depth target
+      auto depth_format = depth_target_->format();
+      infos.push_back(::vk::FramebufferAttachmentImageInfo{
+          {},
+          depth_target_->usage(),
+          static_cast<uint32_t>(depth_target_->size().x()),
+          static_cast<uint32_t>(depth_target_->size().y()),
+          1,
+          depth_format});
     }
 
     ::vk::FramebufferAttachmentsCreateInfo attachements(infos);
 
     ::vk::FramebufferCreateInfo create_info(
-        ::vk::FramebufferCreateFlagBits::eImageless, render_pass_, 1, {},
-        static_cast<uint32_t>(colour_target_->size().x()),
+        ::vk::FramebufferCreateFlagBits::eImageless, render_pass_, infos.size(),
+        {}, static_cast<uint32_t>(colour_target_->size().x()),
         static_cast<uint32_t>(colour_target_->size().y()), 1, &attachements);
 
     auto [res, fb] = device.createFramebuffer(create_info);
@@ -163,17 +174,24 @@ void RenderPass::execute() {
   auto res = cmd.begin(::vk::CommandBufferBeginInfo{});
   if (res != ::vk::Result::eSuccess) return;
 
-  ::vk::ClearValue clear_value(
-      ::vk::ClearColorValue{std::array<float, 4>{0.0, 0.0, 0.0, 1.0}});
+  std::vector<::vk::ClearValue> clears = {
+      ::vk::ClearValue(
+          ::vk::ClearColorValue{std::array<float, 4>{0.0, 0.0, 0.0, 1.0}}),
+  };
 
   const auto extent = ::vk::Extent2D{static_cast<uint32_t>(output_size().x()),
                                      static_cast<uint32_t>(output_size().y())};
 
   if (colour_target_ != nullptr) {
-    const auto view = colour_target_->view();
-    ::vk::RenderPassAttachmentBeginInfo attachment_begin(view);
+    std::vector<::vk::ImageView> views{colour_target_->view()};
+    if (depth_target_ != nullptr) {
+      views.push_back(depth_target_->view());
+      clears.emplace_back(::vk::ClearDepthStencilValue{1.0, 0});
+    }
+
+    ::vk::RenderPassAttachmentBeginInfo attachment_begin(views);
     ::vk::RenderPassBeginInfo rp_begin(render_pass_, framebuffer_, {{}, extent},
-                                       clear_value, &attachment_begin);
+                                       clears, &attachment_begin);
 
     cmd.beginRenderPass(rp_begin, ::vk::SubpassContents::eInline);
 

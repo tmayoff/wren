@@ -11,11 +11,18 @@
 
 namespace wren {
 
-DESCRIBED_ENUM(RenderTargetType, kColour, kDepth)
-
 class RenderTarget {
  public:
+  //! @brief Craete a RenderTarget object with all defaults for a colour target
+  //! @param ctx The full application context
   static auto create(const std::shared_ptr<Context>& ctx)
+      -> expected<std::shared_ptr<RenderTarget>>;
+
+  //! @brief Create e render target to be used as a depth target
+  //! @param ctx the full application context
+  //! @returns On success a shared_ptr to the created depth RenderTarget
+  //!   or an error
+  static auto create_depth(const std::shared_ptr<Context>& ctx)
       -> expected<std::shared_ptr<RenderTarget>>;
 
   static auto create(const math::Vec2f& size, ::vk::Format format,
@@ -46,7 +53,9 @@ class RenderTarget {
  private:
   RenderTarget() = default;
 
-  //! This might not be necessary, the size can stay in the render pass
+  std::function<expected<void>()> transition_fn_;
+
+  // TODO This might not be necessary, the size can stay in the render pass
   math::Vec2f size_;
 
   ::vk::SampleCountFlagBits sample_count_;
@@ -59,8 +68,7 @@ class RenderTarget {
   ::vk::ImageUsageFlags image_usage_;
 
   ::vk::ImageLayout final_layout_ = ::vk::ImageLayout::ePresentSrcKHR;
-
-  RenderTargetType type_ = RenderTargetType::kColour;
+  ::vk::ImageAspectFlagBits aspect_;
 };
 
 }  // namespace wren

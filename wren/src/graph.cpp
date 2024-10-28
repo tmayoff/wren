@@ -34,13 +34,13 @@ auto GraphBuilder::compile() const -> expected<Graph> {
 
     const auto &targets = ctx_->renderer->render_targets();
 
-    if (colour_target != nullptr && pass_resources.has_colour_target()) {
+    if (colour_target == nullptr && pass_resources.has_colour_target()) {
       TRY_RESULT(colour_target, RenderTarget::create(ctx_));
       colour_target->final_layout(::vk::ImageLayout::eShaderReadOnlyOptimal);
     }
 
-    if (depth_target != nullptr && pass_resources.has_depth_target()) {
-      TRY_RESULT(depth_target, RenderTarget::create(ctx_));
+    if (depth_target == nullptr && pass_resources.has_depth_target()) {
+      TRY_RESULT(depth_target, RenderTarget::create_depth(ctx_));
       depth_target->final_layout(::vk::ImageLayout::eShaderReadOnlyOptimal);
     }
 
