@@ -1,6 +1,7 @@
 #include "filesystem.hpp"
 
 #include "result.hpp"
+#include <fstream>
 
 namespace wren::utils::fs {
 
