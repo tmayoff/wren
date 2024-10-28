@@ -113,12 +113,7 @@ auto RenderPass::resize_target(const math::Vec2f& new_size) -> expected<void> {
     depth_target_->resize(ctx_, new_size);
   }
 
-  // for (const auto rt : resources_.render_targets) {
-  //   VK_TIE_RESULT(rt->view,
-  //                 ctx_->graphics_context->Device().get().createImageView(
-  //                     image_view_info));
   recreate_framebuffers(ctx_->graphics_context->Device().get());
-  // }
 
   return {};
 }
