@@ -7,6 +7,10 @@ acquired swapchain image for the last render pass.
 
 ## 3d render pipeline
 
+## notes
+
+Depth is implemented with reverse depth (supposedly better accuracy). This means the depth values are 0 the farther away and 1 the closer they are. When creating the pipeline it also means the VK_COMPARE_OP must be GREATER(_OR_EQUAL).
+
 ## references
 - [Pipeline caching](https://zeux.io/2019/07/17/serializing-pipeline-cache/)
 - [https://ruby0x1.github.io/machinery_blog_archive/post/high-level-rendering-using-render-graphs/index.html](https://ruby0x1.github.io/machinery_blog_archive/post/high-level-rendering-using-render-graphs/index.html)

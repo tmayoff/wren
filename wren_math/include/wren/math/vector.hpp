@@ -112,19 +112,19 @@ struct Vec {
   std::array<T, N> data{};
 };
 
-struct vec2i : Vec<int, 2> {
-  vec2i() : Vec<int, 2>() {}
-  vec2i(int x, int y) : Vec<int, 2>({x, y}) {}
-  vec2i(const Vec<int, 2>& other) : Vec<int, 2>(other) {}
+// struct vec2i : Vec<int, 2> {
+//   vec2i() : Vec<int, 2>() {}
+//   vec2i(int x, int y) : Vec<int, 2>({x, y}) {}
+//   vec2i(const Vec<int, 2>& other) : Vec<int, 2>(other) {}
 
-  [[nodiscard]] auto x() const { return data.at(0); }
-  [[nodiscard]] auto y() const { return data.at(1); }
-};
+//   [[nodiscard]] auto x() const { return data.at(0); }
+//   [[nodiscard]] auto y() const { return data.at(1); }
+// };
 
-struct vec2f : Vec<float, 2> {
-  vec2f() : Vec<float, 2>() {}
-  vec2f(float x, float y) : Vec<float, 2>({x, y}) {}
-  vec2f(const Vec<float, 2>& other) : Vec<float, 2>(other) {}
+struct Vec2f : Vec<float, 2> {
+  Vec2f() : Vec<float, 2>() {}
+  Vec2f(float x, float y) : Vec<float, 2>({x, y}) {}
+  Vec2f(const Vec<float, 2>& other) : Vec<float, 2>(other) {}
 
   [[nodiscard]] auto x() const { return data.at(0); }
   [[nodiscard]] auto y() const { return data.at(1); }

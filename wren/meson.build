@@ -9,6 +9,7 @@ wren = library(
         'src/mesh.cpp',
         'src/mesh_loader.cpp',
         'src/render_pass.cpp',
+        'src/render_target.cpp',
         'src/renderer.cpp',
         'src/scene/deserialization.cpp',
         'src/scene/scene.cpp',

@@ -185,7 +185,7 @@ auto Shader::compile_shader(const ::vk::Device &device,
 
 auto Shader::create_graphics_pipeline(const ::vk::Device &device,
                                       const ::vk::RenderPass &render_pass,
-                                      const math::vec2i &size)
+                                      const math::Vec2f &size, bool depth)
     -> expected<void> {
   ::vk::Result res = ::vk::Result::eSuccess;
 
@@ -250,6 +250,10 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
       {}, false, ::vk::LogicOp::eCopy, colour_blend_attachment,
       {0.0, 0.0, 0.0, 0.0});
 
+  // Depth / Stencil
+  ::vk::PipelineDepthStencilStateCreateInfo depth_state(
+      {}, depth, depth, ::vk::CompareOp::eGreaterOrEqual);
+
   // Stages
   auto v_stage_create_info = ::vk::PipelineShaderStageCreateInfo(
       {}, ::vk::ShaderStageFlagBits::eVertex, vertex_shader_module_.module,
@@ -261,8 +265,8 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
 
   auto create_info = ::vk::GraphicsPipelineCreateInfo(
       {}, shader_stages, &vertex_input_info, &input_assembly, {},
-      &viewport_state, &rasterization, &multisample, {}, &colour_blend,
-      &dynamic_state, pipeline_layout_, render_pass);
+      &viewport_state, &rasterization, &multisample, &depth_state,
+      &colour_blend, &dynamic_state, pipeline_layout_, render_pass);
 
   std::tie(res, pipeline_) = device.createGraphicsPipeline({}, create_info);
   if (res != ::vk::Result::eSuccess)

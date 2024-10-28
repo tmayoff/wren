@@ -11,7 +11,7 @@ namespace wren::vk {
 class Image {
  public:
   static auto create(const ::vk::Device& device, const VmaAllocator& allocator,
-                     const ::vk::Format& format, const math::vec2i& size,
+                     const ::vk::Format& format, const math::Vec2f& size,
                      const ::vk::ImageUsageFlags& usage) -> expected<Image>;
 
   [[nodiscard]] auto get() const { return image_; }

@@ -49,7 +49,7 @@
 
           # tracy
 
-          # # backward-cpp
+          # backward-cpp
           # binutils
           # elfutils
           # libdwarf
@@ -90,6 +90,7 @@
 
               renderdoc
 
+              # Documentation
               doxygen
               graphviz
             ]

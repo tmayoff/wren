@@ -46,7 +46,7 @@ class GraphBuilder {
 
  private:
   [[nodiscard]] auto create_target() const
-      -> expected<std::pair<vk::Image, std::shared_ptr<RenderTarget>>>;
+      -> expected<std::shared_ptr<RenderTarget>>;
 
   std::shared_ptr<Context> ctx_;
   std::vector<std::tuple<std::string, PassResources, RenderPass::execute_fn_t>>

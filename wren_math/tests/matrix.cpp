@@ -68,11 +68,11 @@ BOOST_AUTO_TEST_CASE(Multiplication_Mat_Vec) {
   a.at(1, 0) = 2.0f;
   a.at(1, 1) = 1.0f;
 
-  wren::math::vec2f b(5.0, 7.0);
+  wren::math::Vec2f b(5.0, 7.0);
 
   auto c = a * b;
 
-  wren::math::vec2f expected(29, -3);
+  wren::math::Vec2f expected(29, -3);
 
   BOOST_TEST(c == expected);
 }

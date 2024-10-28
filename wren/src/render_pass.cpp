@@ -12,113 +12,107 @@ namespace wren {
 
 auto RenderPass::create(const std::shared_ptr<Context>& ctx,
                         const std::string& name, const PassResources& resources,
-                        const execute_fn_t& fn,
-                        const std::optional<vk::Image>& image)
+                        const std::shared_ptr<RenderTarget>& colour_target,
+                        const std::shared_ptr<RenderTarget>& depth_target,
+                        const execute_fn_t& fn)
     -> expected<std::shared_ptr<RenderPass>> {
   auto pass = std::shared_ptr<RenderPass>(
-      new RenderPass(ctx, name, resources, fn, image));
+      new RenderPass(ctx, name, resources, colour_target, depth_target, fn));
 
   const auto& device = ctx->graphics_context->Device();
   const auto& swapchain_images = ctx->renderer->swapchain_images_views();
 
   std::vector<::vk::AttachmentDescription> attachments;
+  std::vector<::vk::AttachmentReference> colour_attachments;
 
-  const auto& rt = resources.render_target;
-
-  ::vk::AttachmentDescription attachment(
-      {}, rt->format, rt->sample_count, ::vk::AttachmentLoadOp::eClear,
-      ::vk::AttachmentStoreOp::eStore, ::vk::AttachmentLoadOp::eDontCare,
-      ::vk::AttachmentStoreOp::eDontCare, ::vk::ImageLayout::eUndefined,
-      rt->final_layout);
-  attachments.push_back(attachment);
-
-  ::vk::AttachmentReference attachment_ref(
-      0, ::vk::ImageLayout::eColorAttachmentOptimal);
-  ::vk::SubpassDescription subpass({}, ::vk::PipelineBindPoint::eGraphics, {},
-                                   attachment_ref);
-
-  ::vk::SubpassDependency dependency(
-      VK_SUBPASS_EXTERNAL, 0,
-      ::vk::PipelineStageFlagBits::eColorAttachmentOutput,
-      ::vk::PipelineStageFlagBits::eColorAttachmentOutput, {},
-      ::vk::AccessFlagBits::eColorAttachmentWrite);
-  ::vk::RenderPassCreateInfo create_info({}, attachments, subpass, dependency);
-
-  auto [res, renderpass] = device.get().createRenderPass(create_info);
-  pass->render_pass_ = renderpass;
-
-  auto size = resources.render_target->size;
-
-  for (auto [_, shader] : resources.shaders) {
-    TRY_RESULT(
-        shader->create_graphics_pipeline(device.get(), renderpass, size));
+  // Setup attachments
+  if (colour_target != nullptr) {
+    ::vk::AttachmentDescription attachment(
+        {}, colour_target->format(), colour_target->sample_count(),
+        ::vk::AttachmentLoadOp::eClear, ::vk::AttachmentStoreOp::eStore,
+        ::vk::AttachmentLoadOp::eDontCare, ::vk::AttachmentStoreOp::eDontCare,
+        ::vk::ImageLayout::eUndefined, colour_target->final_layout());
+    attachments.push_back(attachment);
+    colour_attachments.emplace_back(0,
+                                    ::vk::ImageLayout::eColorAttachmentOptimal);
   }
 
-  ::vk::Viewport viewport(0, 0, static_cast<float>(rt->size.x()),
-                          static_cast<float>(rt->size.y()), 1, 0);
-  ::vk::Rect2D scissor({}, {static_cast<uint32_t>(rt->size.x()),
-                            static_cast<uint32_t>(rt->size.y())});
-  ::vk::PipelineViewportStateCreateInfo viewport_state({}, viewport, scissor);
+  ::vk::SubpassDescription subpass({}, ::vk::PipelineBindPoint::eGraphics, {},
+                                   colour_attachments, {});
+
+  if (depth_target != nullptr) {
+    ::vk::AttachmentDescription depth_attachment(
+        {}, depth_target->format(), depth_target->sample_count(),
+        ::vk::AttachmentLoadOp::eClear, ::vk::AttachmentStoreOp::eStore,
+        ::vk::AttachmentLoadOp::eDontCare, ::vk::AttachmentStoreOp::eDontCare,
+        ::vk::ImageLayout::eUndefined, depth_target->final_layout());
+
+    const auto attachment_ref = ::vk::AttachmentReference{
+        1, ::vk::ImageLayout::eDepthStencilAttachmentOptimal};
+    subpass.setPDepthStencilAttachment(&attachment_ref);
+
+    attachments.push_back(depth_attachment);
+  }
+
+  // Subpasses
+  ::vk::SubpassDependency dependency(VK_SUBPASS_EXTERNAL, 0);
+  if (colour_target != nullptr) {
+    dependency.srcStageMask |=
+        ::vk::PipelineStageFlagBits::eColorAttachmentOutput;
+    dependency.dstStageMask |=
+        ::vk::PipelineStageFlagBits::eColorAttachmentOutput;
+    dependency.dstAccessMask |= ::vk::AccessFlagBits::eColorAttachmentWrite;
+  }
+
+  if (depth_target != nullptr) {
+    dependency.srcStageMask |= ::vk::PipelineStageFlagBits::eEarlyFragmentTests;
+    dependency.dstStageMask |= ::vk::PipelineStageFlagBits::eEarlyFragmentTests;
+    dependency.dstAccessMask |=
+        ::vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+  }
+
+  VK_TIE_RESULT(
+      pass->render_pass_,
+      device.get().createRenderPass({{}, attachments, subpass, dependency}));
+
+  math::Vec2f size{512, 512};
+  pass->size_ = size;
+
+  // ===== create pipelines
+  for (const auto& [_, shader] : resources.shaders()) {
+    TRY_RESULT(shader->create_graphics_pipeline(
+        device.get(), pass->render_pass_, size, depth_target != nullptr));
+  }
+
   pass->recreate_framebuffers(device.get());
 
-  {
-    std::vector<::vk::CommandBuffer> cmds;
-    auto [res, pool] =
-        device.get().createCommandPool(::vk::CommandPoolCreateInfo{
-            ::vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-            ctx->graphics_context->FindQueueFamilyIndices()
-                .value()
-                .graphics_index});
+  // ===== Command buffers
+  VK_TIE_RESULT(pass->command_pool_,
+                device.get().createCommandPool(::vk::CommandPoolCreateInfo{
+                    ::vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+                    ctx->graphics_context->FindQueueFamilyIndices()
+                        .value()
+                        .graphics_index}));
 
-    ::vk::CommandBufferAllocateInfo alloc_info{
-        pool, ::vk::CommandBufferLevel::ePrimary, 1};
-    std::vector<::vk::CommandBuffer> bufs;
-    std::tie(res, bufs) = device.get().allocateCommandBuffers(alloc_info);
-
-    pass->command_pool_ = pool;
-    pass->command_buffers_ = bufs;
-  }
+  VK_TIE_RESULT(
+      pass->command_buffers_,
+      device.get().allocateCommandBuffers(
+          {pass->command_pool_, ::vk::CommandBufferLevel::ePrimary, 1}));
 
   return pass;
 }
 
-auto RenderPass::resize_target(const math::vec2i& new_size) -> expected<void> {
-  target_->size = new_size;
+auto RenderPass::resize_target(const math::Vec2f& new_size) -> expected<void> {
+  size_ = new_size;
 
-  // Delete image
-  target_image_.reset();
+  if (colour_target_ != nullptr) {
+    colour_target_->resize(ctx_, new_size);
+  }
 
-  // Create a new image
+  if (depth_target_ != nullptr) {
+    depth_target_->resize(ctx_, new_size);
+  }
 
-  TRY_RESULT(
-      target_image_,
-      vk::Image::create(ctx_->graphics_context->Device().get(),
-                        ctx_->graphics_context->allocator(), target_->format,
-                        target_->size, target_->image_usage));
-
-  // transition image
-  TRY_RESULT(ctx_->renderer->submit_command_buffer(
-      [this](const ::vk::CommandBuffer& cmd_buf) {
-        ::vk::ImageMemoryBarrier barrier(
-            ::vk::AccessFlagBits::eTransferRead,
-            ::vk::AccessFlagBits::eMemoryRead, ::vk::ImageLayout::eUndefined,
-            ::vk::ImageLayout::eShaderReadOnlyOptimal, VK_QUEUE_FAMILY_IGNORED,
-            VK_QUEUE_FAMILY_IGNORED, target_image_->get(),
-            ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor, 0, 1,
-                                        0, 1));
-
-        cmd_buf.pipelineBarrier(::vk::PipelineStageFlagBits::eTransfer,
-                                ::vk::PipelineStageFlagBits::eTransfer,
-                                ::vk::DependencyFlags(), {}, {}, barrier);
-      }));
-
-  ::vk::ImageViewCreateInfo image_view_info(
-      {}, target_image_->get(), ::vk::ImageViewType::e2D, target_->format, {},
-      ::vk::ImageSubresourceRange(::vk::ImageAspectFlagBits::eColor, 0, 1, 0,
-                                  1));
-  VK_TIE_RESULT(
-      target_->image_view,
-      ctx_->graphics_context->Device().get().createImageView(image_view_info));
   recreate_framebuffers(ctx_->graphics_context->Device().get());
 
   return {};
@@ -129,26 +123,45 @@ void RenderPass::on_resource_resized(const std::pair<float, float>& size) {
 }
 
 void RenderPass::recreate_framebuffers(const ::vk::Device& device) {
-  const auto& rt = resources_.render_target;
+  // Framebuffers here are created using the imageless framebuffer extension
+  // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_imageless_framebuffer.html
 
-  ::vk::FramebufferAttachmentImageInfo image_info{
-      {},
-      target_->image_usage,
-      static_cast<uint32_t>(rt->size.x()),
-      static_cast<uint32_t>(rt->size.y()),
-      1,
-      rt->format};
-  ::vk::FramebufferAttachmentsCreateInfo attachements(image_info);
-  ::vk::FramebufferCreateInfo create_info(
-      ::vk::FramebufferCreateFlagBits::eImageless, render_pass_, 1, {},
-      rt->size.x(), rt->size.y(), 1, &attachements);
+  if (colour_target_ != nullptr) {
+    auto col_format = colour_target_->format();
+    std::vector<::vk::FramebufferAttachmentImageInfo> infos = {
+        ::vk::FramebufferAttachmentImageInfo{
+            {},
+            colour_target_->usage(),
+            static_cast<uint32_t>(colour_target_->size().x()),
+            static_cast<uint32_t>(colour_target_->size().y()),
+            1,
+            col_format}};
+    if (depth_target_ != nullptr) {
+      // @todo add depth target
+      auto depth_format = depth_target_->format();
+      infos.push_back(::vk::FramebufferAttachmentImageInfo{
+          {},
+          depth_target_->usage(),
+          static_cast<uint32_t>(depth_target_->size().x()),
+          static_cast<uint32_t>(depth_target_->size().y()),
+          1,
+          depth_format});
+    }
 
-  auto [res, fb] = device.createFramebuffer(create_info);
-  if (res != ::vk::Result::eSuccess) {
-    throw std::runtime_error("Failed to create framebuffer");
+    ::vk::FramebufferAttachmentsCreateInfo attachements(infos);
+
+    ::vk::FramebufferCreateInfo create_info(
+        ::vk::FramebufferCreateFlagBits::eImageless, render_pass_, infos.size(),
+        {}, static_cast<uint32_t>(colour_target_->size().x()),
+        static_cast<uint32_t>(colour_target_->size().y()), 1, &attachements);
+
+    auto [res, fb] = device.createFramebuffer(create_info);
+    if (res != ::vk::Result::eSuccess) {
+      throw std::runtime_error("Failed to create framebuffer");
+    }
+
+    framebuffer_ = fb;
   }
-
-  framebuffer_ = fb;
 }
 
 void RenderPass::execute() {
@@ -157,25 +170,36 @@ void RenderPass::execute() {
   auto res = cmd.begin(::vk::CommandBufferBeginInfo{});
   if (res != ::vk::Result::eSuccess) return;
 
-  ::vk::ClearValue clear_value(
-      ::vk::ClearColorValue{std::array<float, 4>{0.0, 0.0, 0.0, 1.0}});
+  std::vector<::vk::ClearValue> clears = {
+      ::vk::ClearValue(
+          ::vk::ClearColorValue{std::array<float, 4>{0.0, 0.0, 0.0, 1.0}}),
+  };
 
-  const auto extent =
-      ::vk::Extent2D{static_cast<uint32_t>(current_target_size().x()),
-                     static_cast<uint32_t>(current_target_size().y())};
-  ::vk::RenderPassAttachmentBeginInfo attachment_begin(target_->image_view);
-  ::vk::RenderPassBeginInfo rp_begin(render_pass_, framebuffer_, {{}, extent},
-                                     clear_value, &attachment_begin);
+  const auto extent = ::vk::Extent2D{static_cast<uint32_t>(output_size().x()),
+                                     static_cast<uint32_t>(output_size().y())};
 
-  cmd.beginRenderPass(rp_begin, ::vk::SubpassContents::eInline);
+  if (colour_target_ != nullptr) {
+    std::vector<::vk::ImageView> views{colour_target_->view()};
+    if (depth_target_ != nullptr) {
+      views.push_back(depth_target_->view());
+      clears.emplace_back(::vk::ClearDepthStencilValue{0.0, 0});
+    }
 
-  cmd.setViewport(0, ::vk::Viewport{0, 0, static_cast<float>(extent.width),
-                                    static_cast<float>(extent.height)});
-  cmd.setScissor(0, ::vk::Rect2D{{0, 0}, extent});
+    ::vk::RenderPassAttachmentBeginInfo attachment_begin(views);
+    ::vk::RenderPassBeginInfo rp_begin(render_pass_, framebuffer_, {{}, extent},
+                                       clears, &attachment_begin);
 
-  if (execute_fn_) execute_fn_(*this, cmd);
+    cmd.beginRenderPass(rp_begin, ::vk::SubpassContents::eInline);
 
-  cmd.endRenderPass();
+    cmd.setViewport(
+        0, ::vk::Viewport{0, 0, static_cast<float>(extent.width),
+                          static_cast<float>(extent.height), 0.0, 1.0});
+    cmd.setScissor(0, ::vk::Rect2D{{0, 0}, extent});
+
+    if (execute_fn_) execute_fn_(*this, cmd);
+
+    cmd.endRenderPass();
+  }
 
   res = cmd.end();
   if (res != ::vk::Result::eSuccess) {
@@ -198,20 +222,22 @@ auto RenderPass::get_scratch_buffer(uint32_t set, uint32_t binding, size_t size)
 void RenderPass::bind_pipeline(const std::string& pipeline_name) {
   auto cmd = command_buffers_.front();
 
-  const auto pipeline = resources_.shaders.at(pipeline_name)->get_pipeline();
+  const auto pipeline = resources_.shaders().at(pipeline_name)->get_pipeline();
 
   cmd.bindPipeline(::vk::PipelineBindPoint::eGraphics, pipeline);
-  last_bound_shader_ = resources_.shaders.at(pipeline_name);
+  last_bound_shader_ = resources_.shaders().at(pipeline_name);
 }
 
 RenderPass::RenderPass(const std::shared_ptr<Context>& ctx, std::string name,
-                       PassResources resources, execute_fn_t fn,
-                       const std::optional<vk::Image>& image)
+                       PassResources resources,
+                       const std::shared_ptr<RenderTarget>& colour_target,
+                       const std::shared_ptr<RenderTarget>& depth_target,
+                       execute_fn_t fn)
     : ctx_(ctx),
       name_(std::move(name)),
       resources_(std::move(resources)),
       execute_fn_(std::move(fn)),
-      target_image_(image),
-      target_(this->resources_.render_target) {}
+      colour_target_(colour_target),
+      depth_target_(depth_target) {}
 
 }  // namespace wren

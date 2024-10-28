@@ -530,7 +530,7 @@ EXTRACT_ALL            = YES
 # be included in the documentation.
 # The default value is: NO.
 
-EXTRACT_PRIVATE        = NO
+EXTRACT_PRIVATE        = YES
 
 # If the EXTRACT_PRIV_VIRTUAL tag is set to YES, documented private virtual
 # methods of a class will be included in the documentation.
@@ -950,21 +950,21 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = docs/ \
- 						 editor/src \
-						 wren/src \
+                         editor/src \
+                         wren/src \
                          wren/include \
-						 wren_gui/include \
-						 wren_gui/src \
-						 wren_math/include \
-						 wren_math/src \
-						 wren_reflect/include \
-						 wren_reflect/src \
-						 wren_text/include \
-						 wren_text/src \
-						 wren_utils/include \
-						 wren_utils/src \
-						 wren_vk/include \
-						 wren_vk/src \
+                         wren_gui/include \
+                         wren_gui/src \
+                         wren_math/include \
+                         wren_math/src \
+                         wren_reflect/include \
+                         wren_reflect/src \
+                         wren_text/include \
+                         wren_text/src \
+                         wren_utils/include \
+                         wren_utils/src \
+                         wren_vk/include \
+                         wren_vk/src \
                          README.md
 
 # This tag can be used to specify the character encoding of the source files
@@ -1341,7 +1341,7 @@ HTML_FILE_EXTENSION    = .html
 # of the possible markers and block names see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_HEADER            = docs/doxygen/header.html
+HTML_HEADER            =
 
 # The HTML_FOOTER tag can be used to specify a user-defined HTML footer for each
 # generated HTML page. If the tag is left blank doxygen will generate a standard

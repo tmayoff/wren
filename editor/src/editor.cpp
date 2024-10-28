@@ -1,5 +1,7 @@
 #include "editor.hpp"
 
+#include <wren/render_target.hpp>
+
 #include "filesystem_panel.hpp"
 #include "inspector_panel.hpp"
 #include "scene_panel.hpp"
@@ -33,8 +35,9 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app,
 
   spdlog::info("Intializing shaders");
 
-  TRY_RESULT(auto asset_path, editor->editor_context_.asset_manager.find_asset(
-                                  "shaders/editor_mesh.wren_shader"));
+  TRY_RESULT(const auto asset_path,
+             editor->editor_context_.asset_manager.find_asset(
+                 "shaders/editor_mesh.wren_shader"));
 
   TRY_RESULT(editor->mesh_shader_,
              wren::vk::Shader::create(
@@ -55,8 +58,8 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app,
   const auto scene_view = app->context()
                               ->renderer->get_graph()
                               .node_by_name("mesh")
-                              ->render_pass->target()
-                              ->image_view;
+                              ->render_pass->colour_target()
+                              ->view();
   editor->dset_[0] =
       ImGui_ImplVulkan_AddTexture(editor->texture_sampler_, scene_view,
                                   VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -83,8 +86,8 @@ void Editor::on_update() {
 
     const auto scene_view = wren_ctx_->renderer->get_graph()
                                 .node_by_name("mesh")
-                                ->render_pass->target()
-                                ->image_view;
+                                ->render_pass->colour_target()
+                                ->view();
 
     ImGui_ImplVulkan_RemoveTexture(dset_[0]);
     dset_[0] = ImGui_ImplVulkan_AddTexture(
@@ -172,8 +175,7 @@ void Editor::on_update() {
 
   ImGui::Begin("Viewer");
   auto curr_size = ImGui::GetContentRegionAvail();
-  auto curr_size_vec = wren::math::vec2i{static_cast<int>(curr_size.x),
-                                         static_cast<int>(curr_size.y)};
+  auto curr_size_vec = wren::math::Vec2f{curr_size.x, curr_size.y};
   if (curr_size_vec != last_scene_size_) {
     scene_resized_ = curr_size_vec;
     last_scene_size_ = curr_size_vec;
@@ -218,12 +220,10 @@ auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
   builder
       .add_pass(
           "mesh",
-          {.shaders =
-               {
-                   // {"viewer", viewer_shader_},
-                   {"mesh", mesh_shader_},
-               },
-           .target_name = "scene_viewer"},
+          wren::PassResources("scene_viewer")
+              .add_shader("mesh", mesh_shader_)
+              .add_colour_target()
+              .add_depth_target(),
           [this, ctx, render_query](wren::RenderPass &pass,
                                     ::vk::CommandBuffer &cmd) {
             struct GLOBALS {
@@ -252,7 +252,7 @@ auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
                                      transform.matrix());
                 });
           })
-      .add_pass("ui", {.shaders = {}, .target_name = "swapchain_target"},
+      .add_pass("ui", wren::PassResources("swapchain_target"),
                 [](wren::RenderPass &pass, ::vk::CommandBuffer &cmd) {
                   editor::ui::flush(cmd);
                 });
