@@ -252,7 +252,7 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
 
   // Depth / Stencil
   ::vk::PipelineDepthStencilStateCreateInfo depth_state(
-      {}, depth, true, ::vk::CompareOp::eLess, false, false, {}, {}, 0.0, 1.0F);
+      {}, depth, depth, ::vk::CompareOp::eGreaterOrEqual);
 
   // Stages
   auto v_stage_create_info = ::vk::PipelineShaderStageCreateInfo(

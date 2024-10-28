@@ -187,7 +187,7 @@ void RenderPass::execute() {
     std::vector<::vk::ImageView> views{colour_target_->view()};
     if (depth_target_ != nullptr) {
       views.push_back(depth_target_->view());
-      clears.emplace_back(::vk::ClearDepthStencilValue{1.0, 0});
+      clears.emplace_back(::vk::ClearDepthStencilValue{0.0, 0});
     }
 
     ::vk::RenderPassAttachmentBeginInfo attachment_begin(views);

@@ -50,11 +50,12 @@ vec3 light_colour = {1, 1, 1};
 vec3 light_dir = {-1, 1, 0};
 
 void main() {
-    float ambient_strength = 0.1;
+    float ambient_strength = 0.5;
     vec3 ambient = ambient_strength * light_colour;
 
     vec3 norm = normalize(in_frag.normal);
-    vec3 light_dir = normalize(in_frag.light_pos - in_frag.position);
+    // vec3 light_dir = normalize(in_frag.light_pos - in_frag.position);
+    vec3 light_dir = normalize(vec3(0.3, 0.8, 0.2));
 
     float diff = max(dot(norm, light_dir), 0.0);
     vec3 diffuse = diff * light_colour;
