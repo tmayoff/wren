@@ -1,3 +1,5 @@
+# Text Rendering
+
 **Signed distance field**
 
 - [MSDF](https://github.com/Chlumsky/msdfgen)
