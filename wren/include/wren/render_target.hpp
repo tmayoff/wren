@@ -68,7 +68,7 @@ class RenderTarget {
   ::vk::ImageUsageFlags image_usage_;
 
   ::vk::ImageLayout final_layout_ = ::vk::ImageLayout::ePresentSrcKHR;
-  ::vk::ImageAspectFlagBits aspect_;
+  ::vk::ImageAspectFlags aspect_;
 };
 
 }  // namespace wren

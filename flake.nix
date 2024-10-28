@@ -90,8 +90,8 @@
 
               renderdoc
 
+              # Documentation
               doxygen
-              doxygen_gui
               graphviz
             ]
             ++ rawNativeBuildInputs;

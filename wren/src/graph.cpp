@@ -41,7 +41,6 @@ auto GraphBuilder::compile() const -> expected<Graph> {
 
     if (depth_target == nullptr && pass_resources.has_depth_target()) {
       TRY_RESULT(depth_target, RenderTarget::create_depth(ctx_));
-      depth_target->final_layout(::vk::ImageLayout::eShaderReadOnlyOptimal);
     }
 
     TRY_RESULT(auto pass, RenderPass::create(ctx_, name, pass_resources,

@@ -41,62 +41,63 @@ auto RenderPass::create(const std::shared_ptr<Context>& ctx,
                                    colour_attachments, {});
 
   if (depth_target != nullptr) {
-    ::vk::AttachmentDescription attachment(
+    ::vk::AttachmentDescription depth_attachment(
         {}, depth_target->format(), depth_target->sample_count(),
         ::vk::AttachmentLoadOp::eClear, ::vk::AttachmentStoreOp::eStore,
         ::vk::AttachmentLoadOp::eDontCare, ::vk::AttachmentStoreOp::eDontCare,
         ::vk::ImageLayout::eUndefined, depth_target->final_layout());
 
-    const auto depth_attachment = ::vk::AttachmentReference{
+    const auto attachment_ref = ::vk::AttachmentReference{
         1, ::vk::ImageLayout::eDepthStencilAttachmentOptimal};
-    subpass.setPDepthStencilAttachment(&depth_attachment);
+    subpass.setPDepthStencilAttachment(&attachment_ref);
 
-    attachments.push_back(attachment);
+    attachments.push_back(depth_attachment);
   }
 
-  ::vk::SubpassDependency dependency(
-      VK_SUBPASS_EXTERNAL, 0,
-      ::vk::PipelineStageFlagBits::eColorAttachmentOutput,
-      ::vk::PipelineStageFlagBits::eColorAttachmentOutput, {},
-      ::vk::AccessFlagBits::eColorAttachmentWrite);
-  ::vk::RenderPassCreateInfo create_info({}, attachments, subpass, dependency);
+  // Subpasses
+  ::vk::SubpassDependency dependency(VK_SUBPASS_EXTERNAL, 0);
+  if (colour_target != nullptr) {
+    dependency.srcStageMask |=
+        ::vk::PipelineStageFlagBits::eColorAttachmentOutput;
+    dependency.dstStageMask |=
+        ::vk::PipelineStageFlagBits::eColorAttachmentOutput;
+    dependency.dstAccessMask |= ::vk::AccessFlagBits::eColorAttachmentWrite;
+  }
 
-  auto [res, renderpass] = device.get().createRenderPass(create_info);
-  pass->render_pass_ = renderpass;
+  if (depth_target != nullptr) {
+    dependency.srcStageMask |= ::vk::PipelineStageFlagBits::eEarlyFragmentTests;
+    dependency.dstStageMask |= ::vk::PipelineStageFlagBits::eEarlyFragmentTests;
+    dependency.dstAccessMask |=
+        ::vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+  }
+
+  VK_TIE_RESULT(
+      pass->render_pass_,
+      device.get().createRenderPass({{}, attachments, subpass, dependency}));
 
   math::Vec2f size{512, 512};
   pass->size_ = size;
 
   // ===== create pipelines
   for (const auto& [_, shader] : resources.shaders()) {
-    TRY_RESULT(shader->create_graphics_pipeline(device.get(), renderpass, size,
-                                                depth_target != nullptr));
+    TRY_RESULT(shader->create_graphics_pipeline(
+        device.get(), pass->render_pass_, size, depth_target != nullptr));
   }
 
-  ::vk::Viewport viewport(0, 0, size.x(), size.y(), 1, 0);
-  ::vk::Rect2D scissor(
-      {}, {static_cast<uint32_t>(size.x()), static_cast<uint32_t>(size.y())});
-  ::vk::PipelineViewportStateCreateInfo viewport_state({}, viewport, scissor);
   pass->recreate_framebuffers(device.get());
 
-  {
-    // Command buffers
-    std::vector<::vk::CommandBuffer> cmds;
-    auto [res, pool] =
-        device.get().createCommandPool(::vk::CommandPoolCreateInfo{
-            ::vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-            ctx->graphics_context->FindQueueFamilyIndices()
-                .value()
-                .graphics_index});
+  // ===== Command buffers
+  VK_TIE_RESULT(pass->command_pool_,
+                device.get().createCommandPool(::vk::CommandPoolCreateInfo{
+                    ::vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+                    ctx->graphics_context->FindQueueFamilyIndices()
+                        .value()
+                        .graphics_index}));
 
-    ::vk::CommandBufferAllocateInfo alloc_info{
-        pool, ::vk::CommandBufferLevel::ePrimary, 1};
-    std::vector<::vk::CommandBuffer> bufs;
-    std::tie(res, bufs) = device.get().allocateCommandBuffers(alloc_info);
-
-    pass->command_pool_ = pool;
-    pass->command_buffers_ = bufs;
-  }
+  VK_TIE_RESULT(
+      pass->command_buffers_,
+      device.get().allocateCommandBuffers(
+          {pass->command_pool_, ::vk::CommandBufferLevel::ePrimary, 1}));
 
   return pass;
 }
@@ -195,8 +196,9 @@ void RenderPass::execute() {
 
     cmd.beginRenderPass(rp_begin, ::vk::SubpassContents::eInline);
 
-    cmd.setViewport(0, ::vk::Viewport{0, 0, static_cast<float>(extent.width),
-                                      static_cast<float>(extent.height)});
+    cmd.setViewport(
+        0, ::vk::Viewport{0, 0, static_cast<float>(extent.width),
+                          static_cast<float>(extent.height), 0.0, 1.0});
     cmd.setScissor(0, ::vk::Rect2D{{0, 0}, extent});
 
     if (execute_fn_) execute_fn_(*this, cmd);

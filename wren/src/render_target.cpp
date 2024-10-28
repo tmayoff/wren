@@ -67,7 +67,8 @@ auto RenderTarget::create_depth(const std::shared_ptr<Context> &ctx)
   target->format_ = ::vk::Format::eD32SfloatS8Uint;
   target->image_usage_ = ::vk::ImageUsageFlagBits::eDepthStencilAttachment;
   target->final_layout_ = ::vk::ImageLayout::eDepthStencilAttachmentOptimal;
-  target->aspect_ = ::vk::ImageAspectFlagBits::eDepth;
+  target->aspect_ =
+      ::vk::ImageAspectFlagBits::eDepth | ::vk::ImageAspectFlagBits::eStencil;
 
   TRY_RESULT(
       target->image_,
@@ -75,22 +76,20 @@ auto RenderTarget::create_depth(const std::shared_ptr<Context> &ctx)
                         ctx->graphics_context->allocator(), target->format_,
                         target->size_, target->image_usage_));
 
-  target->transition_fn_ = [&target, ctx]() -> expected<void> {
+  target->transition_fn_ = [target = target.get(), ctx]() -> expected<void> {
     // transition image
     if (target->image_.has_value()) {
       TRY_RESULT(ctx->renderer->submit_command_buffer(
-          [&image = target->image_](const ::vk::CommandBuffer &cmd_buf) {
+          [target](const ::vk::CommandBuffer &cmd_buf) {
             ::vk::ImageMemoryBarrier barrier(
                 ::vk::AccessFlagBits::eNone,
                 ::vk::AccessFlagBits::eDepthStencilAttachmentRead |
                     ::vk::AccessFlagBits::eDepthStencilAttachmentWrite,
                 ::vk::ImageLayout::eUndefined,
                 ::vk::ImageLayout::eDepthStencilAttachmentOptimal,
-                VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED, image->get(),
-                ::vk::ImageSubresourceRange(
-                    ::vk::ImageAspectFlagBits::eDepth |
-                        ::vk::ImageAspectFlagBits::eStencil,
-                    0, 1, 0, 1));
+                VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED,
+                target->image_->get(),
+                ::vk::ImageSubresourceRange(target->aspect_, 0, 1, 0, 1));
 
             cmd_buf.pipelineBarrier(
                 ::vk::PipelineStageFlagBits::eTopOfPipe,
