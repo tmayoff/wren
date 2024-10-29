@@ -1,10 +1,10 @@
 # wren
 
-[![builds.sr.ht status](https://builds.sr.ht/~tmayoff/wren/commits/main/nixos.yml.svg)](https://builds.sr.ht/~tmayoff/wren/commits/main/nixos.yml?)
+[![build](https://github.com/tmayoff/wren/actions/workflows/build.yml/badge.svg)](https://github.com/tmayoff/wren/actions/workflows/build.yml)
 
-![Editor](docs/media/screenshot1.png)
+![Editor](docs/media/screenshot2.png)
 
-[docs](https://tmayoff.srht.site/wren)
+[docs](https://tmayoff.github.io/wren/)
 
 Custom vulkan renderer, with eventually no major dependencies
 
@@ -19,8 +19,3 @@ Custom vulkan renderer, with eventually no major dependencies
 - Boost.Describe (C++26?)
 - Vulkan Memory Allocator
 - ImGui
-
-## contributing
-
-Send patches to the [mailing list](https://lists.sr.ht/~tmayoff/wren-devel), report bugs on the [issue tracker](https://todo.sr.ht/~tmayoff/wren).
-
