@@ -71,8 +71,14 @@ class Shader {
 
   [[nodiscard]] auto get_pipeline() const { return pipeline_; }
   [[nodiscard]] auto pipeline_layout() const { return pipeline_layout_; }
-  [[nodiscard]] auto descriptor_set(uint32_t set = 0) const {
-    return descriptor_sets_.at(set);
+  [[nodiscard]] auto descriptor_set_layout(uint32_t set = 0) const {
+    return descriptor_set_layouts_.at(set);
+  }
+
+  [[nodiscard]] auto desciptor_sets() const { return descriptor_sets_; }
+
+  [[nodiscard]] auto descriptor_set_layouts() const {
+    return descriptor_set_layouts_;
   }
 
   void fragment_shader(const ShaderModule &fragment) {
@@ -84,6 +90,7 @@ class Shader {
   }
 
   auto create_graphics_pipeline(const ::vk::Device &device,
+                                const ::vk::DescriptorPool &descriptor_pool,
                                 const ::vk::RenderPass &render_pass,
                                 const math::Vec2f &size, bool depth)
       -> expected<void>;
@@ -92,7 +99,9 @@ class Shader {
   static auto read_wren_shader_file(const std::filesystem::path &path)
       -> expected<std::map<ShaderType, std::string>>;
 
-  std::map<uint32_t, ::vk::DescriptorSetLayout> descriptor_sets_;
+  std::map<uint32_t, ::vk::DescriptorSetLayout> descriptor_set_layouts_;
+  std::vector<::vk::DescriptorSet> descriptor_sets_;
+
   ::vk::PipelineLayout pipeline_layout_;
   ::vk::Pipeline pipeline_;
 

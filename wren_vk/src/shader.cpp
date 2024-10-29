@@ -185,9 +185,9 @@ auto Shader::compile_shader(const ::vk::Device &device,
   return ShaderModule{{spirv.begin(), spirv.end()}, module};
 }
 
-auto Shader::create_graphics_pipeline(const ::vk::Device &device,
-                                      const ::vk::RenderPass &render_pass,
-                                      const math::Vec2f &size, bool depth)
+auto Shader::create_graphics_pipeline(
+    const ::vk::Device &device, const ::vk::DescriptorPool &descriptor_pool,
+    const ::vk::RenderPass &render_pass, const math::Vec2f &size, bool depth)
     -> expected<void> {
   ::vk::Result res = ::vk::Result::eSuccess;
 
@@ -195,14 +195,14 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
   std::vector<::vk::DescriptorSetLayout> set_layouts;
   for (const auto &[set, binding] :
        vertex_shader_module_.get_descriptor_set_layout_bindings()) {
-    VK_TRY_RESULT(
-        dl, device.createDescriptorSetLayout(
-                {::vk::DescriptorSetLayoutCreateFlagBits::ePushDescriptorKHR,
-                 binding}));
+    VK_TRY_RESULT(dl, device.createDescriptorSetLayout({{}, binding}));
 
-    descriptor_sets_.emplace(set, dl);
+    descriptor_set_layouts_.emplace(set, dl);
     set_layouts.push_back(dl);
   }
+
+  ::vk::DescriptorSetAllocateInfo alloc_info{descriptor_pool, set_layouts};
+  VK_TIE_RESULT(descriptor_sets_, device.allocateDescriptorSets(alloc_info));
 
   VK_TIE_RESULT(pipeline_layout_,
                 device.createPipelineLayout({{}, set_layouts}));
@@ -272,9 +272,9 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
       &viewport_state, &rasterization, &multisample, &depth_state,
       &colour_blend, &dynamic_state, pipeline_layout_, render_pass);
 
-  std::tie(res, pipeline_) = device.createGraphicsPipeline({}, create_info);
-  if (res != ::vk::Result::eSuccess)
-    return std::unexpected(make_error_code(res));
+  VK_TIE_RESULT(pipeline_, device.createGraphicsPipeline({}, create_info));
+
+  // Descriptor Sets
 
   return {};
 }
