@@ -80,22 +80,24 @@ auto ShaderModule::get_vertex_input_attributes() const
 }
 
 auto ShaderModule::get_descriptor_set_layout_bindings() const
-    -> std::vector<::vk::DescriptorSetLayoutBinding> {
+    -> std::map<uint32_t, ::vk::DescriptorSetLayoutBinding> {
   uint32_t count = 0;
   reflection->EnumerateDescriptorSets(&count, nullptr);
   std::vector<SpvReflectDescriptorSet *> spv_sets(count);
   reflection->EnumerateDescriptorSets(&count, spv_sets.data());
 
-  std::vector<::vk::DescriptorSetLayoutBinding> layouts;
+  std::map<uint32_t, ::vk::DescriptorSetLayoutBinding> layouts;
   for (const SpvReflectDescriptorSet *set : spv_sets) {
     std::span<SpvReflectDescriptorBinding *> bindings(set->bindings,
                                                       set->binding_count);
 
     for (SpvReflectDescriptorBinding *binding : bindings) {
-      layouts.emplace_back(
-          binding->binding,
-          static_cast<::vk::DescriptorType>(binding->descriptor_type),
-          binding->count, ::vk::ShaderStageFlagBits::eVertex);
+      layouts.emplace(
+          set->set,
+          ::vk::DescriptorSetLayoutBinding{
+              binding->binding,
+              static_cast<::vk::DescriptorType>(binding->descriptor_type),
+              binding->count, ::vk::ShaderStageFlagBits::eVertex});
     }
   }
 
@@ -190,18 +192,20 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
   ::vk::Result res = ::vk::Result::eSuccess;
 
   // Descriptor Sets
-  const auto bindings =
-      vertex_shader_module_.get_descriptor_set_layout_bindings();
-  ::vk::DescriptorSetLayoutCreateInfo dl_create_info(
-      ::vk::DescriptorSetLayoutCreateFlagBits::ePushDescriptorKHR, bindings);
+  std::vector<::vk::DescriptorSetLayout> set_layouts;
+  for (const auto &[set, binding] :
+       vertex_shader_module_.get_descriptor_set_layout_bindings()) {
+    VK_TRY_RESULT(
+        dl, device.createDescriptorSetLayout(
+                {::vk::DescriptorSetLayoutCreateFlagBits::ePushDescriptorKHR,
+                 binding}));
 
-  VK_TIE_ERR_PROP(descriptor_layout_,
-                  device.createDescriptorSetLayout(dl_create_info));
+    descriptor_sets_.emplace(set, dl);
+    set_layouts.push_back(dl);
+  }
 
-  ::vk::PipelineLayoutCreateInfo layout_create({}, descriptor_layout_);
-  std::tie(res, pipeline_layout_) = device.createPipelineLayout(layout_create);
-  if (res != ::vk::Result::eSuccess)
-    return std::unexpected(make_error_code(res));
+  VK_TIE_RESULT(pipeline_layout_,
+                device.createPipelineLayout({{}, set_layouts}));
 
   // Dynamic states
   std::array dynamic_states = {::vk::DynamicState::eViewport,
@@ -289,7 +293,7 @@ auto Shader::read_wren_shader_file(const std::filesystem::path &path)
     const auto shader_content = reader.read_to_text_start("##type ");
 
     shaders.emplace(
-        utils::string_to_enum<ShaderType>(shader_type, true).value(),
+        utils::string_to_enum<ShaderType>(shader_type, false).value(),
         shader_content);
   }
 

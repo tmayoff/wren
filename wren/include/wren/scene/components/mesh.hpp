@@ -40,10 +40,10 @@ class MeshRenderer {
 
     ::vk::DescriptorBufferInfo buffer_info(ubo_->get(), 0, sizeof(LOCALS));
     std::array writes = {::vk::WriteDescriptorSet{
-        {}, 1, 0, ::vk::DescriptorType::eUniformBuffer, {}, buffer_info}};
+        {}, 0, 0, ::vk::DescriptorType::eUniformBuffer, {}, buffer_info}};
 
     cmd.pushDescriptorSetKHR(::vk::PipelineBindPoint::eGraphics,
-                             shader->pipeline_layout(), 0, writes);
+                             shader->pipeline_layout(), 1, writes);
 
     mesh_->bind(cmd);
     mesh_->draw(cmd);

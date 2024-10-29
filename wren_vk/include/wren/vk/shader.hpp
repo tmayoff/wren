@@ -49,7 +49,7 @@ struct ShaderModule {
       -> std::vector<::vk::VertexInputAttributeDescription>;
 
   [[nodiscard]] auto get_descriptor_set_layout_bindings() const
-      -> std::vector<::vk::DescriptorSetLayoutBinding>;
+      -> std::map<uint32_t, ::vk::DescriptorSetLayoutBinding>;
 };
 
 class Shader {
@@ -71,7 +71,9 @@ class Shader {
 
   [[nodiscard]] auto get_pipeline() const { return pipeline_; }
   [[nodiscard]] auto pipeline_layout() const { return pipeline_layout_; }
-  [[nodiscard]] auto descriptor_layout() const { return descriptor_layout_; }
+  [[nodiscard]] auto descriptor_set(uint32_t set = 0) const {
+    return descriptor_sets_.at(set);
+  }
 
   void fragment_shader(const ShaderModule &fragment) {
     fragment_shader_module_ = fragment;
@@ -90,7 +92,7 @@ class Shader {
   static auto read_wren_shader_file(const std::filesystem::path &path)
       -> expected<std::map<ShaderType, std::string>>;
 
-  ::vk::DescriptorSetLayout descriptor_layout_;
+  std::map<uint32_t, ::vk::DescriptorSetLayout> descriptor_sets_;
   ::vk::PipelineLayout pipeline_layout_;
   ::vk::Pipeline pipeline_;
 
