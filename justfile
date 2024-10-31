@@ -19,7 +19,7 @@ test: build
     meson test -C build --print-errorlogs
 
 coverage: test
-    meson compile -C build coverage-xml
+    meson compile -C build coverage
     
 clean:
     ninja -C build clean
