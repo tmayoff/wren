@@ -93,6 +93,9 @@
               # Documentation
               doxygen
               graphviz
+
+              # Coverage
+              lcov
             ]
             ++ rawNativeBuildInputs;
 
