@@ -16,13 +16,12 @@ jobs:
     - uses: DeterminateSystems/nix-installer-action@v14
     - uses: DeterminateSystems/magic-nix-cache-action@v8
 
-    - name: setup
+    - name: coverage
       run: |
         nix develop --command meson setup build -Db_coverage=true
-        nix develop --command just coverage
+        nix develop --command just test
     - name: Coverage
-      run: |
-        nix develop --command cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+      run: ninja -C build coverage
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
