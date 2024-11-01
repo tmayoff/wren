@@ -18,8 +18,8 @@ debug: build
 test: build
     meson test -C build --print-errorlogs
 
-coverage: test
-    meson compile -C build coverage
+coverage: 
+    cd build && llvm-cov gcov $(find ./ "*.gcno")
     
 clean:
     ninja -C build clean

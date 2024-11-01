@@ -82,6 +82,7 @@
             [
               vulkan-tools
               llvmPackages_19.clang-tools
+              llvmPackages_17.libllvm
               sccache
 
               just
@@ -95,7 +96,7 @@
               graphviz
 
               # Coverage
-              lcov
+              # lcov
             ]
             ++ rawNativeBuildInputs;
 
@@ -107,6 +108,7 @@
               vulkan-validation-layers
 
               pkgs.nixgl.nixVulkanIntel
+              grcov
             ]
             ++ rawBuildInputs;
 
