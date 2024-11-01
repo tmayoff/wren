@@ -21,7 +21,7 @@ jobs:
         nix develop --command meson setup build -Db_coverage=true
         nix develop --command just test
     - name: Coverage
-      run: ninja -C build coverage
+      run:  nix develop --command ninja -C build coverage
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
