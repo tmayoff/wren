@@ -33,7 +33,7 @@
         ];
 
         rawBuildInputs = with pkgs; [
-          boost.dev
+          boost
 
           SDL2
           spdlog
