@@ -96,6 +96,7 @@
               graphviz
 
               # Coverage
+              gcovr
               # lcov
             ]
             ++ rawNativeBuildInputs;
@@ -108,7 +109,6 @@
               vulkan-validation-layers
 
               pkgs.nixgl.nixVulkanIntel
-              grcov
             ]
             ++ rawBuildInputs;
 
