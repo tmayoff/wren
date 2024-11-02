@@ -1,9 +1,5 @@
 deps = [wren_dep, imgui, tracy]
 
-if buildtype == 'debug'
-    deps += backward_dep
-endif
-
 executable(
     'wren_editor',
     'src/main.cpp',
