@@ -20,6 +20,7 @@ test: build
 
 coverage: test
     lcov --directory . --capture --output-file build/coverage.info --gcov-tool ./tools/gcov.sh --ignore-errors source --ignore-errors inconsistent
+    lcov --remove coverage.info '*/tests/*' '/nix/*' --output-file coverage.info
     
 clean:
     ninja -C build clean
