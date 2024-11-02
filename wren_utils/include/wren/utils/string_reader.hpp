@@ -14,9 +14,7 @@ class StringReader {
 
   auto read_to_text_start(const std::string_view& text) -> std::string_view;
 
-  [[nodiscard]] auto at_end() const { 
-    //
-    return position_ > input_.size(); }
+  [[nodiscard]] auto at_end() const { return position_ > input_.size(); }
 
  private:
   auto substr(std::string_view::size_type start,
