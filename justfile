@@ -18,8 +18,8 @@ debug: build
 test: build
     meson test -C build --print-errorlogs
 
-coverage: 
-    cd build && llvm-cov gcov $(find ./ "*.gcno")
+coverage: test
+    lcov --directory . --capture --output-file builds/coverage.info --gcov-tool ./tools/gcov.sh --ignore-errors source --ignore-errors inconsistent
     
 clean:
     ninja -C build clean

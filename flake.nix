@@ -96,8 +96,8 @@
               graphviz
 
               # Coverage
-              gcovr
-              # lcov
+              # gcovr
+              lcov
             ]
             ++ rawNativeBuildInputs;
 
