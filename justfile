@@ -19,7 +19,7 @@ test: build
     meson test -C build --print-errorlogs
 
 coverage: test
-    lcov --directory . --capture --output-file builds/coverage.info --gcov-tool ./tools/gcov.sh --ignore-errors source --ignore-errors inconsistent
+    lcov --directory . --capture --output-file build/coverage.info --gcov-tool ./tools/gcov.sh --ignore-errors source --ignore-errors inconsistent
     
 clean:
     ninja -C build clean
