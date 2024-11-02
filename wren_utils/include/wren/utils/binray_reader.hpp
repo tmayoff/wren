@@ -30,6 +30,10 @@ class BinaryReader {
     return list;
   }
 
+  auto at_end() {
+    return pos_ == data_.end();
+  }
+
  private:
   std::span<uint8_t> data_;
   std::span<uint8_t>::iterator pos_;

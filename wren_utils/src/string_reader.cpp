@@ -7,6 +7,11 @@ void StringReader::skip_to_text_end(const std::string_view& text) {
   position_ = input_.find(text, position_) + size;
 }
 
+void StringReader::skip_to_end_line() {
+  auto pos = input_.find("\n", position_);
+  position_ = pos + 1;
+}
+
 auto StringReader::read_to_end_line() -> std::string_view {
   auto pos = input_.find("\n", position_);
 

@@ -27,6 +27,10 @@ key1: value1_two
   reader.skip_to_text_end(": ");
   const auto val1 = reader.read_to_text_end("_");
   BOOST_TEST(val1 == "value1_");
+
+  reader.skip_to_end_line();
+
+  BOOST_TEST(reader.at_end());
 }
 
 BOOST_AUTO_TEST_SUITE_END();
