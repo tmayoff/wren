@@ -1,3 +1,21 @@
+# rendering
+
+## design 
+
+[RenderTarget](@ref wren::RenderTarget) is the main data structure for a render pass. They contain all the information to create and recreate an vk::Image and vk::ImageView.
+
+When creating a pass you need to provide a [render resources object](@ref wren::PassResources) which contains the details for a particular pass: colour (+depth), shaders, etc. 
+
+An example of how to craete a graph with a single pass with a colour target
+
+```cpp
+  wren::GraphBuilder builder(ctx);
+  builder.add_pass("mesh",
+          resouces, 
+          [](wren::RenderPass& pass, vk::CommandBuffer& cmd){})
+         .compile();
+```
+
 ## plan
 
 A render pass can be built with a shader and a render target. A shorthand can be used for specifying the swapchain as the render target, maybe by omitting the target.

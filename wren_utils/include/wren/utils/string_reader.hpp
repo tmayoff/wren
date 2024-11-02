@@ -10,13 +10,13 @@ class StringReader {
 
   void skip_to_text_end(const std::string_view& text);
 
+  void skip_to_end_line();
   auto read_to_end_line() -> std::string_view;
 
   auto read_to_text_start(const std::string_view& text) -> std::string_view;
+  auto read_to_text_end(const std::string_view& text) -> std::string_view;
 
-  [[nodiscard]] auto at_end() const { 
-    //
-    return position_ > input_.size(); }
+  [[nodiscard]] auto at_end() const { return position_ >= input_.size(); }
 
  private:
   auto substr(std::string_view::size_type start,

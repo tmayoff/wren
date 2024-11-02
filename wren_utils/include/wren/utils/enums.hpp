@@ -21,7 +21,7 @@ auto enum_to_string(E e) -> std::string {
 }
 
 template <typename E>
-auto string_to_enum(const std::string_view& name, bool case_sensitive = false)
+auto string_to_enum(const std::string_view& name, bool case_insensitive = false)
     -> std::optional<E> {
   bool found = false;
 
@@ -29,11 +29,12 @@ auto string_to_enum(const std::string_view& name, bool case_sensitive = false)
 
   boost::mp11::mp_for_each<boost::describe::describe_enumerators<E>>(
       [&](auto d) {
+        const std::string described = d.name;
         if (!found) {
-          if (case_sensitive && boost::iequals(d.name, name)) {
+          if (case_insensitive && boost::iequals(name, described)) {
             found = true;
             r = d.value;
-          } else if (!case_sensitive && std::strcmp(d.name, name.data())) {
+          } else if (!case_insensitive && name == described) {
             found = true;
             r = d.value;
           }

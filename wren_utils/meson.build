@@ -14,3 +14,5 @@ wren_utils_dep = declare_dependency(
     dependencies: [boost],
     link_with: utils,
 )
+
+subdir('tests')
