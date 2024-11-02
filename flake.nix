@@ -33,7 +33,7 @@
         ];
 
         rawBuildInputs = with pkgs; [
-          boost.dev
+          boost
 
           SDL2
           spdlog
@@ -82,6 +82,7 @@
             [
               vulkan-tools
               llvmPackages_19.clang-tools
+              llvmPackages_17.libllvm
               sccache
 
               just
@@ -93,6 +94,10 @@
               # Documentation
               doxygen
               graphviz
+
+              # Coverage
+              # gcovr
+              lcov
             ]
             ++ rawNativeBuildInputs;
 

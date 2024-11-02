@@ -1,0 +1,30 @@
+name: coverage
+
+on:
+  push:
+
+env: 
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: DeterminateSystems/nix-installer-action@v14
+    - uses: DeterminateSystems/magic-nix-cache-action@v8
+
+    - name: build & test
+      run: |
+        nix develop --command meson setup build -Db_coverage=true
+        nix develop --command just test
+    - name: coverage
+      run:  nix develop --command just coverage
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        files: build/coverage.info
+        token: ${{ secrets.CODECOV_TOKEN }}
+
