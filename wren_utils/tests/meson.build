@@ -1,4 +1,4 @@
-tests = ['binary_reader', 'string_reader']
+tests = ['binary_reader', 'string_reader', 'enums']
 
 foreach test : tests
     test(
