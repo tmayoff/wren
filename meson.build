@@ -43,8 +43,6 @@ if get_option('build_profiling')
     add_project_arguments('-ftime-trace', language: 'cpp')
 endif
 
-subdir('external')
-
 subdir('wren_utils')
 subdir('wren_math')
 subdir('wren_reflect')
