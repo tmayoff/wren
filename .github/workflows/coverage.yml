@@ -16,6 +16,8 @@ jobs:
     - uses: DeterminateSystems/nix-installer-action@v14
     - uses: DeterminateSystems/magic-nix-cache-action@v8
 
+    - uses: mozilla-actions/sccache-action@v0.0.6
+
     - name: build & test
       run: |
         nix develop --command meson setup build -Db_coverage=true
