@@ -27,4 +27,8 @@ jobs:
       with:
         files: build/coverage.info
         token: ${{ secrets.CODECOV_TOKEN }}
-
+    - name: Upload tests
+      uses: codecov/test-results-action@v1
+      with:
+        files: build/meson-logs/testlog.junit.xml
+        token: ${{ secrets.CODECOV_TOKEN }}
