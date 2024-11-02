@@ -25,6 +25,20 @@
 
         boost = pkgs.boost185;
 
+        flecs = pkgs.stdenv.mkDerivation {
+          name = "flecs";
+          src = pkgs.fetchFromGitHub {
+            owner = "SanderMertens";
+            repo = "flecs";
+            rev = "v4.0.2";
+            hash = "sha256-HYolfWnsqXAUh1DDwvorLa+t6VZDaP+2+J7zsK3uP40=";
+          };
+
+          nativeBuildInputs = with pkgs; [
+            cmake
+          ];
+        };
+
         rawNativeBuildInputs = with pkgs; [
           pkg-config
           meson
@@ -46,6 +60,8 @@
           vulkan-memory-allocator
           shaderc
           spirv-headers
+
+          flecs
 
           # tracy
 
