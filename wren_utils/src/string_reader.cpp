@@ -17,8 +17,16 @@ auto StringReader::read_to_end_line() -> std::string_view {
 
 auto StringReader::read_to_text_start(const std::string_view& text)
     -> std::string_view {
-
   auto end = input_.find(text, position_);
+
+  const auto content = substr(position_, end);
+  position_ = end;
+  return content;
+}
+
+auto StringReader::read_to_text_end(const std::string_view& text)
+    -> std::string_view {
+  auto end = input_.find(text, position_) + text.size();
 
   const auto content = substr(position_, end);
   position_ = end;
