@@ -189,8 +189,6 @@ auto Shader::create_graphics_pipeline(
     const ::vk::Device &device, const ::vk::DescriptorPool &descriptor_pool,
     const ::vk::RenderPass &render_pass, const math::Vec2f &size, bool depth)
     -> expected<void> {
-  ::vk::Result res = ::vk::Result::eSuccess;
-
   // Descriptor Sets
   std::vector<::vk::DescriptorSetLayout> set_layouts;
   for (const auto &[set, binding] :
@@ -293,7 +291,7 @@ auto Shader::read_wren_shader_file(const std::filesystem::path &path)
     const auto shader_content = reader.read_to_text_start("##type ");
 
     shaders.emplace(
-        utils::string_to_enum<ShaderType>(shader_type, false).value(),
+        utils::string_to_enum<ShaderType>(shader_type, true).value(),
         shader_content);
   }
 
