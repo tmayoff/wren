@@ -39,11 +39,31 @@
           ];
         };
 
+        slang = pkgs.stdenv.mkDerivation rec {
+          pname = "slang";
+          version = "v2024.14.5";
+          src = pkgs.fetchFromGitHub {
+            owner = "shader-slang";
+            repo = "slang";
+            rev = "${version}";
+            hash = "sha256-s6I400tcHcPYY/YhR+jxHUazdhJLyZoYyFAMQlh0L6E=";
+            fetchSubmodules = true;
+          };
+
+          nativeBuildInputs = [pkgs.cmake pkgs.python311 pkgs.ninja];
+
+          buildPhase = ''
+            cd ..
+            cmake --workflow --preset release
+          '';
+        };
+
         rawNativeBuildInputs = with pkgs; [
           pkg-config
           meson
           cmake
           ninja
+          slang
         ];
 
         rawBuildInputs = with pkgs; [
