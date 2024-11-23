@@ -53,3 +53,6 @@ subdir('wren_vk')
 subdir('wren')
 # subdir('wren_ecs')
 subdir('editor')
+
+
+subdir('examples')
