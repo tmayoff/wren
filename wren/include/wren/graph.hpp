@@ -39,6 +39,8 @@ class GraphBuilder {
  public:
   explicit GraphBuilder(const std::shared_ptr<Context> &ctx) : ctx_(ctx) {}
 
+  [[nodiscard]] auto build() const -> expected<void>;
+
   [[nodiscard]] auto compile() const -> expected<Graph>;
 
   auto add_pass(const std::string &name, const PassResources &resources,
