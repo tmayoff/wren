@@ -2,27 +2,41 @@
 
 #include <cstdlib>
 #include <wren/application.hpp>
+#include <wren/assets/manager.hpp>
+
+auto initialize(const std::shared_ptr<wren::Application>& app)
+    -> wren::expected<void> {
+  spdlog::info("Intializing shaders");
+
+  std::vector<std::filesystem::path> asset_paths = {
+#ifdef WREN_BUILD_ASSETS_DIR
+      WREN_BUILD_ASSETS_DIR
+#endif
+  };
+  wren::assets::Manager asset_manager(asset_paths);
+  TRY_RESULT(const auto asset_path,
+             asset_manager.find_asset("shaders/mesh.wren_shader"));
+
+  TRY_RESULT(auto mesh_shader,
+             wren::vk::Shader::create(
+                 app->context()->graphics_context->Device().get(), asset_path));
+
+  wren::GraphBuilder builder(app->context());
+  builder.add_pass("main",
+                   wren::PassResources("swapchain_target")
+                       .add_shader("mesh", mesh_shader)
+                       .add_colour_target(),
+                   [](wren::RenderPass& pass, const vk::CommandBuffer& cmd) {
+                     // TODO Render things here
+                   });
+
+  app->context()->renderer->set_graph_builder(builder);
+
+  return {};
+}
 
 auto main() -> int {
   spdlog::set_level(spdlog::level::debug);
-
-  // Fix this warning
-  // std::span args(argv + 1, argc - 1);
-
-  // spdlog::debug("launching editor");
-  // spdlog::debug("args:");
-  // for (const auto arg : args) {
-  //   spdlog::debug("\t{}", arg);
-  // }
-
-  // std::optional<std::filesystem::path> project_path;
-  // if (!args.empty()) {
-  //   std::filesystem::path p(args.front());
-  //   if (std::filesystem::exists(p)) {
-  //     spdlog::info("Loading project {}", args.front());
-  //     project_path = p;
-  //   }
-  // }
 
   const auto& err = wren::Application::Create("Editor");
   if (!err.has_value()) {
@@ -32,7 +46,11 @@ auto main() -> int {
 
   auto app = err.value();
 
-  // TODO setup render graph
+  const auto init_err = initialize(app);
+  if (!init_err.has_value()) {
+    spdlog::error("failed to initialize: {}", init_err.error().message());
+    return EXIT_FAILURE;
+  }
 
   app->run();
 
