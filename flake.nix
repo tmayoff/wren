@@ -67,7 +67,7 @@
           ];
 
           configurePhase = ''
-            cmake --preset default
+            cmake --preset default -DSLANG_ENABLE_TESTS=Off -DSLANG_ENABLE_GFX=Off
           '';
 
           buildPhase = ''
