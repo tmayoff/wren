@@ -39,8 +39,14 @@ class GraphBuilder {
  public:
   explicit GraphBuilder(const std::shared_ptr<Context> &ctx) : ctx_(ctx) {}
 
+  /**
+    @brief This calls compile() and then assigns the graph to the renderer
+  */
   [[nodiscard]] auto build() const -> expected<void>;
 
+  /**
+    @brief Compiles the builder into an actual graph, it creates missing resources for targets and binds targets to the swapchain
+  */
   [[nodiscard]] auto compile() const -> expected<Graph>;
 
   auto add_pass(const std::string &name, const PassResources &resources,
