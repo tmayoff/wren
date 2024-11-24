@@ -50,11 +50,18 @@
             fetchSubmodules = true;
           };
 
-          nativeBuildInputs = [pkgs.cmake pkgs.python311 pkgs.ninja];
+          nativeBuildInputs = with pkgs; [
+            cmake
+            python311
+            ninja
+          ];
+
+          configurePhase = ''
+            cmake --preset default
+          '';
 
           buildPhase = ''
-            cd ..
-            cmake --workflow --preset release
+            cmake --build --preset release
           '';
         };
 
