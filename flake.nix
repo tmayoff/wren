@@ -1,6 +1,16 @@
 {
   description = "Wren game engine";
 
+  nixConfig = {
+    extra-substituters = [
+      "https://tmayoff.cachix.org"
+    ];
+
+    extra-trusted-public-keys = [
+      "tmayoff.cachix.org-1:MxpzBMSFgtdDe1ZoDdENnwaRGmworx1aSRriKDpXFn8="
+    ];
+  };
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -61,7 +71,7 @@
           '';
 
           buildPhase = ''
-            cmake --build --preset release
+            cmake --build --preset release -j4
           '';
         };
 
