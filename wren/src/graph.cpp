@@ -16,6 +16,14 @@ auto GraphBuilder::add_pass(const std::string &name,
   return *this;
 }
 
+auto GraphBuilder::build() const -> expected<void> {
+  TRY_RESULT(auto graph, compile());
+
+  ctx_->renderer->set_graph(graph);
+
+  return {};
+}
+
 auto GraphBuilder::compile() const -> expected<Graph> {
   Graph graph;
 

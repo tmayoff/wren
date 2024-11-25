@@ -24,10 +24,8 @@ class Renderer {
 
   void draw();
 
-  auto set_graph_builder(const GraphBuilder &builder) {
-    render_graph = builder.compile().value();
-  }
-  auto get_graph() const { return render_graph; }
+  auto set_graph(const Graph &graph) { render_graph_ = graph; }
+  auto get_graph() const { return render_graph_; }
 
   auto swapchain_images_views() const { return swapchain_image_views_; }
 
@@ -79,7 +77,7 @@ class Renderer {
   ::vk::CommandPool command_pool_;
   ::vk::CommandBuffer one_time_cmd_buffer;
 
-  Graph render_graph;
+  Graph render_graph_;
 
   Mesh m;
 };
