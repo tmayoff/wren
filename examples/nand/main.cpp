@@ -22,15 +22,16 @@ auto initialize(const std::shared_ptr<wren::Application>& app)
                  app->context()->graphics_context->Device().get(), asset_path));
 
   wren::GraphBuilder builder(app->context());
-  builder.add_pass("main",
-                   wren::PassResources("swapchain_target")
-                       .add_shader("mesh", mesh_shader)
-                       .add_colour_target(),
-                   [](wren::RenderPass& pass, const vk::CommandBuffer& cmd) {
-                     // TODO Render things here
-                   });
-
-  app->context()->renderer->set_graph_builder(builder);
+  builder
+      .add_pass("main",
+                wren::PassResources("swapchain_target")
+                    .add_shader("mesh", mesh_shader)
+                    .add_colour_target(),
+                [](wren::RenderPass& pass, const vk::CommandBuffer& cmd) {
+                  // TODO Render things here
+                })
+      .build()
+      .value();
 
   return {};
 }
