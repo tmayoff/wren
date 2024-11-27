@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <wren/application.hpp>
 #include <wren/assets/manager.hpp>
+#include <wren/physics/ray.hpp>
 
 auto initialize(const std::shared_ptr<wren::Application>& app)
     -> wren::expected<void> {
@@ -13,6 +14,7 @@ auto initialize(const std::shared_ptr<wren::Application>& app)
       WREN_BUILD_ASSETS_DIR
 #endif
   };
+
   wren::assets::Manager asset_manager(asset_paths);
   TRY_RESULT(const auto asset_path,
              asset_manager.find_asset("shaders/mesh.wren_shader"));
@@ -36,6 +38,8 @@ auto initialize(const std::shared_ptr<wren::Application>& app)
   return {};
 }
 
+void update();
+
 auto main() -> int {
   spdlog::set_level(spdlog::level::debug);
 
@@ -45,7 +49,7 @@ auto main() -> int {
     return EXIT_FAILURE;
   }
 
-  auto app = err.value();
+  const auto app = err.value();
 
   const auto init_err = initialize(app);
   if (!init_err.has_value()) {
@@ -53,7 +57,19 @@ auto main() -> int {
     return EXIT_FAILURE;
   }
 
+  app->add_callback_to_phase(wren::CallbackPhase::Update, []() { update(); });
+
   app->run();
 
   return EXIT_SUCCESS;
+}
+
+void update() {
+  // TODO Raycasting here
+
+  wren::physics::RayHit hit;
+  wren::physics::Ray ray;
+  if (wren::physics::raycast(ray, hit)) {
+    spdlog::info("Hit object");
+  }
 }
