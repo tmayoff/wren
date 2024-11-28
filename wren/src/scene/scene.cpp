@@ -6,13 +6,13 @@
 
 namespace wren::scene {
 
-auto Scene::create_entity(const std::string& name) -> flecs::entity {
+auto Scene::create_entity(const std::string& name) -> Entity {
   auto entity = ecs_.entity(name.c_str());
 
   // entity.add_component<components::Tag>(name);
   entity.add<components::Transform>();
 
-  return entity;
+  return {entity, shared_from_this()};
 }
 
 }  // namespace wren::scene
