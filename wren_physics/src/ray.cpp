@@ -18,6 +18,7 @@ auto raycast(const flecs::world& world, const Ray& ray, RayHit& hit) -> bool {
     auto pos = collider->raycast(transform, ray.origin, ray.direction);
     if (pos.has_value()) {
       hit.hit = true;
+      hit.point = pos.value();
     }
   });
 

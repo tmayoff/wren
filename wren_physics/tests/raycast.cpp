@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(RaycastBoxCollider) {
   BOOST_TEST(q.count() == 1);
 
   physics::Ray ray;
-  ray.direction = (math::Vec3f(0) - transform.position);
+  ray.direction = (transform.position - math::Vec3f(0));
 
   physics::RayHit hit{};
   physics::raycast(scene->world(), ray, hit);
