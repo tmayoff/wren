@@ -3,9 +3,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - docs/**
-      - Doxyfile
   workflow_dispatch:
       
 permissions:
@@ -21,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: DeterminateSystems/nix-installer-action@v14
+      - uses: DeterminateSystems/nix-installer-action@v16
       - uses: DeterminateSystems/magic-nix-cache-action@v8
      
       - name: Configure Git Credentials

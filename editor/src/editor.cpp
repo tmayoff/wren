@@ -44,7 +44,7 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app,
                  app->context()->graphics_context->Device().get(), asset_path));
 
   TRY_RESULT(const auto graph, editor->build_render_graph(app->context()));
-  app->context()->renderer->set_graph_builder(graph);
+  TRY_RESULT(graph.build());
 
   editor::ui::init(app->context());
 
