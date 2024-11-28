@@ -36,7 +36,7 @@ auto Entity::has_component() const -> bool {
 
 template <typename T>
 auto Entity::get_component() -> T& {
-  return scene_->world().get<T>(entity_);
+  return *entity_.get_mut<T>();
 }
 
 template <typename T, typename... Args>
