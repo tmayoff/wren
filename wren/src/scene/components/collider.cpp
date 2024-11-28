@@ -20,6 +20,8 @@ auto BoxCollider2D::raycast(const Transform& transform,
     return {};
   }
 
+  // TODO Check if the collision is within the bounds of the plane
+
   return origin + direction * t;
 }
 

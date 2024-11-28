@@ -4,6 +4,11 @@
 #include <wren/application.hpp>
 #include <wren/assets/manager.hpp>
 #include <wren/physics/ray.hpp>
+#include <wren/scene/components/collider.hpp>
+#include <wren/scene/entity.hpp>
+#include <wren/scene/scene.hpp>
+
+namespace components = wren::scene::components;
 
 auto initialize(const std::shared_ptr<wren::Application>& app)
     -> wren::expected<void> {
@@ -38,7 +43,7 @@ auto initialize(const std::shared_ptr<wren::Application>& app)
   return {};
 }
 
-void update();
+void update(const std::shared_ptr<wren::scene::Scene>& scene);
 
 auto main() -> int {
   spdlog::set_level(spdlog::level::debug);
@@ -57,19 +62,27 @@ auto main() -> int {
     return EXIT_FAILURE;
   }
 
-  app->add_callback_to_phase(wren::CallbackPhase::Update, []() { update(); });
+  const auto scene = wren::scene::Scene::create();
+
+  auto quad = scene->create_entity("Quad");
+  quad.add_component<wren::scene::components::BoxCollider2D::Ptr>(
+      new components::BoxCollider2D());
+  auto& collider = quad.get_component<components::BoxCollider2D>();
+
+  app->add_callback_to_phase(wren::CallbackPhase::Update,
+                             [scene]() { update(scene); });
 
   app->run();
 
   return EXIT_SUCCESS;
 }
 
-void update() {
-  // TODO Raycasting here
-
+void update(const std::shared_ptr<wren::scene::Scene>& scene) {
   wren::physics::RayHit hit;
   wren::physics::Ray ray;
-  if (wren::physics::raycast(ray, hit)) {
+  ray.origin = wren::math::Vec3f{100, 0, 1};
+  ray.direction = wren::math::Vec3f{0, 0, -1};
+  if (wren::physics::raycast(scene->world(), ray, hit)) {
     spdlog::info("Hit object");
   }
 }
