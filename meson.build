@@ -51,6 +51,7 @@ subdir('wren_vk')
 # subdir('wren_gltf')
 # subdir('wren_gui')
 subdir('wren')
+subdir('wren_physics')
 # subdir('wren_ecs')
 subdir('editor')
 
