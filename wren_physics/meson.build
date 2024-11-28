@@ -8,3 +8,5 @@ wren_physics_dep = declare_dependency(
     include_directories: 'include',
     link_with: wren_physics,
 )
+
+subdir('tests')

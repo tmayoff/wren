@@ -4,12 +4,14 @@
 
 #include <wren/math/vector.hpp>
 
+#include "../components.hpp"
+
 namespace wren::scene::components {
 
-struct Collider {};
+struct Collider : public Base {};
 
 struct BoxCollider2D : public Collider {
-  BoxCollider2D(const flecs::world& world) {
+  static void init(const flecs::world& world) {
     static bool inited = false;
     if (!inited) {
       inited = true;
