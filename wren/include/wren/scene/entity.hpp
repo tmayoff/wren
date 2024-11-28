@@ -42,9 +42,6 @@ auto Entity::get_component() -> T& {
 template <typename T>
 concept HasInit = requires() { T::init(); };
 
-// template <typename T>
-// concept IsSmartPointer = requires() {};
-
 template <typename T, typename... Args>
 void Entity::add_component(Args&&... args) {
   entity_.add<T>();
