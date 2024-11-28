@@ -17,22 +17,27 @@ BOOST_AUTO_TEST_CASE(RaycastBoxCollider) {
 
   auto box = scene->create_entity("box");
 
-  box.add_component<components::BoxCollider2D>();
+  box.add_component<components::BoxCollider2D::Ptr>(
+      new components::BoxCollider2D());
   auto& transform = box.get_component<components::Transform>();
   transform.position.z(-10);
+  // transform.position.x(1000);
 
-  BOOST_TEST(box.has_component<components::BoxCollider2D>());
+  BOOST_TEST(box.has_component<components::BoxCollider2D::Ptr>());
 
-  const auto q = scene->world().query<components::Collider>();
-  BOOST_TEST(q.count() > 0);
+  const auto q = scene->world().query<const components::Collider::Ptr>();
+  BOOST_TEST(q.count() == 1);
 
   physics::Ray ray;
   ray.direction = (math::Vec3f(0) - transform.position);
 
   physics::RayHit hit{};
-  // physics::raycast(scene->world(), ray, hit);
+  physics::raycast(scene->world(), ray, hit);
 
-  // BOOST_TEST(hit.hit);
+  BOOST_TEST(hit.hit);
+
+  const float length = (hit.point - math::Vec3f{0, 0, -10}).length();
+  BOOST_TEST(length <= 0.001);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

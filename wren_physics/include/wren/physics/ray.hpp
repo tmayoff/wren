@@ -7,7 +7,8 @@
 namespace wren::physics {
 
 struct RayHit {
-  bool hit;
+  bool hit = false;
+  math::Vec3f point;
 };
 
 struct Ray {

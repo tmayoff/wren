@@ -39,6 +39,12 @@ auto Entity::get_component() -> T& {
   return *entity_.get_mut<T>();
 }
 
+template <typename T>
+concept HasInit = requires() { T::init(); };
+
+// template <typename T>
+// concept IsSmartPointer = requires() {};
+
 template <typename T, typename... Args>
 void Entity::add_component(Args&&... args) {
   entity_.add<T>();
@@ -47,7 +53,7 @@ void Entity::add_component(Args&&... args) {
     entity_.set<T>(t);
   }
 
-  if constexpr (T::init) {
+  if constexpr (HasInit<T>) {
     T::init(scene_->world());
   }
 }
