@@ -29,12 +29,12 @@ auto deserialize(const std::filesystem::path& project_root,
 
     for (const auto& [key, val] : entity_table) {
       if (key.str() == "transform") {
-        // auto& t = *entity.get_mut<components::Transform>();
-        // deserialize(*val.as_table(), t);
+        auto& t = entity.get_component<components::Transform>();
+        deserialize(*val.as_table(), t);
       } else if (key.str() == "mesh_renderer") {
-        // components::MeshRenderer mesh_renderer{};
-        // deserialize(*val.as_table(), project_root, mesh_renderer);
-        // entity.emplace<components::MeshRenderer>(mesh_renderer);
+        components::MeshRenderer mesh_renderer{};
+        deserialize(*val.as_table(), project_root, mesh_renderer);
+        entity.add_component<components::MeshRenderer>(mesh_renderer);
       }
     }
   }
