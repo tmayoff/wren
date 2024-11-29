@@ -64,9 +64,8 @@ struct Vec {
 
   [[nodiscard]] constexpr auto dot(const vec_t& other) const {
     T dot = 0;
-    const auto a = this->normalized();
-    const auto b = other.normalized();
-    for (std::size_t i = 0; i < N; i++) dot += a.data.at(i) * b.data.at(i);
+    for (std::size_t i = 0; i < N; i++)
+      dot += this->data.at(i) * other.data.at(i);
     return dot;
   }
 

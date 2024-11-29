@@ -10,19 +10,18 @@ auto BoxCollider2D::raycast(const Transform& transform,
       math::Quaternionf{transform.rotation}.to_mat() * math::Vec3f{0, 0, 1};
 
   float denominator = normal.dot(direction);
-  if (std::abs(denominator) < 0.0001) {
+  if (std::abs(denominator) < 1e-6) {
     return {};
   }
 
-  float t = normal.dot(transform.position - origin) / denominator;
+  // Calculate the position along the ray
+  float t = (transform.position - origin).dot(normal) / denominator;
   if (t < 0) {
     // Intersection points is behind the ray's origin
     return {};
   }
 
-  // TODO Check if the collision is within the bounds of the plane
-
-  const auto point = origin + t * direction;
+  const auto point = origin + direction * t;
   math::Vec3f projected_point = point - transform.position;
   // projected_point -= projected_point.dot(normal) * normal;
 
