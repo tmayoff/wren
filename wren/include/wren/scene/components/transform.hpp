@@ -19,6 +19,16 @@ struct Transform {
 
     return translate * rotate;
   }
+
+  [[nodiscard]] auto right() const {
+    return (math::Quaternionf{rotation}.to_mat() * math::Vec3f{1, 0, 0})
+        .normalized();
+  }
+
+  [[nodiscard]] auto up() const {
+    return (math::Quaternionf{rotation}.to_mat() * math::Vec3f{0, 1, 0})
+        .normalized();
+  }
 };
 
 }  // namespace wren::scene::components

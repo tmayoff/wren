@@ -9,9 +9,9 @@ template <typename T, std::size_t N>
 struct Vec {
   using vec_t = Vec<T, N>;
 
-  static auto UnitX() { return vec_t{1.0f}; }
-  static auto UnitY() { return vec_t{0.0f, 1.0f}; }
-  static auto UnitZ() { return vec_t{0.0f, 0.0f, 1.0f}; }
+  static auto unit_x() { return vec_t{1.0f}; }
+  static auto unit_y() { return vec_t{0.0f, 1.0f}; }
+  static auto unit_z() { return vec_t{0.0f, 0.0f, 1.0f}; }
 
   Vec() : data() {}
 
@@ -22,8 +22,16 @@ struct Vec {
     }
   }
 
-  // template <typename... Args>
-  // Vec(Args&&... d) : data({{std::forward<Args>(d)...}}) {}
+  template <typename... Args>
+  Vec(Args... args)
+    requires(sizeof...(Args) > 1)
+      : data({std::forward<Args>(args)...}) {}
+
+  // Swizzles
+  [[nodiscard]] auto xyz() const {
+    static_assert(N > 3, "xyz swizzle requires 4 or more components ");
+    return Vec<T, 3>{data.at(0), data.at(1), data.at(2)};
+  }
 
   auto at(std::size_t i) -> T& { return data.at(i); }
   [[nodiscard]] auto at(std::size_t i) const { return data.at(i); }
@@ -74,6 +82,12 @@ struct Vec {
     return v;
   }
 
+  constexpr auto operator-=(const vec_t& other) {
+    for (std::size_t i = 0; i < N; i++) {
+      data.at(i) = data.at(i) - other.data.at(i);
+    }
+  }
+
   constexpr auto operator-(const vec_t& other) const {
     vec_t v{};
     for (std::size_t i = 0; i < N; i++)
@@ -112,7 +126,12 @@ struct Vec {
   std::array<T, N> data{};
 };
 
-// struct vec2i : Vec<int, 2> {
+template <typename T, std::size_t N>
+auto operator*(float scalar, Vec<T, N> vec) -> Vec<T, N> {
+  return vec * scalar;
+}
+
+// // struct vec2i : Vec<int, 2> {
 //   vec2i() : Vec<int, 2>() {}
 //   vec2i(int x, int y) : Vec<int, 2>({x, y}) {}
 //   vec2i(const Vec<int, 2>& other) : Vec<int, 2>(other) {}
@@ -123,18 +142,20 @@ struct Vec {
 
 struct Vec2f : Vec<float, 2> {
   Vec2f() : Vec<float, 2>() {}
-  Vec2f(float x, float y) : Vec<float, 2>({x, y}) {}
+  Vec2f(float x, float y) : Vec<float, 2>(x, y) {}
   Vec2f(const Vec<float, 2>& other) : Vec<float, 2>(other) {}
 
   [[nodiscard]] auto x() const { return data.at(0); }
+  auto x(float x) { data.at(0) = x; }
   [[nodiscard]] auto y() const { return data.at(1); }
+  auto y(float y) { data.at(1) = y; }
 };
 
 struct Vec3f : Vec<float, 3> {
   Vec3f() : Vec<float, 3>() {}
   Vec3f(const auto& other) : Vec<float, 3>(other) {}
   // Vec3f(float scalar) : Vec<float, 3>({scalar, scalar, scalar}) {}
-  Vec3f(float x, float y, float z) : Vec<float, 3>({x, y, z}) {}
+  Vec3f(float x, float y, float z) : Vec<float, 3>(x, y, z) {}
   Vec3f(const Vec<float, 3>& other) : Vec<float, 3>(other) {}
 
   [[nodiscard]] auto x() const { return data.at(0); }
@@ -154,9 +175,9 @@ struct Vec3f : Vec<float, 3> {
 struct Vec4f : Vec<float, 4> {
   Vec4f() : Vec<float, 4>() {}
   Vec4f(const auto& other) : Vec<float, 4>(other) {}
-  Vec4f(float x, float y, float z, float w) : Vec<float, 4>({x, y, z, w}) {}
+  Vec4f(float x, float y, float z, float w) : Vec<float, 4>(x, y, z, w) {}
   Vec4f(const Vec3f& vec, float w)
-      : Vec<float, 4>({vec.x(), vec.y(), vec.z(), w}) {}
+      : Vec<float, 4>(vec.x(), vec.y(), vec.z(), w) {}
   Vec4f(const Vec<float, 4>& other) : Vec<float, 4>(other) {}
   // Vec4f(std::array<float, 4> data) : Vec<float, 4>(data) {}
 

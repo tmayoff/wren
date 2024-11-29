@@ -19,9 +19,14 @@ BOOST_AUTO_TEST_CASE(RaycastBoxCollider) {
 
   box.add_component<components::BoxCollider2D::Ptr>(
       new components::BoxCollider2D());
+  auto collider = std::dynamic_pointer_cast<components::BoxCollider2D>(
+      box.get_component<components::BoxCollider2D::Ptr>());
+
+  collider->size.x(1.0);
+  collider->size.y(1.0);
+
   auto& transform = box.get_component<components::Transform>();
   transform.position.z(-10);
-  // transform.position.x(1000);
 
   BOOST_TEST(box.has_component<components::BoxCollider2D::Ptr>());
 
@@ -38,6 +43,14 @@ BOOST_AUTO_TEST_CASE(RaycastBoxCollider) {
 
   const float length = (hit.point - math::Vec3f{0, 0, -10}).length();
   BOOST_TEST(length <= 0.001);
+
+  // Move ray
+  ray.origin = math::Vec3f{100, 0, 1};
+
+  hit.reset();
+
+  physics::raycast(scene->world(), ray, hit);
+  BOOST_TEST(!hit.hit);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

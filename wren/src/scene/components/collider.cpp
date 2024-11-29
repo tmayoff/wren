@@ -22,7 +22,23 @@ auto BoxCollider2D::raycast(const Transform& transform,
 
   // TODO Check if the collision is within the bounds of the plane
 
-  return origin + direction * t;
+  const auto point = origin + t * direction;
+  math::Vec3f projected_point = point - transform.position;
+  // projected_point -= projected_point.dot(normal) * normal;
+
+  const math::Vec3f left_edge = -(transform.right() * size.x() / 2);
+  const math::Vec3f right_edge = (transform.right() * size.x() / 2);
+  const math::Vec3f top_edge = (transform.up() * size.y() / 2);
+  const math::Vec3f bottom_edge = -(transform.up() * size.y() / 2);
+
+  if (projected_point.x() > left_edge.x() &&
+      projected_point.x() < right_edge.x() &&
+      projected_point.y() < top_edge.y() &&
+      projected_point.y() > bottom_edge.y()) {
+    return point;
+  }
+
+  return {};
 }
 
 }  // namespace wren::scene::components
