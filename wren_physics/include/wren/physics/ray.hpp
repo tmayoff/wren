@@ -9,6 +9,11 @@ namespace wren::physics {
 struct RayHit {
   bool hit = false;
   math::Vec3f point;
+
+  void reset() {
+    hit = false;
+    point = math::Vec3f{};
+  }
 };
 
 struct Ray {
