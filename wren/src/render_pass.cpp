@@ -81,7 +81,8 @@ auto RenderPass::create(const std::shared_ptr<Context>& ctx,
   // ===== create pipelines
   for (const auto& [_, shader] : resources.shaders()) {
     TRY_RESULT(shader->create_graphics_pipeline(
-        device.get(), pass->render_pass_, size, depth_target != nullptr));
+        device.get(), device.descriptor_pool(), pass->render_pass_, size,
+        depth_target != nullptr));
   }
 
   pass->recreate_framebuffers(device.get());

@@ -242,7 +242,9 @@ auto Editor::build_render_graph(const std::shared_ptr<wren::Context> &ctx)
             // cmd.draw(6, 1, 0, 0);
 
             pass.bind_pipeline("mesh");
-            pass.write_scratch_buffer(cmd, 0, 0, ubo);
+            // TODO write global UBOs
+
+            // pass.write_scratch_buffer(cmd, 0, 0, ubo);
 
             render_query.each(
                 [cmd, ctx, this](

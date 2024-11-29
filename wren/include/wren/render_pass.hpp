@@ -116,6 +116,9 @@ class RenderPass {
   ::vk::CommandPool command_pool_;
   std::vector<::vk::CommandBuffer> command_buffers_;
 
+  std::map<uint32_t, ::vk::DescriptorSet> descriptor_sets_;
+  ::vk::DescriptorSet descriptor_set_;
+
   std::shared_ptr<RenderTarget> colour_target_;
   std::shared_ptr<RenderTarget> depth_target_;
 
@@ -143,11 +146,10 @@ void RenderPass::write_scratch_buffer(const ::vk::CommandBuffer& cmd,
   buffer->set_data_raw(&data, sizeof(T));
 
   ::vk::DescriptorBufferInfo buffer_info(buffer->get(), 0, sizeof(T));
-  std::array writes = {::vk::WriteDescriptorSet{
-      {}, binding, 0, ::vk::DescriptorType::eUniformBuffer, {}, buffer_info}};
 
-  cmd.pushDescriptorSetKHR(::vk::PipelineBindPoint::eGraphics,
-                           last_bound_shader_->pipeline_layout(), set, writes);
+  cmd.bindDescriptorSets(::vk::PipelineBindPoint::eGraphics,
+                         last_bound_shader_->pipeline_layout(), set,
+                         last_bound_shader_->desciptor_sets().front(), {});
 }
 
 }  // namespace wren
