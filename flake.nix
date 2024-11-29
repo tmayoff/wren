@@ -1,6 +1,16 @@
 {
   description = "Wren game engine";
 
+  nixConfig = {
+    extra-substituters = [
+      "https://tmayoff.cachix.org"
+    ];
+
+    extra-trusted-public-keys = [
+      "tmayoff.cachix.org-1:MxpzBMSFgtdDe1ZoDdENnwaRGmworx1aSRriKDpXFn8="
+    ];
+  };
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -39,11 +49,38 @@
           ];
         };
 
+        slang = pkgs.stdenv.mkDerivation rec {
+          pname = "slang";
+          version = "v2024.14.5";
+          src = pkgs.fetchFromGitHub {
+            owner = "shader-slang";
+            repo = "slang";
+            rev = "${version}";
+            hash = "sha256-s6I400tcHcPYY/YhR+jxHUazdhJLyZoYyFAMQlh0L6E=";
+            fetchSubmodules = true;
+          };
+
+          nativeBuildInputs = with pkgs; [
+            cmake
+            python311
+            ninja
+          ];
+
+          configurePhase = ''
+            cmake --preset default -DSLANG_ENABLE_TESTS=Off -DSLANG_ENABLE_GFX=Off
+          '';
+
+          buildPhase = ''
+            cmake --build --preset release -j4
+          '';
+        };
+
         rawNativeBuildInputs = with pkgs; [
           pkg-config
           meson
           cmake
           ninja
+          slang
         ];
 
         rawBuildInputs = with pkgs; [

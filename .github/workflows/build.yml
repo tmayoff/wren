@@ -21,6 +21,12 @@ jobs:
     - uses: DeterminateSystems/flake-checker-action@v9
     - uses: DeterminateSystems/magic-nix-cache-action@v8
 
+    - uses: cachix/install-nix-action@v25
+    - uses: cachix/cachix-action@v14
+      with:
+        name: tmayoff
+        authToken: '${{ secrets.CACHIX_AUTH }}'
+
     # Build
     - name: Setup sccache
       uses: mozilla-actions/sccache-action@v0.0.6
