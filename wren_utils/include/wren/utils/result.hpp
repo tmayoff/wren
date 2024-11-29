@@ -1,12 +1,9 @@
 #pragma once
 
-#include <fmt/core.h>
-#include <fmt/format.h>
-#include <fmt/ostream.h>
-
 #include <boost/describe.hpp>
 #include <boost/preprocessor.hpp>
 #include <expected>
+#include <format>
 #include <optional>
 #include <system_error>
 
@@ -51,8 +48,8 @@ using expected = std::expected<T, Err>;
 }  // namespace wren
 
 template <>
-struct fmt::formatter<wren::Err> : fmt::formatter<std::string> {
-  auto format(wren::Err, fmt::format_context& ctx) const -> decltype(ctx.out());
+struct std::formatter<wren::Err> : std::formatter<std::string> {
+  auto format(wren::Err, std::format_context& ctx) const -> decltype(ctx.out());
 };
 
 //! @brief This macro creates the hooks into std::error_code for a
