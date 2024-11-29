@@ -15,7 +15,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - uses: DeterminateSystems/nix-installer-action@v14
+    - uses: DeterminateSystems/nix-installer-action@v16
     - uses: DeterminateSystems/magic-nix-cache-action@v8
 
     - uses: mozilla-actions/sccache-action@v0.0.6
@@ -27,7 +27,7 @@ jobs:
     - name: coverage
       run:  nix develop --command just coverage
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5
       with:
         files: build/coverage.info
         token: ${{ secrets.CODECOV_TOKEN }}
