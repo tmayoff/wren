@@ -18,6 +18,7 @@ namespace wren {
 class Err {
  public:
   template <typename T>
+    requires std::is_error_code_enum_v<T>
   Err(T error) : error_code_(make_error_code(error)) {}
   Err(const std::error_code& ec) : error_code_(ec) {}
   Err(int32_t ec, const std::error_category& e_cat) : error_code_(ec, e_cat) {}
