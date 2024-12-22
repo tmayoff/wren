@@ -2,10 +2,10 @@
 #include <wren/math/utils.hpp>
 #include <wren/math/vector.hpp>
 
-BOOST_AUTO_TEST_SUITE(VECTOR)
+BOOST_AUTO_TEST_SUITE(vector_test_suite)
 
-BOOST_AUTO_TEST_CASE(ADD_SUB) {
-  enum class OP { kAdd, kSub };
+BOOST_AUTO_TEST_CASE(AddSub) {
+  enum class OP { Add, Sub };
 
   struct Test {
     wren::math::Vec2f a;
@@ -13,21 +13,28 @@ BOOST_AUTO_TEST_CASE(ADD_SUB) {
 
     wren::math::Vec2f expected;
 
-    OP op = OP::kAdd;
+    OP op = OP::Add;
   };
 
   std::array tests = {
-      Test{{5.0f, 5.0f}, {10.0f, 10.0f}, {15.0f, 15.0f}},
-      Test{{5.0f, 5.0f}, {10.0f, 10.0f}, {-5.0f, -5.0f}, OP::kSub},
+      Test{
+          .a = {5.0f, 5.0f},
+          .b = {10.0f, 10.0f},
+          .expected = {15.0f, 15.0f},
+      },
+      Test{.a = {5.0f, 5.0f},
+           .b = {10.0f, 10.0f},
+           .expected = {-5.0f, -5.0f},
+           .op = OP::Sub},
   };
 
-  for (auto const& test : tests) {
+  for (const auto& test : tests) {
     wren::math::Vec2f c;
     switch (test.op) {
-      case OP::kAdd:
+      case OP::Add:
         c = test.a + test.b;
         break;
-      case OP::kSub:
+      case OP::Sub:
         c = test.a - test.b;
         break;
     }
@@ -45,11 +52,19 @@ BOOST_AUTO_TEST_CASE(MUL) {
   };
 
   std::array tests = {
-      Test{{5, 5}, 10, {50, 50}},
-      Test{{5, 5}, -1, {-5, -5}},
+      Test{
+          .a = {5, 5},
+          .scalar = 10,
+          .expected = {50, 50},
+      },
+      Test{
+          .a = {5, 5},
+          .scalar = -1,
+          .expected = {-5, -5},
+      },
   };
 
-  for (auto const& test : tests) {
+  for (const auto& test : tests) {
     wren::math::Vec2f c = test.a * test.scalar;
     BOOST_TEST(c == test.expected);
   }
@@ -63,12 +78,12 @@ BOOST_AUTO_TEST_CASE(DOT) {
   };
 
   std::array tests = {
-      Test{{10, 10, 10}, {10, 10, 10}, 1},
-      Test{{10, 10, 10}, {15, 15, 15}, 1},
-      Test{{10, 10, 10}, {-10, -10, -10}, -1},
+      Test{.a = {0.5, 0.5, 0}, .b = {0.5, 0.5, 0}, .expected = 0.5},
+      Test{.a = {1, 1, 0}, .b = {1, 1, 0}, .expected = 2},
+      Test{.a = {0.5, 0.5, 0}, .b = {-0.5, -0.5, 0}, .expected = -0.5},
   };
 
-  for (auto const& test : tests) {
+  for (const auto& test : tests) {
     float got = test.a.dot(test.b);
     BOOST_TEST(got == test.expected, boost::test_tools::tolerance(0.01F));
   }
@@ -82,12 +97,12 @@ BOOST_AUTO_TEST_CASE(CROSS) {
   };
 
   std::array tests = {
-      Test{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
-      Test{{0, 1, 0}, {0, 0, 1}, {1, 0, 0}},
-      Test{{0, 0, 1}, {1, 0, 0}, {0, 1, 0}},
+      Test{.a = {1, 0, 0}, .b = {0, 1, 0}, .expected = {0, 0, 1}},
+      Test{.a = {0, 1, 0}, .b = {0, 0, 1}, .expected = {1, 0, 0}},
+      Test{.a = {0, 0, 1}, .b = {1, 0, 0}, .expected = {0, 1, 0}},
   };
 
-  for (auto const& test : tests) {
+  for (const auto& test : tests) {
     auto got = test.a % test.b;
     BOOST_TEST(got == test.expected);
   }
