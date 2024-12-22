@@ -98,7 +98,7 @@
             [
               vulkan-tools
               llvmPackages_19.clang-tools
-              # llvmPackages_17.libllvm
+              llvmPackages_19.libllvm
               sccache
 
               just
