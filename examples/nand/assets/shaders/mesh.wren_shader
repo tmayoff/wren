@@ -3,7 +3,7 @@
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
-layout(location = 2) in vec4 in_color;
+layout(location = 2) in vec4 in_colour;
 
 layout(binding = 0) uniform GLOBALS {
     mat4 view;
@@ -16,22 +16,11 @@ layout(binding = 1) uniform LOCALS {
 
 layout(location = 0) out FRAGMENT {
   vec4 colour;
-  vec3 normal;
-  vec3 light_pos;
-  vec3 position;
 } out_frag;
-
-vec3 light_position = {100.0, -200.0, 0.0};
 
 void main() {
     gl_Position = globals.proj * globals.view * locals.model * vec4(in_position, 1.0);
-
-    out_frag.colour = in_color;
-
-    // Instead of `mat3(transpose(inverse(locals.model)))` it should be `locals.normal_matrix * in_normal;`
-    out_frag.normal = mat3(transpose(inverse(locals.model))) * in_normal;
-    out_frag.light_pos = vec3(globals.proj * globals.view * vec4(light_position, 1.0));
-    out_frag.position = vec3(locals.model * vec4(in_position, 1.0));
+    out_frag.colour = in_colour;
 }
 
 ##type fragment
@@ -39,27 +28,10 @@ void main() {
 
 layout(location = 0) in FRAGMENT {
   vec4 colour;
-  vec3 normal;
-  vec3 light_pos;
-  vec3 position;
 } in_frag;
 
 layout(location = 0) out vec4 out_colour;
 
-vec3 light_colour = {1, 1, 1};
-vec3 light_dir = {-1, 1, 0};
-
 void main() {
-    float ambient_strength = 0.5;
-    vec3 ambient = ambient_strength * light_colour;
-
-    vec3 norm = normalize(in_frag.normal);
-    // vec3 light_dir = normalize(in_frag.light_pos - in_frag.position);
-    vec3 light_dir = normalize(vec3(0.3, 0.8, 0.2));
-
-    float diff = max(dot(norm, light_dir), 0.0);
-    vec3 diffuse = diff * light_colour;
-    
-    vec3 result = (ambient + diffuse) * in_frag.colour.xyz;
-    out_colour = vec4(result.xyz, in_frag.colour.w);
+    out_colour = in_frag.colour;
 }
