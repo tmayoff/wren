@@ -13,31 +13,74 @@ namespace math = wren::math;
 BOOST_AUTO_TEST_SUITE(raycasting)
 
 BOOST_AUTO_TEST_CASE(RaycastBoxCollider) {
-  const auto scene = wren::scene::Scene::create();
+  struct Test {
+    math::Vec3f ray_pos;
+    math::Vec3f ray_dir;
+    math::Vec3f obj_pos;
+    std::optional<math::Vec3f> hit_point;
+  };
 
-  auto box = scene->create_entity("box");
+  std::array tests = {
+      Test{
+          .ray_pos = {},
+          .ray_dir = {0, 0, -1},
+          .obj_pos = {0, 0, -10},
+          .hit_point = math::Vec3f{0, 0, -10},
+      },
+      Test{
+          .ray_pos = {100, 0, 1},
+          .ray_dir = {0, 0, -1},
+          .obj_pos = {0, 0, -10},
+          .hit_point = {},
+      },
+      Test{
+          .ray_pos = {0, 0, 1},
+          .ray_dir = {-0.1, 0.0, -1.0},
+          .obj_pos = {0, 0, 0},
+          .hit_point = math::Vec3f{-0.1, 0, 0},
+      },
+  };
 
-  box.add_component<components::BoxCollider2D::Ptr>(
-      new components::BoxCollider2D());
-  auto& transform = box.get_component<components::Transform>();
-  transform.position.z(-10);
-  // transform.position.x(1000);
+  size_t index = 0;
+  for (const auto test : tests) {
+    BOOST_TEST_INFO_SCOPE(index);
 
-  BOOST_TEST(box.has_component<components::BoxCollider2D::Ptr>());
+    const auto scene = wren::scene::Scene::create();
 
-  const auto q = scene->world().query<const components::Collider::Ptr>();
-  BOOST_TEST(q.count() == 1);
+    auto box = scene->create_entity("box");
 
-  physics::Ray ray;
-  ray.direction = (transform.position - math::Vec3f(0));
+    box.add_component<components::BoxCollider2D::Ptr>(
+        new components::BoxCollider2D());
+    auto collider = std::dynamic_pointer_cast<components::BoxCollider2D>(
+        box.get_component<components::BoxCollider2D::Ptr>());
 
-  physics::RayHit hit{};
-  physics::raycast(scene->world(), ray, hit);
+    collider->size.x(1.0);
+    collider->size.y(1.0);
 
-  BOOST_TEST(hit.hit);
+    auto& transform = box.get_component<components::Transform>();
+    transform.position = test.obj_pos;
 
-  const float length = (hit.point - math::Vec3f{0, 0, -10}).length();
-  BOOST_TEST(length <= 0.001);
+    BOOST_TEST(box.has_component<components::BoxCollider2D::Ptr>());
+
+    const auto q = scene->world().query<const components::Collider::Ptr>();
+    BOOST_TEST(q.count() == 1);
+
+    physics::Ray ray;
+    ray.origin = test.ray_pos;
+    ray.direction = test.ray_dir.normalized();
+
+    physics::RayHit hit{};
+    physics::raycast(scene->world(), ray, hit);
+
+    BOOST_TEST(hit.hit == test.hit_point.has_value());
+
+    if (test.hit_point.has_value()) {
+      const float length = (hit.point - test.hit_point.value()).length();
+      BOOST_TEST(length <= 0.001);
+    }
+
+    ++index;
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
