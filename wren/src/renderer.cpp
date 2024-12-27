@@ -59,7 +59,7 @@ void Renderer::end_frame(uint32_t image_index) {
       ::vk::PipelineStageFlagBits::eColorAttachmentOutput;
 
   std::vector<::vk::CommandBuffer> cmd_bufs;
-  for (auto g : render_graph) {
+  for (auto g : render_graph_) {
     ZoneScopedN("render_pass->execute()");
     g->render_pass->execute();
     const auto bufs = g->render_pass->get_command_buffers();
@@ -119,7 +119,7 @@ Renderer::Renderer(const std::shared_ptr<Context> &ctx)
         recreate_swapchain();
 
         // Resize the 'swapchain_target' render pass and it's targets
-        for (const auto &n : render_graph) {
+        for (const auto &n : render_graph_) {
           if (n->render_pass->resources().target_prefix() ==
               "swapchain_target") {
             n->render_pass->resize_target({w.width, w.height});
@@ -289,7 +289,7 @@ auto Renderer::recreate_swapchain() -> expected<void> {
     target->view(swapchain_image_views_.front());
   }
 
-  for (const auto &g : render_graph)
+  for (const auto &g : render_graph_)
     g->render_pass->recreate_framebuffers(
         ctx_->graphics_context->Device().get());
 

@@ -11,6 +11,7 @@ wren = library(
         'src/render_pass.cpp',
         'src/render_target.cpp',
         'src/renderer.cpp',
+        'src/scene/components/collider.cpp',
         'src/scene/deserialization.cpp',
         'src/scene/scene.cpp',
         'src/scene/serialization.cpp',

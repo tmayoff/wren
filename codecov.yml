@@ -1,0 +1,7 @@
+coverage:
+  status:
+    project: false
+ignore:
+  - "examples"
+  - "tools"
+  - "subprojects"
