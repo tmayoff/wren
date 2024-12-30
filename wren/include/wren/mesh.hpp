@@ -30,15 +30,37 @@ const std::array kTriangleVertices = {
 };
 
 const std::array kQuadVertices = {
-    Vertex{.pos = {-0.5f, -0.5f, 0.0f}, .normal = {1.0f, 0.0f, 0.0f}},
-    Vertex{.pos = {0.5f, -0.5f, 0.0f}, .normal = {0.0f, 1.0f, 0.0f}},
-    Vertex{.pos = {0.5f, 0.5f, 0.0f}, .normal = {0.0f, 0.0f, 1.0f}},
-    Vertex{.pos = {-0.5f, 0.5f, 0.0f}, .normal = {1.0f, 1.0f, 1.0f}}};
+    Vertex{
+        .pos = {-0.5f, -0.5f, 0.0f},
+        .normal = {1.0f, 0.0f, 0.0f},
+        .colour = {1, 1, 1, 1},
+    },
+    Vertex{
+        .pos = {0.5f, -0.5f, 0.0f},
+        .normal = {0.0f, 1.0f, 0.0f},
+        .colour = {1, 1, 1, 1},
+    },
+    Vertex{
+        .pos = {0.5f, 0.5f, 0.0f},
+        .normal = {0.0f, 0.0f, 1.0f},
+        .colour = {1, 1, 1, 1},
+    },
+    Vertex{
+        .pos = {-0.5f, 0.5f, 0.0f},
+        .normal = {1.0f, 1.0f, 1.0f},
+        .colour = {1, 1, 1, 1},
+    },
+};
 
-const std::vector<uint16_t> kQuadIndices = {0, 1, 2, 2, 3, 0};
+const std::vector<uint16_t> kQuadIndices = {0, 2, 1, 0, 3, 2};
 
 class Mesh {
  public:
+  static auto create_quad() -> Mesh {
+    return {std::vector<Vertex>{kQuadVertices.begin(), kQuadVertices.end()},
+            std::vector<uint16_t>{kQuadIndices.begin(), kQuadIndices.end()}};
+  }
+
   Mesh() = default;
 
   Mesh(const vulkan::Device& device, VmaAllocator allocator);
