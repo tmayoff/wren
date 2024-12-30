@@ -20,12 +20,15 @@ class Device {
 
   [[nodiscard]] auto command_pool() const { return command_pool_; }
 
+  [[nodiscard]] auto descriptor_pool() const { return descriptor_pool_; }
+
  private:
   auto create_device(const ::vk::Instance &instance,
                      const ::vk::PhysicalDevice &physical_device,
                      const ::vk::SurfaceKHR &surface) -> expected<void>;
 
   ::vk::CommandPool command_pool_;
+  ::vk::DescriptorPool descriptor_pool_;
   ::vk::Device device_;
   ::vk::Queue graphics_queue_;
   ::vk::Queue present_queue_;
