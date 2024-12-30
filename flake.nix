@@ -23,8 +23,6 @@
           inherit system overlays;
         };
 
-        boost = pkgs.boost185;
-
         flecs = pkgs.stdenv.mkDerivation {
           name = "flecs";
           src = pkgs.fetchFromGitHub {
@@ -129,8 +127,8 @@
             ++ rawBuildInputs;
 
           SPIRV_INCLUDEDIR = "${pkgs.lib.getDev pkgs.spirv-headers}";
-          BOOST_INCLUDEDIR = "${pkgs.lib.getDev boost}/include";
-          BOOST_LIBRARYDIR = "${pkgs.lib.getLib boost}/lib";
+          BOOST_INCLUDEDIR = "${pkgs.lib.getDev pkgs.boost}/include";
+          BOOST_LIBRARYDIR = "${pkgs.lib.getLib pkgs.boost}/lib";
 
           shellHook = ''
             export VK_ICD_FILENAMES=$(nixVulkanIntel printenv VK_ICD_FILENAMES)
