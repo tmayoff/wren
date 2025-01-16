@@ -82,7 +82,7 @@ void update(const std::shared_ptr<wren::scene::Scene>& scene);
 auto main() -> int {
   spdlog::set_level(spdlog::level::debug);
 
-  const auto& err = wren::Application::Create("Editor");
+  const auto& err = wren::Application::Create("nand");
   if (!err.has_value()) {
     spdlog::error("failed to create application: {}", err.error().message());
     return EXIT_FAILURE;
