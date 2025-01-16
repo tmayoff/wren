@@ -37,15 +37,15 @@ inline auto ortho(T left, T right, T bottom, T top) {
 }
 
 template <typename T>
-inline auto ortho(T left, T right, T bottom, T top, T z_near, T z_far) {
+inline auto ortho(T left, T right, T bottom, T top, T near, T far) {
   Mat4f res = Mat4f::identity();
-  // TODO test this
+
   res.at(0, 0) = static_cast<T>(2) / (right - left);
-  res.at(1, 1) = static_cast<T>(2) / (top - bottom);
-  res.at(2, 2) = static_cast<T>(1) / (z_far - z_near);
+  res.at(1, 1) = static_cast<T>(2) / (bottom - top);
+  res.at(2, 2) = static_cast<T>(1) / (near - far);
   res.at(3, 0) = -(right + left) / (right - left);
-  res.at(3, 1) = -(top + bottom) / (top - bottom);
-  res.at(3, 2) = -z_near / (z_far - z_near);
+  res.at(3, 1) = -(bottom + top) / (bottom - top);
+  res.at(3, 2) = near / (near - far);
   return res;
 }
 
