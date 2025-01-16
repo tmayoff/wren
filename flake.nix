@@ -49,7 +49,7 @@
 
         slang = pkgs.stdenv.mkDerivation rec {
           pname = "slang";
-          version = "v2024.14.5";
+          version = "v2025.2.1";
           src = pkgs.fetchFromGitHub {
             owner = "shader-slang";
             repo = "slang";
@@ -58,19 +58,11 @@
             fetchSubmodules = true;
           };
 
-          nativeBuildInputs = with pkgs; [
-            cmake
-            python311
-            ninja
-          ];
+          cmakeFlags = ["-DSLANG_SLANG_LLVM_FLAVOR=USE_SYSTEM_LLVM"];
 
-          configurePhase = ''
-            cmake --preset default -DSLANG_ENABLE_TESTS=Off -DSLANG_ENABLE_GFX=Off
-          '';
+          nativeBuildInputs = with pkgs; [cmake python3];
 
-          buildPhase = ''
-            cmake --build --preset release -j4
-          '';
+          buildInputs = with pkgs; [llvmPackages_13.libllvm llvmPackages_13.clang-unwrapped xorg.libX11];
         };
 
         rawNativeBuildInputs = with pkgs; [
