@@ -54,7 +54,7 @@
             owner = "shader-slang";
             repo = "slang";
             rev = "${version}";
-            hash = "sha256-oNG1PQGBTryV+D9cqZcWoaw52KiwuaR4ZduxvMOBHSw";
+            hash = "sha256-oNG1PQGBTryV+D9cqZcWoaw52KiwuaR4ZduxvMOBHSw=";
             fetchSubmodules = true;
           };
 
