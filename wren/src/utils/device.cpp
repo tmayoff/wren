@@ -42,20 +42,23 @@ auto Device::create_device(const ::vk::Instance &instance,
 
     ::vk::DeviceCreateInfo create_info({}, queue_create_info, {}, extensions,
                                        {}, &features2);
-    auto res = physical_device.createDevice(create_info);
-    if (res.result != ::vk::Result::eSuccess)
-      return std::unexpected(make_error_code(res.result));
-    device_ = res.value;
+    VK_TIE_RESULT(device_, physical_device.createDevice(create_info));
     VULKAN_HPP_DEFAULT_DISPATCHER.init(device_);
   }
 
   graphics_queue_ = device_.getQueue(indices->graphics_index, 0);
   present_queue_ = device_.getQueue(indices->present_index, 0);
 
-  {
-    const ::vk::CommandPoolCreateInfo create_info({}, indices->graphics_index);
-    VK_TIE_ERR_PROP(command_pool_, device_.createCommandPool(create_info));
-  }
+  // ====== Commmand Pool
+  const ::vk::CommandPoolCreateInfo create_info({}, indices->graphics_index);
+  VK_TIE_ERR_PROP(command_pool_, device_.createCommandPool(create_info));
+
+  // ====== Descriptor Pool
+  const ::vk::DescriptorPoolSize pool_size{::vk::DescriptorType::eUniformBuffer,
+                                           3};
+  VK_TIE_RESULT(descriptor_pool_,
+                device_.createDescriptorPool(
+                    ::vk::DescriptorPoolCreateInfo{{}, 3, pool_size}));
 
   return {};
 }
