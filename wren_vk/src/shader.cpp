@@ -129,6 +129,8 @@ auto Shader::create(const ::vk::Device &device,
 
   TRY_RESULT(auto shaders, read_wren_shader_file(shader_path));
 
+  // TODO load SPIR-V shader? Or compile slang here
+
   for (const auto &[type, content] : shaders) {
     const auto p = shader_path / utils::enum_to_string(type);
     switch (type) {
