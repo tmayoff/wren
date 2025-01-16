@@ -49,12 +49,12 @@
 
         slang = pkgs.stdenv.mkDerivation rec {
           pname = "slang";
-          version = "v2025.2.1";
+          version = "v2025.1";
           src = pkgs.fetchFromGitHub {
             owner = "shader-slang";
             repo = "slang";
             rev = "${version}";
-            hash = "sha256-oNG1PQGBTryV+D9cqZcWoaw52KiwuaR4ZduxvMOBHSw=";
+            hash = "sha256-uTf2GOEaqcZ8ZKGBFit5UU1JycMLYpKSq0Zvxxct+JI=";
             fetchSubmodules = true;
           };
 
