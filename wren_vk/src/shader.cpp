@@ -157,6 +157,22 @@ auto Shader::create(const ::vk::Device &device,
   return shader;
 }
 
+auto Shader::create(const ::vk::Device &device,
+                    const std::span<const uint32_t> spirv_data)
+    -> expected<Ptr> {
+  const auto shader = std::make_shared<Shader>();
+
+  ::vk::ShaderModuleCreateInfo create_info({}, spirv_data);
+  VK_TRY_RESULT(module, device.createShaderModule(create_info));
+
+  ShaderModule m({spirv_data.begin(), spirv_data.end()}, module);
+
+  shader->vertex_shader(m);
+  shader->fragment_shader(m);
+
+  return shader;
+}
+
 auto Shader::compile_shader(const ::vk::Device &device,
                             const shaderc_shader_kind &shader_kind,
                             const std::string &filename,

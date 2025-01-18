@@ -63,6 +63,9 @@ class Shader {
   static auto create(const ::vk::Device &device,
                      const std::filesystem::path &shader_path) -> expected<Ptr>;
 
+  static auto create(const ::vk::Device &device,
+                     const std::span<const uint32_t> spirv_data) -> expected<Ptr>;
+
   static auto compile_shader(const ::vk::Device &device,
                              const shaderc_shader_kind &shader_kind,
                              const std::string &filename,

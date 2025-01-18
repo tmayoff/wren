@@ -1,7 +1,9 @@
 #include "editor.hpp"
 
+#include <span>
 #include <wren/render_target.hpp>
 
+#include "editor_mesh.hpp"
 #include "filesystem_panel.hpp"
 #include "inspector_panel.hpp"
 #include "scene_panel.hpp"
@@ -39,9 +41,10 @@ auto Editor::create(const std::shared_ptr<wren::Application> &app,
              editor->editor_context_.asset_manager.find_asset(
                  "shaders/editor_mesh.wren_shader"));
 
-  TRY_RESULT(editor->mesh_shader_,
-             wren::vk::Shader::create(
-                 app->context()->graphics_context->Device().get(), asset_path));
+  TRY_RESULT(
+      editor->mesh_shader_,
+      wren::vk::Shader::create(app->context()->graphics_context->Device().get(),
+                               std::span(editor_mesh)));
 
   TRY_RESULT(const auto graph, editor->build_render_graph(app->context()));
   TRY_RESULT(graph.build());
