@@ -1,4 +1,4 @@
-deps = [wren_dep, imgui, tracy]
+deps = [wren_dep, imgui, tracy, backward]
 
 shaders = custom_target(
     command: [
@@ -9,6 +9,7 @@ shaders = custom_target(
         '-source-embed-language', 'cpp',
         '-source-embed-name', 'editor_mesh',
         '-source-embed-style', 'default',
+        '-preserve-params',
     ],
     input: ['assets/shaders/editor_mesh.slang'],
     output: ['editor_mesh.hpp'],

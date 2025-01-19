@@ -4,6 +4,7 @@ cpp = meson.get_compiler('cpp')
 
 buildtype = get_option('buildtype')
 
+backward = dependency('backward-cpp')
 fmt = dependency('fmt')
 spdlog = dependency('spdlog')
 vulkan = dependency('vulkan')
@@ -33,7 +34,7 @@ add_project_arguments(
     language: 'cpp',
 )
 
-if get_option('buildtype') == 'debug'
+if buildtype == 'debug'
     add_project_arguments('-DWREN_DEBUG', language: 'cpp')
 endif
 

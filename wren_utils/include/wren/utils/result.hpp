@@ -19,9 +19,14 @@ class Err {
  public:
   template <typename T>
     requires std::is_error_code_enum_v<T>
-  Err(T error) : error_code_(make_error_code(error)) {}
-  Err(const std::error_code& ec) : error_code_(ec) {}
-  Err(int32_t ec, const std::error_category& e_cat) : error_code_(ec, e_cat) {}
+  Err(T error, std::source_location loc = std::source_location::current())
+      : error_code_(make_error_code(error)), loc_(loc) {}
+  Err(const std::error_code& ec,
+      std::source_location loc = std::source_location::current())
+      : error_code_(ec), loc_(loc) {}
+  Err(int32_t ec, const std::error_category& e_cat,
+      std::source_location loc = std::source_location::current())
+      : error_code_(ec, e_cat), loc_(loc) {}
 
   [[nodiscard]] auto error() const { return error_code_; }
 
@@ -29,9 +34,13 @@ class Err {
 
   [[nodiscard]] auto extra_msg() const { return extra_message_; }
 
+  [[nodiscard]] auto location() const { return loc_; }
+
  private:
   std::error_code error_code_;
   std::optional<std::string> extra_message_;
+
+  std::source_location loc_;
 };
 
 // struct error_code : public std::error_code {

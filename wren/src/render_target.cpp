@@ -22,7 +22,7 @@ auto RenderTarget::create(const std::shared_ptr<Context> &ctx)
                         ctx->graphics_context->allocator(), target->format_,
                         target->size_, target->image_usage_));
 
-  target->transition_fn_ = [&target, ctx]() -> expected<void> {
+  target->transition_fn_ = [target = target.get(), ctx]() -> expected<void> {
     // transition image
     if (target->image_.has_value()) {
       TRY_RESULT(ctx->renderer->submit_command_buffer(

@@ -85,7 +85,6 @@
           vulkan-headers
           vulkan-loader
           vulkan-memory-allocator
-          shaderc
           spirv-headers
 
           flecs
@@ -151,7 +150,10 @@
               mesonlsp
               vulkan-validation-layers
 
+              backward-cpp
+
               pkgs.nixgl.nixVulkanIntel
+              pkgs.nixgl.auto.nixGLDefault
             ]
             ++ rawBuildInputs;
 
