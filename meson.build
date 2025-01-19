@@ -24,6 +24,8 @@ flecs = dependency('flecs')
 toml = dependency('tomlplusplus')
 # json = dependency('nlohmann_json')
 
+slangc = find_program('slangc')
+
 add_project_arguments(
     '-DVULKAN_HPP_NO_EXCEPTIONS',
     '-DVUKLAN_HPP_ASSERT_ON_RESULT(x)',
@@ -31,7 +33,7 @@ add_project_arguments(
     language: 'cpp',
 )
 
-if get_option('buildtype') == 'debug'
+if buildtype == 'debug'
     add_project_arguments('-DWREN_DEBUG', language: 'cpp')
 endif
 

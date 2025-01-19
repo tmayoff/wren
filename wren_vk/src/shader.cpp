@@ -129,6 +129,8 @@ auto Shader::create(const ::vk::Device &device,
 
   TRY_RESULT(auto shaders, read_wren_shader_file(shader_path));
 
+  // TODO load SPIR-V shader? Or compile slang here
+
   for (const auto &[type, content] : shaders) {
     const auto p = shader_path / utils::enum_to_string(type);
     switch (type) {
@@ -151,6 +153,22 @@ auto Shader::create(const ::vk::Device &device,
       }
     }
   }
+
+  return shader;
+}
+
+auto Shader::create(const ::vk::Device &device,
+                    const std::span<const uint32_t> spirv_data)
+    -> expected<Ptr> {
+  const auto shader = std::make_shared<Shader>();
+
+  ::vk::ShaderModuleCreateInfo create_info({}, spirv_data);
+  VK_TRY_RESULT(module, device.createShaderModule(create_info));
+
+  ShaderModule m({spirv_data.begin(), spirv_data.end()}, module);
+
+  shader->vertex_shader(m);
+  shader->fragment_shader(m);
 
   return shader;
 }
