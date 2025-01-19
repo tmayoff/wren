@@ -1,4 +1,4 @@
-deps = [wren_dep, imgui, tracy, backward]
+deps = [wren_dep, imgui, tracy]
 
 shaders = custom_target(
     command: [

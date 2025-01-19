@@ -4,7 +4,6 @@ cpp = meson.get_compiler('cpp')
 
 buildtype = get_option('buildtype')
 
-backward = dependency('backward-cpp')
 fmt = dependency('fmt')
 spdlog = dependency('spdlog')
 vulkan = dependency('vulkan')

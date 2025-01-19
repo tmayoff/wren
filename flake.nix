@@ -150,10 +150,7 @@
               mesonlsp
               vulkan-validation-layers
 
-              backward-cpp
-
               pkgs.nixgl.nixVulkanIntel
-              pkgs.nixgl.auto.nixGLDefault
             ]
             ++ rawBuildInputs;
 
