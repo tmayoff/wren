@@ -16,9 +16,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: DeterminateSystems/nix-installer-action@v16
-    - uses: DeterminateSystems/magic-nix-cache-action@v8
+    - uses: DeterminateSystems/magic-nix-cache-action@v9
 
-    - uses: mozilla-actions/sccache-action@v0.0.6
+    - uses: mozilla-actions/sccache-action@v0.0.7
 
     - name: build & test
       run: |
