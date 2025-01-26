@@ -19,7 +19,7 @@ jobs:
     # Nix
     - uses: DeterminateSystems/nix-installer-action@v16
     - uses: DeterminateSystems/flake-checker-action@v9
-    - uses: DeterminateSystems/magic-nix-cache-action@v8
+    - uses: DeterminateSystems/magic-nix-cache-action@v9
 
     - uses: cachix/install-nix-action@v25
     - uses: cachix/cachix-action@v14
