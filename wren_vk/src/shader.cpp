@@ -228,7 +228,7 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
   ::vk::PipelineViewportStateCreateInfo viewport_state{{}, viewport, scissor};
 
   ::vk::PipelineRasterizationStateCreateInfo rasterization(
-      {}, false, false, ::vk::PolygonMode::eFill, ::vk::CullModeFlagBits::eBack,
+      {}, false, false, ::vk::PolygonMode::eFill, ::vk::CullModeFlagBits::eNone,
       ::vk::FrontFace::eCounterClockwise, false, {}, {}, {}, 1.0f);
 
   ::vk::PipelineMultisampleStateCreateInfo multisample{

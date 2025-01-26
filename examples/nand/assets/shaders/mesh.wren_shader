@@ -1,0 +1,37 @@
+##type vertex
+#version 450
+
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec3 in_normal;
+layout(location = 2) in vec4 in_colour;
+
+layout(binding = 0) uniform GLOBALS {
+    mat4 view;
+    mat4 proj;
+} globals;
+
+layout(binding = 1) uniform LOCALS {
+    mat4 model;
+} locals;
+
+layout(location = 0) out FRAGMENT {
+  vec4 colour;
+} out_frag;
+
+void main() {
+    gl_Position = globals.proj * globals.view * locals.model * vec4(in_position, 1.0);
+    out_frag.colour = in_colour;
+}
+
+##type fragment
+#version 450
+
+layout(location = 0) in FRAGMENT {
+  vec4 colour;
+} in_frag;
+
+layout(location = 0) out vec4 out_colour;
+
+void main() {
+    out_colour = in_frag.colour;
+}
