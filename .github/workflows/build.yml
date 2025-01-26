@@ -21,13 +21,19 @@ jobs:
     - uses: DeterminateSystems/flake-checker-action@v9
     - uses: DeterminateSystems/magic-nix-cache-action@v9
 
+    - uses: cachix/install-nix-action@v25
+    - uses: cachix/cachix-action@v14
+      with:
+        name: tmayoff
+        authToken: '${{ secrets.CACHIX_AUTH }}'
+
     # Build
     - name: Setup sccache
       uses: mozilla-actions/sccache-action@v0.0.7
 
     - name: configure
-      run: nix develop --command just configure
+      run: nix develop --accept-flake-config --command just configure
     - name: build
-      run: nix develop --command just build
+      run: nix develop --accept-flake-config --command just build
     - name: test
-      run: nix develop --command just test
+      run: nix develop --accept-flake-config --command just test

@@ -1,14 +1,11 @@
 #include "shader.hpp"
 
-#include <shaderc/shaderc.h>
-#include <shaderc/status.h>
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan_core.h>
 // #include <wren/reflect/spirv_reflect.h>
 
 #include <algorithm>
 #include <cstdint>
-#include <shaderc/shaderc.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <wren/math/vector.hpp>
@@ -102,85 +99,78 @@ auto ShaderModule::get_descriptor_set_layout_bindings() const
   return layouts;
 }
 
+// auto Shader::create(const ::vk::Device &device,
+//                     const std::string &vertex_shader,
+//                     const std::string &fragment_shader) -> expected<Ptr> {
+//   const auto shader = std::make_shared<Shader>();
+
+//   TRY_RESULT(
+//       const auto vertex,
+//       compile_shader(device, shaderc_shader_kind::shaderc_glsl_vertex_shader,
+//                      "vertex_shader", vertex_shader));
+
+//   TRY_RESULT(
+//       const auto fragment,
+//       compile_shader(device,
+//       shaderc_shader_kind::shaderc_glsl_fragment_shader,
+//                      "fragment_shader", fragment_shader));
+
+//   shader->vertex_shader(vertex);
+//   shader->fragment_shader(fragment);
+
+//   return shader;
+// }
+
 auto Shader::create(const ::vk::Device &device,
-                    const std::string &vertex_shader,
-                    const std::string &fragment_shader) -> expected<Ptr> {
-  const auto shader = std::make_shared<Shader>();
-
-  TRY_RESULT(
-      const auto vertex,
-      compile_shader(device, shaderc_shader_kind::shaderc_glsl_vertex_shader,
-                     "vertex_shader", vertex_shader));
-
-  TRY_RESULT(
-      const auto fragment,
-      compile_shader(device, shaderc_shader_kind::shaderc_glsl_fragment_shader,
-                     "fragment_shader", fragment_shader));
-
-  shader->vertex_shader(vertex);
-  shader->fragment_shader(fragment);
-
-  return shader;
-}
-
-auto Shader::create(const ::vk::Device &device,
-                    const std::filesystem::path &shader_path) -> expected<Ptr> {
+                    const std::filesystem::path &shader_path) ->
+                    expected<Ptr> {
   const auto shader = std::make_shared<Shader>();
 
   TRY_RESULT(auto shaders, read_wren_shader_file(shader_path));
 
-  for (const auto &[type, content] : shaders) {
-    const auto p = shader_path / utils::enum_to_string(type);
-    switch (type) {
-      case ShaderType::Vertex: {
-        TRY_RESULT(const auto module,
-                   compile_shader(
-                       device, shaderc_shader_kind::shaderc_glsl_vertex_shader,
-                       shader_path, content));
-        shader->vertex_shader(module);
-        break;
-      }
-      case ShaderType::Fragment: {
-        TRY_RESULT(
-            const auto module,
-            compile_shader(device,
-                           shaderc_shader_kind::shaderc_glsl_fragment_shader,
-                           shader_path, content));
-        shader->fragment_shader(module);
-        break;
-      }
-    }
-  }
+  // TODO load SPIR-V shader? Or compile slang here
+
+  // for (const auto &[type, content] : shaders) {
+  //   const auto p = shader_path / utils::enum_to_string(type);
+  //   switch (type) {
+  //     case ShaderType::Vertex: {
+  //       TRY_RESULT(const auto module,
+  //                  compile_shader(
+  //                      device,
+  //                      shaderc_shader_kind::shaderc_glsl_vertex_shader,
+  //                      shader_path, content));
+  //       shader->vertex_shader(module);
+  //       break;
+  //     }
+  //     case ShaderType::Fragment: {
+  //       TRY_RESULT(
+  //           const auto module,
+  //           compile_shader(device,
+  //                          shaderc_shader_kind::shaderc_glsl_fragment_shader,
+  //                          shader_path, content));
+  //       shader->fragment_shader(module);
+  //       break;
+  //     }
+  //   }
+  // }
 
   return shader;
 }
 
-auto Shader::compile_shader(const ::vk::Device &device,
-                            const shaderc_shader_kind &shader_kind,
-                            const std::string &filename,
-                            const std::string &shader_source)
-    -> expected<ShaderModule> {
-  shaderc::Compiler compiler;
-  shaderc::CompileOptions options;
+auto Shader::create(const ::vk::Device &device,
+                    const std::span<const uint32_t> spirv_data)
+    -> expected<Ptr> {
+  const auto shader = std::make_shared<Shader>();
 
-  const auto compilation_result =
-      compiler.CompileGlslToSpv(shader_source, shader_kind, filename.c_str());
+  ::vk::ShaderModuleCreateInfo create_info({}, spirv_data);
+  VK_TRY_RESULT(module, device.createShaderModule(create_info));
 
-  const auto compilation_status = compilation_result.GetCompilationStatus();
-  if (compilation_status != shaderc_compilation_status_success) {
-    spdlog::error("{}", compilation_result.GetErrorMessage());
-    return std::unexpected(make_error_code(compilation_status));
-  }
+  ShaderModule m({spirv_data.begin(), spirv_data.end()}, module);
 
-  std::span spirv(compilation_result.cbegin(), compilation_result.cend());
-  ::vk::ShaderModuleCreateInfo create_info({}, spirv);
+  shader->vertex_shader(m);
+  shader->fragment_shader(m);
 
-  auto [res, module] = device.createShaderModule(create_info);
-  if (res != ::vk::Result::eSuccess) {
-    return std::unexpected(make_error_code(res));
-  }
-
-  return ShaderModule{{spirv.begin(), spirv.end()}, module};
+  return shader;
 }
 
 auto Shader::create_graphics_pipeline(const ::vk::Device &device,
