@@ -3,13 +3,12 @@ deps = [wren_dep, imgui, tracy]
 shaders = custom_target(
     command: [
         slangc,
-        '@INPUT@',
         '-o', '@OUTPUT@',
         '-target', 'spirv',
         '-source-embed-language', 'cpp',
         '-source-embed-name', 'editor_mesh',
         '-source-embed-style', 'default',
-        '-preserve-params',
+        '-preserve-params', '@INPUT@',
     ],
     input: ['assets/shaders/editor_mesh.slang'],
     output: ['editor_mesh.hpp'],

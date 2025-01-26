@@ -13,7 +13,6 @@ vma = dependency(
     modules: ['GPUOpen::VulkanMemoryAllocator'],
 )
 vulkan = dependency('vulkan')
-shaderc = dependency('shaderc')
 sdl2 = dependency('SDL2')
 boost = dependency('boost')
 boost_test = dependency('boost', modules: ['unit_test_framework'])
