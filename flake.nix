@@ -33,6 +33,8 @@
           inherit system overlays;
         };
 
+        boost = pkgs.boost186;
+
         flecs = pkgs.stdenv.mkDerivation {
           name = "flecs";
           src = pkgs.fetchFromGitHub {
@@ -129,6 +131,7 @@
 
               just
 
+              lldb
               gdb
 
               renderdoc

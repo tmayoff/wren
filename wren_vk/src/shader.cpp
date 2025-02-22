@@ -122,8 +122,7 @@ auto ShaderModule::get_descriptor_set_layout_bindings() const
 // }
 
 auto Shader::create(const ::vk::Device &device,
-                    const std::filesystem::path &shader_path) ->
-                    expected<Ptr> {
+                    const std::filesystem::path &shader_path) -> expected<Ptr> {
   const auto shader = std::make_shared<Shader>();
 
   TRY_RESULT(auto shaders, read_wren_shader_file(shader_path));
