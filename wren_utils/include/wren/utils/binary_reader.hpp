@@ -1,13 +1,13 @@
 #pragma once
 
-#include <cstdint>
 #include <span>
 
 namespace wren::utils {
 
 class BinaryReader {
  public:
-  BinaryReader(std::span<uint8_t>& data) : data_(data), pos_(data_.begin()) {}
+  BinaryReader(const std::span<const std::byte>& data)
+      : data_(data), pos_(data_.begin()) {}
 
   void skip(size_t byte_count) { pos_ += static_cast<long>(byte_count); }
 
@@ -16,7 +16,7 @@ class BinaryReader {
     std::span sub(pos_, pos_ + sizeof(T));
     pos_ += sizeof(T);
 
-    return *reinterpret_cast<T*>(sub.data());
+    return *reinterpret_cast<const T*>(sub.data());
   }
 
   template <typename T, std::size_t N>
@@ -33,8 +33,8 @@ class BinaryReader {
   auto at_end() { return pos_ == data_.end(); }
 
  private:
-  std::span<uint8_t> data_;
-  std::span<uint8_t>::iterator pos_;
+  std::span<const std::byte> data_;
+  std::span<const std::byte>::iterator pos_;
 };
 
 }  // namespace wren::utils

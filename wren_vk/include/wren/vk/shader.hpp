@@ -1,7 +1,5 @@
 #pragma once
 
-#include <shaderc/shaderc.h>
-#include <shaderc/status.h>
 #include <wren/reflect/spirv_reflect.h>
 // #include <wren/reflect/spirv_reflect.h>
 
@@ -16,15 +14,7 @@
 #include <wren/math/vector.hpp>
 #include <wren/utils/result.hpp>
 
-DEFINE_ERROR_IMPL("shaderc", shaderc_compilation_status)
-BOOST_DESCRIBE_ENUM(shaderc_compilation_status,
-                    shaderc_compilation_status_invalid_stage,
-                    shaderc_compilation_status_compilation_error,
-                    shaderc_compilation_status_internal_error,
-                    shaderc_compilation_status_null_result_object,
-                    shaderc_compilation_status_validation_error,
-                    shaderc_compilation_status_transformation_error,
-                    shaderc_compilation_status_configuration_error)
+#include "wren/reflect/reflect.hpp"
 
 namespace wren::reflect {
 using spirv_t = std::vector<uint32_t>;
@@ -34,13 +24,14 @@ namespace wren::vk {
 
 DESCRIBED_ENUM(ShaderType, Vertex, Fragment);
 
-struct ShaderModule {
-  reflect::spirv_t spirv;
-  ::vk::ShaderModule module;
-  std::shared_ptr<spv_reflect::ShaderModule> reflection;
-
+class ShaderModule {
+ public:
   ShaderModule() = default;
   ShaderModule(reflect::spirv_t spirv, const ::vk::ShaderModule &module);
+
+  [[nodiscard]] auto module() const -> ::vk::ShaderModule { return module_; }
+
+  [[nodiscard]] auto get_entry_point(ShaderType type) const -> std::string;
 
   [[nodiscard]] auto get_vertex_input_bindings() const
       -> std::vector<::vk::VertexInputBindingDescription>;
@@ -50,6 +41,12 @@ struct ShaderModule {
 
   [[nodiscard]] auto get_descriptor_set_layout_bindings() const
       -> std::vector<::vk::DescriptorSetLayoutBinding>;
+
+ private:
+  reflect::spirv_t spirv_;
+  ::vk::ShaderModule module_;
+  std::shared_ptr<spv_reflect::ShaderModule> reflection_;
+  reflect::Reflect reflect_;
 };
 
 class Shader {
@@ -63,11 +60,16 @@ class Shader {
   static auto create(const ::vk::Device &device,
                      const std::filesystem::path &shader_path) -> expected<Ptr>;
 
-  static auto compile_shader(const ::vk::Device &device,
-                             const shaderc_shader_kind &shader_kind,
-                             const std::string &filename,
-                             const std::string &shader_source)
-      -> wren::expected<ShaderModule>;
+  static auto create(const ::vk::Device &device,
+                     const std::span<const uint32_t> spirv_data)
+      -> expected<Ptr>;
+
+  // TODO compile slang shaders?
+  //  static auto compile_shader(const ::vk::Device &device,
+  //                             const shaderc_shader_kind &shader_kind,
+  //                             const std::string &filename,
+  //                             const std::string &shader_source)
+  //      -> wren::expected<ShaderModule>;
 
   [[nodiscard]] auto get_pipeline() const { return pipeline_; }
   [[nodiscard]] auto pipeline_layout() const { return pipeline_layout_; }

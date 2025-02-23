@@ -86,6 +86,7 @@ void draw_component(wren::scene::components::Transform& transform) {
 }
 
 void draw_component(const std::string_view& tag, wren::math::Vec3f& vec) {
+  ImGui::LabelText("##name", "%s", tag.data());
   ImGui::PushItemWidth(80);
   ImGui::Text("X");
   ImGui::SameLine();
