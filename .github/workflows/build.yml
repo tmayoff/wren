@@ -24,8 +24,8 @@ jobs:
         authToken: '${{ secrets.CACHIX_AUTH }}'
 
     # Build
-    - name: Setup sccache
-      uses: mozilla-actions/sccache-action@v0.0.7
+    # - name: Setup sccache
+    #   uses: mozilla-actions/sccache-action@v0.0.7
       
     - uses: ammaraskar/gcc-problem-matcher@master
 
