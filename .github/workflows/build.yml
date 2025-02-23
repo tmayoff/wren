@@ -34,7 +34,7 @@ jobs:
     - name: build
       run: nix develop --command ninja -C build
     - name: test
-      run: nix develop --command meson -C build test --print-errorlogs
+      run: nix develop --command meson test -C build --print-errorlogs
 
   lint:
     runs-on: ubuntu-latest
