@@ -134,7 +134,7 @@
             export VK_ICD_FILENAMES=$(nixVulkanIntel printenv VK_ICD_FILENAMES)
             export LD_LIBRARY_PATH=$(nixVulkanIntel printenv LD_LIBRARY_PATH):$LD_LIBRARY_PATH
 
-            export CXX="sccache clang++"
+            # export CXX="sccache clang++"
           '';
         };
       }
