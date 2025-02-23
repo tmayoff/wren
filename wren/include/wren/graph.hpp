@@ -45,7 +45,8 @@ class GraphBuilder {
   [[nodiscard]] auto build() const -> expected<void>;
 
   /**
-    @brief Compiles the builder into an actual graph, it creates missing resources for targets and binds targets to the swapchain
+    @brief Compiles the builder into an actual graph, it creates missing
+    resources for targets and binds targets to the swapchain
   */
   [[nodiscard]] auto compile() const -> expected<Graph>;
 
