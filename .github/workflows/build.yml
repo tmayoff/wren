@@ -16,10 +16,15 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    # Nix
+    - uses: cachix/cachix-action@v15
+      with:
+        name: tmayoff
+        # If you chose signing key for write access
+        signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+        # If you chose API tokens for write access OR if you have a private cache
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
     - uses: DeterminateSystems/nix-installer-action@v16
-    - uses: DeterminateSystems/flake-checker-action@v9
-    - uses: DeterminateSystems/magic-nix-cache-action@v9
 
     # Build
     - name: Setup sccache
