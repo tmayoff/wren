@@ -1,4 +1,4 @@
-name: build
+name: checks
 
 on:
   push:
@@ -10,24 +10,85 @@ jobs:
   build:
     env:
       SCCACHE_GHA_ENABLED: "true"
+      CXX: "sccache clang++"
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
 
-    # Nix
     - uses: DeterminateSystems/nix-installer-action@v16
-    - uses: DeterminateSystems/flake-checker-action@v9
-    - uses: DeterminateSystems/magic-nix-cache-action@v9
 
-    # Build
+    - uses: cachix/cachix-action@v15
+      with:
+        name: tmayoff
+        authToken: '${{ secrets.CACHIX_AUTH }}'
+
     - name: Setup sccache
       uses: mozilla-actions/sccache-action@v0.0.7
+
+    # ninja outputs the relative path to the file from the build dir, requires this action to ignore the first ../
+    - uses: misyltoad/gcc-problem-matcher@v3
 
     - name: configure
       run: nix develop --command just configure
     - name: build
-      run: nix develop --command just build
+      run: nix develop --command ninja -C build
     - name: test
-      run: nix develop --command just test
+      run: nix develop --command meson test -C build --print-errorlogs
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: DeterminateSystems/nix-installer-action@v16
+
+    - uses: cachix/cachix-action@v15
+      with:
+        name: tmayoff
+        authToken: '${{ secrets.CACHIX_AUTH }}'
+
+    # clang-format outputs errors with the file's absolute path so the ammaraskar action works
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
+
+    - name: configure
+      run: nix develop --command just configure
+    - name: format check
+      run: nix develop --command ninja -C build clang-format-check
+
+  coverage:
+    env: 
+      SCCACHE_GHA_ENABLED: "true"
+      CXX: "sccache clang++"
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: DeterminateSystems/nix-installer-action@v16
+
+    - uses: cachix/cachix-action@v15
+      with:
+        name: tmayoff
+        authToken: '${{ secrets.CACHIX_AUTH }}'
+
+    - uses: mozilla-actions/sccache-action@v0.0.7
+
+    - name: build & test
+      run: |
+        nix develop --command meson setup build -Db_coverage=true
+        nix develop --command just test
+    - name: coverage
+      run:  nix develop --command just coverage
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        files: build/coverage.info
+        token: ${{ secrets.CODECOV_TOKEN }}
+    - name: Upload tests
+      uses: codecov/test-results-action@v1
+      with:
+        files: build/meson-logs/testlog.junit.xml
+        token: ${{ secrets.CODECOV_TOKEN }}

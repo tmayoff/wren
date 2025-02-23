@@ -17,18 +17,17 @@ class Application {
  public:
   enum class errors {};
 
-  static auto Create(std::string const &application_name)
+  static auto Create(const std::string &application_name)
       -> expected<std::shared_ptr<Application>>;
 
-  auto context() -> std::shared_ptr<Context> const & { return ctx; }
+  auto context() -> const std::shared_ptr<Context> & { return ctx; }
   void run();
 
-  void add_callback_to_phase(CallbackPhase phase,
-                             phase_cb_t const &cb);
+  void add_callback_to_phase(CallbackPhase phase, const phase_cb_t &cb);
 
  private:
-  explicit Application(std::shared_ptr<Context> const &ctx,
-                       std::shared_ptr<Renderer> const &renderer);
+  explicit Application(const std::shared_ptr<Context> &ctx,
+                       const std::shared_ptr<Renderer> &renderer);
 
   std::shared_ptr<Context> ctx;
   std::shared_ptr<Renderer> renderer;

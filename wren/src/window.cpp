@@ -437,12 +437,13 @@ void Window::dispatch_events(const event::Dispatcher &dispatcher) {
           break;
         case SDL_MOUSEMOTION:
           dispatcher.dispatch(
-              event::MouseMoved{.x=static_cast<float>(event.motion.x),
-                                .y=static_cast<float>(event.motion.y)});
+              event::MouseMoved{.x = static_cast<float>(event.motion.x),
+                                .y = static_cast<float>(event.motion.y)});
 
           dispatcher.dispatch(
-              event::MouseMoved{.x=static_cast<float>(event.motion.xrel),
-                                .y=static_cast<float>(event.motion.yrel), .relative=true});
+              event::MouseMoved{.x = static_cast<float>(event.motion.xrel),
+                                .y = static_cast<float>(event.motion.yrel),
+                                .relative = true});
           break;
 
         case SDL_MOUSEBUTTONDOWN: {
@@ -458,8 +459,8 @@ void Window::dispatch_events(const event::Dispatcher &dispatcher) {
         }
         case SDL_MOUSEWHEEL: {
           dispatcher.dispatch(
-              event::MouseWheel{.x=static_cast<float>(event.wheel.x),
-                                .y=static_cast<float>(event.wheel.y)});
+              event::MouseWheel{.x = static_cast<float>(event.wheel.x),
+                                .y = static_cast<float>(event.wheel.y)});
 
           break;
         }

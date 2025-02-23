@@ -9,7 +9,7 @@
 #include <spirv/1.2/spirv.hpp>
 #include <wren_reflect/spirv.hpp>
 
-std::string_view const triangle_vert_shader = R"(
+const std::string_view triangle_vert_shader = R"(
 #version 450
 
 layout(location = 0) out vec3 fragColor;
@@ -36,27 +36,26 @@ TEST_CASE("Entry Points") {
   shaderc::Compiler compiler;
   shaderc::CompileOptions options;
 
-  auto const compile_result = compiler.CompileGlslToSpv(
+  const auto compile_result = compiler.CompileGlslToSpv(
       triangle_vert_shader.data(),
       shaderc_shader_kind::shaderc_glsl_vertex_shader, "tests.glsl");
   REQUIRE(compile_result.GetCompilationStatus() ==
           shaderc_compilation_status_success);
 
-  auto parser =
-      std::make_shared<wren::reflect::Parser>(wren::reflect::spirv_t{
-          compile_result.begin(), compile_result.end()});
+  auto parser = std::make_shared<wren::reflect::Parser>(
+      wren::reflect::spirv_t{compile_result.begin(), compile_result.end()});
 
-  auto const entry_points = parser->entry_points();
+  const auto entry_points = parser->entry_points();
 
   REQUIRE(entry_points.size() == 1);
-  auto const entry_point = entry_points.front();
+  const auto entry_point = entry_points.front();
 
   REQUIRE(entry_point.name == "main");
   REQUIRE(entry_point.exeuction_model == spv::ExecutionModelVertex);
 }
 
 TEST_CASE("Vertex Inputs") {
-  std::string_view const vertex_inputs = R"(
+  const std::string_view vertex_inputs = R"(
 #version 450
 
 layout(location = 0) in vec2 inPosition;
@@ -73,28 +72,27 @@ void main() {
   shaderc::Compiler compiler;
   shaderc::CompileOptions options;
 
-  auto const compile_result = compiler.CompileGlslToSpv(
-      vertex_inputs.data(),
-      shaderc_shader_kind::shaderc_glsl_vertex_shader, "tests.glsl");
+  const auto compile_result = compiler.CompileGlslToSpv(
+      vertex_inputs.data(), shaderc_shader_kind::shaderc_glsl_vertex_shader,
+      "tests.glsl");
   REQUIRE(compile_result.GetCompilationStatus() ==
           shaderc_compilation_status_success);
 
-  auto parser =
-      std::make_shared<wren::reflect::Parser>(wren::reflect::spirv_t{
-          compile_result.begin(), compile_result.end()});
+  auto parser = std::make_shared<wren::reflect::Parser>(
+      wren::reflect::spirv_t{compile_result.begin(), compile_result.end()});
 
-  REQUIRE(std::find_if(parser->op_names().begin(),
-                       parser->op_names().end(), [](auto const pair) {
+  REQUIRE(std::find_if(parser->op_names().begin(), parser->op_names().end(),
+                       [](const auto pair) {
                          return pair.second == "inPosition";
                        }) != parser->op_names().end());
 
-  for (auto const& n : parser->op_names()) {
+  for (const auto& n : parser->op_names()) {
     spdlog::info("Named types: {} {}", n.first, n.second);
   }
 
   REQUIRE(!parser->types().empty());
 
-  for (auto const& type : parser->types()) {
+  for (const auto& type : parser->types()) {
     spdlog::info("ID: {} type: {} parent: {}", type.id,
                  spv::to_string(type.type), type.parent_type);
     if (type.storage_class.has_value()) {
