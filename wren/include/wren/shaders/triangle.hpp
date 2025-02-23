@@ -4,7 +4,7 @@
 
 namespace wren::shaders {
 
-std::string_view const TRIANGLE_VERT_SHADER = R"(
+const std::string_view TRIANGLE_VERT_SHADER = R"(
 #version 450
 
 layout(location = 0) out vec3 fragColor;
@@ -28,7 +28,7 @@ void main() {
 
 )";
 
-std::string_view const TRIANGLE_FRAG_SHADER = R"(
+const std::string_view TRIANGLE_FRAG_SHADER = R"(
 #version 450
 
 layout(location = 0) in vec3 fragColor;

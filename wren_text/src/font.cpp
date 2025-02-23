@@ -13,7 +13,7 @@ auto load_default_font() -> wren::expected<std::filesystem::path> {
 
   std::optional<std::filesystem::path> font_path;
 
-  for (auto const& font : DEFAULT_FONTS) {
+  for (const auto& font : DEFAULT_FONTS) {
     FcPattern* pat = FcNameParse((FcChar8* const)(font.data()));
     FcConfigSubstitute(config, pat, FcMatchPattern);
     FcDefaultSubstitute(pat);
