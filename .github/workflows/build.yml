@@ -21,8 +21,6 @@ jobs:
     - uses: cachix/cachix-action@v15
       with:
         name: tmayoff
-        # If you chose signing key for write access
-        # signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
         authToken: '${{ secrets.CACHIX_AUTH }}'
 
     # Build
@@ -35,3 +33,28 @@ jobs:
       run: nix develop --command just build
     - name: test
       run: nix develop --command just test
+
+  lint:
+    env:
+      SCCACHE_GHA_ENABLED: "true"
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: DeterminateSystems/nix-installer-action@v16
+
+    - uses: cachix/cachix-action@v15
+      with:
+        name: tmayoff
+        authToken: '${{ secrets.CACHIX_AUTH }}'
+
+    # Build
+    - name: Setup sccache
+      uses: mozilla-actions/sccache-action@v0.0.7
+
+    - name: configure
+      run: nix develop --command just configure
+    - name: format check
+      run: nix develop --command ninja -C build clang-format-check
