@@ -26,18 +26,17 @@ jobs:
     # Build
     - name: Setup sccache
       uses: mozilla-actions/sccache-action@v0.0.7
+      
+    - uses: ammaraskar/gcc-problem-matcher@master
 
     - name: configure
       run: nix develop --command just configure
     - name: build
-      run: nix develop --command just build
+      run: nix develop --command ninja -C compile
     - name: test
-      run: nix develop --command just test
+      run: nix develop --command meson -C test --print-errorlogs
 
   lint:
-    env:
-      SCCACHE_GHA_ENABLED: "true"
-
     runs-on: ubuntu-latest
 
     steps:
@@ -50,9 +49,7 @@ jobs:
         name: tmayoff
         authToken: '${{ secrets.CACHIX_AUTH }}'
 
-    # Build
-    - name: Setup sccache
-      uses: mozilla-actions/sccache-action@v0.0.7
+    - uses: ammaraskar/gcc-problem-matcher@master
 
     - name: configure
       run: nix develop --command just configure
