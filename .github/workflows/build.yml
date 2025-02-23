@@ -32,7 +32,7 @@ jobs:
     - name: configure
       run: nix develop --command just configure
     - name: build
-      run: nix develop --command ninja -C compile
+      run: nix develop --command ninja -C build
     - name: test
       run: nix develop --command meson -C test --print-errorlogs
 
