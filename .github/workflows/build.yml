@@ -27,6 +27,7 @@ jobs:
     - name: Setup sccache
       uses: mozilla-actions/sccache-action@v0.0.7
 
+    # ninja outputs the relative path to the file from the build dir, requires this action to ignore the first ../
     - uses: misyltoad/gcc-problem-matcher@v3
 
     - name: configure
@@ -49,7 +50,8 @@ jobs:
         name: tmayoff
         authToken: '${{ secrets.CACHIX_AUTH }}'
 
-    - uses: misyltoad/gcc-problem-matcher@v3
+    # clang-format outputs errors with the file's absolute path so the ammaraskar action works
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
 
     - name: configure
       run: nix develop --command just configure
