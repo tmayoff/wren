@@ -26,7 +26,7 @@ jobs:
     - name: Setup sccache
       uses: mozilla-actions/sccache-action@v0.0.7
 
-    - uses: root-project/gcc-problem-matcher-improved@v0.0.1-alpha.1
+    - uses: misyltoad/gcc-problem-matcher@v3
 
     - name: configure
       run: nix develop --command just configure
