@@ -23,11 +23,10 @@ jobs:
         name: tmayoff
         authToken: '${{ secrets.CACHIX_AUTH }}'
 
-    # Build
-    # - name: Setup sccache
-    #   uses: mozilla-actions/sccache-action@v0.0.7
-      
-    - uses: ammaraskar/gcc-problem-matcher@master
+    - name: Setup sccache
+      uses: mozilla-actions/sccache-action@v0.0.7
+
+    - uses: root-project/gcc-problem-matcher-improved@v1
 
     - name: configure
       run: nix develop --command just configure
