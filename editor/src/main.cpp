@@ -33,11 +33,7 @@ auto main(int argc, char** argv) -> int {
   const auto& err = wren::Application::Create("Editor");
   if (!err.has_value()) {
     spdlog::error("failed to create application: {}", err.error().message());
-
-
-
-
-            return EXIT_FAILURE;
+    return EXIT_FAILURE;
   }
 
   auto app = err.value();
