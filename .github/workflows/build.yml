@@ -35,7 +35,7 @@ jobs:
     - name: build
       run: nix develop --command ninja -C build
     - name: test
-      run: nix develop --command meson test -C build --print-errorlogs
+      run: nix develop --accept-flake-config --command meson test -C build --print-errorlogs
 
   lint:
     runs-on: ubuntu-latest
@@ -56,7 +56,7 @@ jobs:
     - name: configure
       run: nix develop --command just configure
     - name: format check
-      run: nix develop --command ninja -C build clang-format-check
+      run: nix develop --accept-flake-config --command ninja -C build clang-format-check
 
   coverage:
     env: 
@@ -78,10 +78,10 @@ jobs:
 
     - name: build & test
       run: |
-        nix develop --command meson setup build -Db_coverage=true
-        nix develop --command just test
+        nix develop --accept-flake-config --command meson setup build -Db_coverage=true
+        nix develop --accept-flake-config --command just test
     - name: coverage
-      run:  nix develop --command just coverage
+      run:  nix develop --accept-flake-config --command just coverage
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
       with:
