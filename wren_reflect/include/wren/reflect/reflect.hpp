@@ -19,6 +19,7 @@ struct EntryPoint {
 
 class Reflect {
  public:
+  Reflect() = default;
   Reflect(const std::span<const std::byte>& spirv);
 
   [[nodiscard]] auto magic_number() const { return magic_number_; }
@@ -29,10 +30,10 @@ class Reflect {
   auto parse_op_code(utils::BinaryReader& reader, uint32_t wordcount,
                      const spv::Op& opcode) -> uint32_t;
 
-  uint32_t magic_number_;
-  uint32_t version_;
-  uint32_t generator_;
-  uint32_t bound_;
+  uint32_t magic_number_{};
+  uint32_t version_{};
+  uint32_t generator_{};
+  uint32_t bound_{};
 
   std::vector<EntryPoint> entry_points_;
 };

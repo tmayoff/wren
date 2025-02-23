@@ -21,18 +21,43 @@ namespace wren::vk {
 
 ShaderModule::ShaderModule(reflect::spirv_t spirv,
                            const ::vk::ShaderModule &module)
-    : spirv(std::move(spirv)),
-      module(module),
-      reflection(std::make_shared<spv_reflect::ShaderModule>(this->spirv)) {}
+    : spirv_(std::move(spirv)),
+      module_(module),
+      reflection_(std::make_shared<spv_reflect::ShaderModule>(spirv_)),
+      reflect_(std::as_bytes(std::span{spirv_})) {}
+
+auto ShaderModule::get_entry_point(ShaderType type) const -> std::string {
+  const auto &entry_points = reflect_.entry_points();
+
+  const auto entry_point =
+      std::ranges::find_if(entry_points, [type](const reflect::EntryPoint &e) {
+        switch (type) {
+          case ShaderType::Vertex:
+            return e.execution_model ==
+                   spv::ExecutionModel::ExecutionModelVertex;
+          case ShaderType::Fragment:
+            return e.execution_model ==
+                   spv::ExecutionModel::ExecutionModelFragment;
+        }
+
+        return false;
+      });
+
+  if (entry_point != entry_points.end()) {
+    return entry_point->name;
+  }
+
+  return "";
+}
 
 auto ShaderModule::get_vertex_input_bindings() const
     -> std::vector<::vk::VertexInputBindingDescription> {
   uint32_t count = 0;
-  reflection->EnumerateInputVariables(&count, nullptr);
+  reflection_->EnumerateInputVariables(&count, nullptr);
   if (count == 0) return {};
 
   std::vector<SpvReflectInterfaceVariable *> input_variables(count);
-  reflection->EnumerateInputVariables(&count, input_variables.data());
+  reflection_->EnumerateInputVariables(&count, input_variables.data());
 
   uint32_t offset = 0;
   std::vector<::vk::VertexInputBindingDescription> bindings;
@@ -55,9 +80,9 @@ auto ShaderModule::get_vertex_input_bindings() const
 auto ShaderModule::get_vertex_input_attributes() const
     -> std::vector<::vk::VertexInputAttributeDescription> {
   uint32_t count = 0;
-  reflection->EnumerateInputVariables(&count, nullptr);
+  reflection_->EnumerateInputVariables(&count, nullptr);
   std::vector<SpvReflectInterfaceVariable *> input_variables(count);
-  reflection->EnumerateInputVariables(&count, input_variables.data());
+  reflection_->EnumerateInputVariables(&count, input_variables.data());
 
   std::ranges::sort(input_variables, [](const auto &a, const auto &b) {
     return a->location < b->location;
@@ -79,9 +104,9 @@ auto ShaderModule::get_vertex_input_attributes() const
 auto ShaderModule::get_descriptor_set_layout_bindings() const
     -> std::vector<::vk::DescriptorSetLayoutBinding> {
   uint32_t count = 0;
-  reflection->EnumerateDescriptorSets(&count, nullptr);
+  reflection_->EnumerateDescriptorSets(&count, nullptr);
   std::vector<SpvReflectDescriptorSet *> spv_sets(count);
-  reflection->EnumerateDescriptorSets(&count, spv_sets.data());
+  reflection_->EnumerateDescriptorSets(&count, spv_sets.data());
 
   std::vector<::vk::DescriptorSetLayoutBinding> layouts;
   for (const SpvReflectDescriptorSet *set : spv_sets) {
@@ -245,11 +270,12 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
 
   // Stages
   auto v_stage_create_info = ::vk::PipelineShaderStageCreateInfo(
-      {}, ::vk::ShaderStageFlagBits::eVertex, vertex_shader_module_.module,
-      "main");
+      {}, ::vk::ShaderStageFlagBits::eVertex, vertex_shader_module_.module(),
+      vertex_shader_module_.get_entry_point(ShaderType::Vertex).c_str());
   auto f_stage_create_info = ::vk::PipelineShaderStageCreateInfo(
-      {}, ::vk::ShaderStageFlagBits::eFragment, fragment_shader_module_.module,
-      "main");
+      {}, ::vk::ShaderStageFlagBits::eFragment,
+      fragment_shader_module_.module(),
+      vertex_shader_module_.get_entry_point(ShaderType::Fragment).c_str());
   std::array shader_stages = {v_stage_create_info, f_stage_create_info};
 
   auto create_info = ::vk::GraphicsPipelineCreateInfo(

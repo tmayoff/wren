@@ -14,6 +14,8 @@
 #include <wren/math/vector.hpp>
 #include <wren/utils/result.hpp>
 
+#include "wren/reflect/reflect.hpp"
+
 namespace wren::reflect {
 using spirv_t = std::vector<uint32_t>;
 }
@@ -22,13 +24,14 @@ namespace wren::vk {
 
 DESCRIBED_ENUM(ShaderType, Vertex, Fragment);
 
-struct ShaderModule {
-  reflect::spirv_t spirv;
-  ::vk::ShaderModule module;
-  std::shared_ptr<spv_reflect::ShaderModule> reflection;
-
+class ShaderModule {
+ public:
   ShaderModule() = default;
   ShaderModule(reflect::spirv_t spirv, const ::vk::ShaderModule &module);
+
+  [[nodiscard]] auto module() const -> ::vk::ShaderModule { return module_; }
+
+  [[nodiscard]] auto get_entry_point(ShaderType type) const -> std::string;
 
   [[nodiscard]] auto get_vertex_input_bindings() const
       -> std::vector<::vk::VertexInputBindingDescription>;
@@ -38,6 +41,12 @@ struct ShaderModule {
 
   [[nodiscard]] auto get_descriptor_set_layout_bindings() const
       -> std::vector<::vk::DescriptorSetLayoutBinding>;
+
+ private:
+  reflect::spirv_t spirv_;
+  ::vk::ShaderModule module_;
+  std::shared_ptr<spv_reflect::ShaderModule> reflection_;
+  reflect::Reflect reflect_;
 };
 
 class Shader {

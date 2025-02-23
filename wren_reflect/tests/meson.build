@@ -1,18 +1,23 @@
 tests = ['reflect']
 
-shaders = custom_target(
-    command: [
-        slangc,
-        '-o', '@OUTPUT@',
-        '-target', 'spirv',
-        '-source-embed-language', 'cpp',
-        '-source-embed-name', 'triangle',
-        '-source-embed-style', 'default',
-        '-preserve-params', '@INPUT@',
-    ],
-    input: ['triangle.slang'],
-    output: ['triangle.hpp'],
-)
+shader_names = ['triangle', 'editor']
+
+shaders = []
+foreach shader : shader_names
+    shaders += custom_target(
+        command: [
+            slangc,
+            '-o', '@OUTPUT@',
+            '-target', 'spirv',
+            '-source-embed-language', 'cpp',
+            '-source-embed-name', shader,
+            '-source-embed-style', 'default',
+            '-preserve-params', '@INPUT@',
+        ],
+        input: [shader + '.slang'],
+        output: [shader + '.hpp'],
+    )
+endforeach
 
 foreach test : tests
     test(

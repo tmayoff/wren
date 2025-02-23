@@ -10,6 +10,8 @@
 
 namespace wren::reflect {
 
+auto parse_string(utils::BinaryReader& reader) -> std::string;
+
 Reflect::Reflect(const std::span<const std::byte>& spirv) {
   utils::BinaryReader reader(spirv);
 
@@ -35,6 +37,22 @@ Reflect::Reflect(const std::span<const std::byte>& spirv) {
   }
 }
 
+auto parse_string(utils::BinaryReader& reader) -> std::string {
+  std::string s;
+
+  bool ended = false;
+
+  while (true) {
+    char c = reader.read<char>();
+    s += c;
+    if (c == '\0') ended = true;
+
+    if (ended && s.size() % sizeof(uint32_t) == 0) break;
+  }
+
+  return s;
+}
+
 auto Reflect::parse_op_code(utils::BinaryReader& reader,
                             const uint32_t wordcount, const spv::Op& op)
     -> uint32_t {
@@ -57,11 +75,7 @@ auto Reflect::parse_op_code(utils::BinaryReader& reader,
       entry.entry_point = reader.read<uint32_t>();
       ++skipped_words;
 
-      while (true) {
-        char c = reader.read<char>();
-        entry.name += c;
-        if (c == '\0' && entry.name.size() % sizeof(uint32_t) == 0) break;
-      }
+      entry.name = parse_string(reader);
       skipped_words += entry.name.size() / sizeof(uint32_t);
 
       const uint32_t id_count = wordcount - skipped_words;
