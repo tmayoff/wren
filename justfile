@@ -12,6 +12,9 @@ build:
 run: build
     ./build/editor/wren_editor ~/Documents/wren_game
 
+nand: build
+    ./build/examples/nand/nand
+
 debug: build
     lldb ./build/editor/wren_editor ~/Documents/wren_game
 

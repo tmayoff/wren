@@ -54,3 +54,6 @@ subdir('wren')
 subdir('wren_physics')
 # subdir('wren_ecs')
 subdir('editor')
+
+
+subdir('examples')
