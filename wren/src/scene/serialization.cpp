@@ -2,6 +2,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include <fstream>
 #include <toml++/toml.hpp>
 
 #include "scene/components/mesh.hpp"

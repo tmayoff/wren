@@ -4,7 +4,6 @@ cpp = meson.get_compiler('cpp')
 
 buildtype = get_option('buildtype')
 
-fmt = dependency('fmt')
 spdlog = dependency('spdlog')
 vulkan = dependency('vulkan')
 # fontconfig = dependency('Fontconfig')
@@ -25,9 +24,14 @@ toml = dependency('tomlplusplus')
 # json = dependency('nlohmann_json')
 
 add_project_arguments(
+    # vulkan-hpp configuration
     '-DVULKAN_HPP_NO_EXCEPTIONS',
     '-DVUKLAN_HPP_ASSERT_ON_RESULT(x)',
     '-DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1',
+
+    # spdlog configuration
+    '-DSPDLOG_USE_STD_FORMAT',
+    
     language: 'cpp',
 )
 
