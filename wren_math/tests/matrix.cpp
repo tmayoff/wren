@@ -2,19 +2,36 @@
 #include <wren/math/matrix.hpp>
 #include <wren/math/utils.hpp>
 
-BOOST_AUTO_TEST_SUITE(MATRIX)
+namespace wm = wren::math;
 
-BOOST_AUTO_TEST_CASE(ColMajor) {
+BOOST_AUTO_TEST_CASE(RowMajorIdentity) {
+  wm::Mat4f identity = wm::Mat4f::identity();
+
+  const auto data = identity.data();
+
+  const std::array expected = {
+      1, 0, 0, 0,  // Row 1
+      0, 1, 0, 0,  // Row 2
+      0, 0, 1, 0,  // Row 3
+      0, 0, 0, 1,
+  };
+
+  BOOST_TEST(data == expected, boost::test_tools::per_element());
+}
+
+BOOST_AUTO_TEST_CASE(RowMajor) {
   wren::math::Mat<float, 2, 2> a;
   a.at(0, 0) = 1.0;
-  a.at(0, 1) = 2.0;
   a.at(1, 0) = 3.0;
+  a.at(0, 1) = 2.0;
   a.at(1, 1) = 4.0;
 
-  BOOST_TEST(a.data().at(0) == 1.0);
-  BOOST_TEST(a.data().at(1) == 2.0);
-  BOOST_TEST(a.data().at(2) == 3.0);
-  BOOST_TEST(a.data().at(3) == 4.0);
+  const std::array expected = {
+      1.0, 3.0,  // Row 1
+      2.0, 4.0,  // Row 2
+  };
+
+  BOOST_TEST(a.data() == expected, boost::test_tools::per_element());
 }
 
 BOOST_AUTO_TEST_CASE(Identity) {
@@ -37,7 +54,7 @@ BOOST_AUTO_TEST_CASE(Identity) {
   BOOST_TEST(c == b);
 }
 
-BOOST_AUTO_TEST_CASE(Multiplication_Mat_Mat) {
+BOOST_AUTO_TEST_CASE(MultiplicationMatMat) {
   wren::math::Mat<float, 2, 2> a{};
   a.at(0, 0) = 3.0f;
   a.at(1, 0) = 7.0f;
@@ -61,7 +78,7 @@ BOOST_AUTO_TEST_CASE(Multiplication_Mat_Mat) {
   BOOST_TEST(c == expected);
 }
 
-BOOST_AUTO_TEST_CASE(Multiplication_Mat_Vec) {
+BOOST_AUTO_TEST_CASE(MultiplicationMatVec) {
   wren::math::Mat<float, 2, 2> a{};
   a.at(0, 0) = 3.0f;
   a.at(0, 1) = -2.0f;
@@ -76,5 +93,3 @@ BOOST_AUTO_TEST_CASE(Multiplication_Mat_Vec) {
 
   BOOST_TEST(c == expected);
 }
-
-BOOST_AUTO_TEST_SUITE_END()

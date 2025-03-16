@@ -4,7 +4,7 @@
 #include <wren/math/utils.hpp>
 #include <wren/math/vector.hpp>
 
-BOOST_AUTO_TEST_SUITE(GEOMETRY)
+namespace wm = wren::math;
 
 BOOST_AUTO_TEST_CASE(TRANSLATE) {
   struct Test {
@@ -14,12 +14,12 @@ BOOST_AUTO_TEST_CASE(TRANSLATE) {
 
   std::array tests = {
       Test{
-          {0, 0, 0},
-          {},
+          .pos = {0, 0, 0},
+          .expected = {},
       },
       Test{
-          {0, 1, 0},
-          wren::math::Mat4f{wren::math::Mat4f::data_t{{
+          .pos = {0, 1, 0},
+          .expected = wm::Mat4f{wm::Mat4f::data_t{{
               // {1, 0, 0, 0},
               // {0, 1, 0, 1},
               // {0, 0, 1, 0},
@@ -29,9 +29,7 @@ BOOST_AUTO_TEST_CASE(TRANSLATE) {
   };
 
   for (const auto &test : tests) {
-    const auto got = wren::math::translate(wren::math::Mat4f{}, test.pos);
+    const auto got = wm::translate(wm::Mat4f{}, test.pos);
     BOOST_TEST(got == test.expected);
   }
 }
-
-BOOST_AUTO_TEST_SUITE_END()

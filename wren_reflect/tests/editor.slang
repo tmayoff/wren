@@ -31,6 +31,7 @@ VertexStageOutput vertexMain(AssembledVertex assembledVertex) {
   float4 colour = assembledVertex.color;
 
   output.sv_position = mul(view * model, float4(position, 1.0));
+  // output.sv_position = float4(position, 1.0);
   output.coarseVertex.color = colour;
   output.coarseVertex.normal = mul(view * proj, float4(normal, 1.0)).xyz;
   return output;

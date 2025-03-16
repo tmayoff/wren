@@ -8,6 +8,7 @@ shaders = custom_target(
         '-source-embed-language', 'cpp',
         '-source-embed-name', 'editor_mesh',
         '-source-embed-style', 'default',
+        '-matrix-layout-row-major',
         '-preserve-params', '@INPUT@',
     ],
     input: ['assets/shaders/editor_mesh.slang'],

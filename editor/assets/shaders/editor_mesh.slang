@@ -4,6 +4,7 @@ struct AssembledVertex {
   float4 color : COLOR;
 };
 
+[[vk::binding(0, 0)]]
 cbuffer GLOBALS {
   float4x4 view;
   float4x4 proj;
@@ -16,6 +17,7 @@ cbuffer LOCALS {
 struct CoarseVertex {
   float4 color;
   float3 normal;
+  float3 pos;
 };
 
 struct VertexStageOutput {
@@ -30,9 +32,10 @@ VertexStageOutput vertexMain(AssembledVertex assembledVertex) {
   float3 normal = assembledVertex.normal;
   float4 colour = assembledVertex.color;
 
-  output.sv_position = mul(view * model, float4(position, 1.0));
+  output.sv_position = mul(float4(position, 1.0), view);
   output.coarseVertex.color = colour;
   output.coarseVertex.normal = mul(view * proj, float4(normal, 1.0)).xyz;
+  output.coarseVertex.pos = output.sv_position.xyz;
   return output;
 }
 
@@ -42,7 +45,19 @@ struct Fragment {
 
 [shader("fragment")]
 Fragment fragmentMain(CoarseVertex coarseVertex: CoarseVertex) : SV_Target {
-  float4 color = coarseVertex.color;
+  const var lightColor = float4(1.0, 1.0, 1.0, 1.0);
+  const var lightPos = float3(5.0, 5.0, 5.0);
+
+  float3 norm = normalize(coarseVertex.normal);
+  var lightDir = normalize(lightPos - coarseVertex.pos);
+
+  float diff = max(dot(norm, lightDir), 0.0);
+  var diffuse = diff * lightColor;
+
+  float ambientStrength = 0.3;
+  float4 ambient = ambientStrength * lightColor;
+
+  float4 color = (ambient + diffuse) * coarseVertex.color;
 
   Fragment output;
   output.color = color;
