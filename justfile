@@ -15,8 +15,8 @@ run: build
 debug: build
     lldb ./build/editor/wren_editor ~/Documents/wren_game
 
-test: build
-    meson test -C build --print-errorlogs
+test test_="": build
+    meson test -C build --print-errorlogs {{test_}}
 
 coverage: test
     lcov --directory . --capture --initial --output-file build/initial.info --gcov-tool ./tools/gcov.sh --ignore-errors source --ignore-errors inconsistent

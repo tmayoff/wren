@@ -11,7 +11,7 @@ class Camera {
   Camera() = default;
   Camera(float fov, float aspect_ratio, float z_near, float z_far)
       : fov_(fov), aspect_ratio_(aspect_ratio), z_near_(z_near), z_far_(z_far) {
-    transform_.position.z(-5);
+    // transform_.position.z(-5);
     update_projection_matrix();
   }
 

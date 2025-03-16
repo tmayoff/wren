@@ -14,7 +14,6 @@ wren_vk = library(
         spdlog,
         vma,
         vulkan,
-        shaderc,
     ],
     install: true,
 )
@@ -28,6 +27,5 @@ wren_vk_dep = declare_dependency(
         spdlog,
         vma,
         vulkan,
-        shaderc,
     ],
 )

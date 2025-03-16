@@ -14,10 +14,10 @@ struct Transform {
 
   [[nodiscard]] auto matrix() const {
     math::Mat4f translate = math::translate(math::Mat4f::identity(), position);
-    math::Mat4f rotate = math::Quaternionf(rotation).to_mat();
+    // math::Mat4f rotate = math::Quaternionf(rotation).to_mat();
     // math::Mat4f scale{};
 
-    return translate * rotate;
+    return translate;
   }
 
   [[nodiscard]] auto right() const {

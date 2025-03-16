@@ -4,7 +4,7 @@
 
 #include <boost/algorithm/string/split.hpp>
 #include <span>
-#include <wren/utils/binray_reader.hpp>
+#include <wren/utils/binary_reader.hpp>
 #include <wren/utils/filesystem.hpp>
 
 namespace wren {
@@ -21,7 +21,7 @@ auto load_glb_mesh(const std::filesystem::path& glb_path) -> Mesh {
 auto load_stl_mesh(const std::filesystem::path& stl_path) -> Mesh {
   auto data = utils::fs::read_file_to_bin(stl_path);
   std::span s(data);
-  utils::BinaryReader reader(s);
+  utils::BinaryReader reader(std::as_bytes(s));
 
   // Skip header
   reader.skip(80);

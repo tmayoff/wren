@@ -7,7 +7,7 @@
 namespace wren::math {
 
 /*
- @brief Column major matrix
+ @brief Row major matrix
 */
 template <typename T, std::size_t Rows, std::size_t Cols>
 class Mat {
@@ -77,7 +77,7 @@ class Mat {
 
  private:
   constexpr static auto get_index(std::size_t col, std::size_t row) {
-    return row + Rows * col;
+    return col + Cols * row;
   }
 
   std::array<T, Rows * Cols> data_{};

@@ -31,9 +31,9 @@ jobs:
     - uses: misyltoad/gcc-problem-matcher@v3
 
     - name: configure
-      run: nix develop --command just configure
+      run: nix develop --accept-flake-config --command just configure
     - name: build
-      run: nix develop --command ninja -C build
+      run: nix develop --accept-flake-config --command just build
     - name: test
       run: nix develop --accept-flake-config --command meson test -C build --print-errorlogs
 
@@ -54,7 +54,7 @@ jobs:
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
 
     - name: configure
-      run: nix develop --command just configure
+      run: nix develop --accept-flake-config --command just configure
     - name: format check
       run: nix develop --accept-flake-config --command ninja -C build clang-format-check
 

@@ -1,14 +1,11 @@
 #include "shader.hpp"
 
-#include <shaderc/shaderc.h>
-#include <shaderc/status.h>
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan_core.h>
 // #include <wren/reflect/spirv_reflect.h>
 
 #include <algorithm>
 #include <cstdint>
-#include <shaderc/shaderc.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 #include <wren/math/vector.hpp>
@@ -24,18 +21,43 @@ namespace wren::vk {
 
 ShaderModule::ShaderModule(reflect::spirv_t spirv,
                            const ::vk::ShaderModule &module)
-    : spirv(std::move(spirv)),
-      module(module),
-      reflection(std::make_shared<spv_reflect::ShaderModule>(this->spirv)) {}
+    : spirv_(std::move(spirv)),
+      module_(module),
+      reflection_(std::make_shared<spv_reflect::ShaderModule>(spirv_)),
+      reflect_(std::as_bytes(std::span{spirv_})) {}
+
+auto ShaderModule::get_entry_point(ShaderType type) const -> std::string {
+  const auto &entry_points = reflect_.entry_points();
+
+  const auto entry_point =
+      std::ranges::find_if(entry_points, [type](const reflect::EntryPoint &e) {
+        switch (type) {
+          case ShaderType::Vertex:
+            return e.execution_model ==
+                   spv::ExecutionModel::ExecutionModelVertex;
+          case ShaderType::Fragment:
+            return e.execution_model ==
+                   spv::ExecutionModel::ExecutionModelFragment;
+        }
+
+        return false;
+      });
+
+  if (entry_point != entry_points.end()) {
+    return entry_point->name;
+  }
+
+  return "";
+}
 
 auto ShaderModule::get_vertex_input_bindings() const
     -> std::vector<::vk::VertexInputBindingDescription> {
   uint32_t count = 0;
-  reflection->EnumerateInputVariables(&count, nullptr);
+  reflection_->EnumerateInputVariables(&count, nullptr);
   if (count == 0) return {};
 
   std::vector<SpvReflectInterfaceVariable *> input_variables(count);
-  reflection->EnumerateInputVariables(&count, input_variables.data());
+  reflection_->EnumerateInputVariables(&count, input_variables.data());
 
   uint32_t offset = 0;
   std::vector<::vk::VertexInputBindingDescription> bindings;
@@ -58,9 +80,9 @@ auto ShaderModule::get_vertex_input_bindings() const
 auto ShaderModule::get_vertex_input_attributes() const
     -> std::vector<::vk::VertexInputAttributeDescription> {
   uint32_t count = 0;
-  reflection->EnumerateInputVariables(&count, nullptr);
+  reflection_->EnumerateInputVariables(&count, nullptr);
   std::vector<SpvReflectInterfaceVariable *> input_variables(count);
-  reflection->EnumerateInputVariables(&count, input_variables.data());
+  reflection_->EnumerateInputVariables(&count, input_variables.data());
 
   std::ranges::sort(input_variables, [](const auto &a, const auto &b) {
     return a->location < b->location;
@@ -82,9 +104,9 @@ auto ShaderModule::get_vertex_input_attributes() const
 auto ShaderModule::get_descriptor_set_layout_bindings() const
     -> std::vector<::vk::DescriptorSetLayoutBinding> {
   uint32_t count = 0;
-  reflection->EnumerateDescriptorSets(&count, nullptr);
+  reflection_->EnumerateDescriptorSets(&count, nullptr);
   std::vector<SpvReflectDescriptorSet *> spv_sets(count);
-  reflection->EnumerateDescriptorSets(&count, spv_sets.data());
+  reflection_->EnumerateDescriptorSets(&count, spv_sets.data());
 
   std::vector<::vk::DescriptorSetLayoutBinding> layouts;
   for (const SpvReflectDescriptorSet *set : spv_sets) {
@@ -102,26 +124,27 @@ auto ShaderModule::get_descriptor_set_layout_bindings() const
   return layouts;
 }
 
-auto Shader::create(const ::vk::Device &device,
-                    const std::string &vertex_shader,
-                    const std::string &fragment_shader) -> expected<Ptr> {
-  const auto shader = std::make_shared<Shader>();
+// auto Shader::create(const ::vk::Device &device,
+//                     const std::string &vertex_shader,
+//                     const std::string &fragment_shader) -> expected<Ptr> {
+//   const auto shader = std::make_shared<Shader>();
 
-  TRY_RESULT(
-      const auto vertex,
-      compile_shader(device, shaderc_shader_kind::shaderc_glsl_vertex_shader,
-                     "vertex_shader", vertex_shader));
+//   TRY_RESULT(
+//       const auto vertex,
+//       compile_shader(device, shaderc_shader_kind::shaderc_glsl_vertex_shader,
+//                      "vertex_shader", vertex_shader));
 
-  TRY_RESULT(
-      const auto fragment,
-      compile_shader(device, shaderc_shader_kind::shaderc_glsl_fragment_shader,
-                     "fragment_shader", fragment_shader));
+//   TRY_RESULT(
+//       const auto fragment,
+//       compile_shader(device,
+//       shaderc_shader_kind::shaderc_glsl_fragment_shader,
+//                      "fragment_shader", fragment_shader));
 
-  shader->vertex_shader(vertex);
-  shader->fragment_shader(fragment);
+//   shader->vertex_shader(vertex);
+//   shader->fragment_shader(fragment);
 
-  return shader;
-}
+//   return shader;
+// }
 
 auto Shader::create(const ::vk::Device &device,
                     const std::filesystem::path &shader_path) -> expected<Ptr> {
@@ -129,58 +152,49 @@ auto Shader::create(const ::vk::Device &device,
 
   TRY_RESULT(auto shaders, read_wren_shader_file(shader_path));
 
-  for (const auto &[type, content] : shaders) {
-    const auto p = shader_path / utils::enum_to_string(type);
-    switch (type) {
-      case ShaderType::Vertex: {
-        TRY_RESULT(const auto module,
-                   compile_shader(
-                       device, shaderc_shader_kind::shaderc_glsl_vertex_shader,
-                       shader_path, content));
-        shader->vertex_shader(module);
-        break;
-      }
-      case ShaderType::Fragment: {
-        TRY_RESULT(
-            const auto module,
-            compile_shader(device,
-                           shaderc_shader_kind::shaderc_glsl_fragment_shader,
-                           shader_path, content));
-        shader->fragment_shader(module);
-        break;
-      }
-    }
-  }
+  // TODO load SPIR-V shader? Or compile slang here
+
+  // for (const auto &[type, content] : shaders) {
+  //   const auto p = shader_path / utils::enum_to_string(type);
+  //   switch (type) {
+  //     case ShaderType::Vertex: {
+  //       TRY_RESULT(const auto module,
+  //                  compile_shader(
+  //                      device,
+  //                      shaderc_shader_kind::shaderc_glsl_vertex_shader,
+  //                      shader_path, content));
+  //       shader->vertex_shader(module);
+  //       break;
+  //     }
+  //     case ShaderType::Fragment: {
+  //       TRY_RESULT(
+  //           const auto module,
+  //           compile_shader(device,
+  //                          shaderc_shader_kind::shaderc_glsl_fragment_shader,
+  //                          shader_path, content));
+  //       shader->fragment_shader(module);
+  //       break;
+  //     }
+  //   }
+  // }
 
   return shader;
 }
 
-auto Shader::compile_shader(const ::vk::Device &device,
-                            const shaderc_shader_kind &shader_kind,
-                            const std::string &filename,
-                            const std::string &shader_source)
-    -> expected<ShaderModule> {
-  shaderc::Compiler compiler;
-  shaderc::CompileOptions options;
+auto Shader::create(const ::vk::Device &device,
+                    const std::span<const uint32_t> spirv_data)
+    -> expected<Ptr> {
+  const auto shader = std::make_shared<Shader>();
 
-  const auto compilation_result =
-      compiler.CompileGlslToSpv(shader_source, shader_kind, filename.c_str());
+  ::vk::ShaderModuleCreateInfo create_info({}, spirv_data);
+  VK_TRY_RESULT(module, device.createShaderModule(create_info));
 
-  const auto compilation_status = compilation_result.GetCompilationStatus();
-  if (compilation_status != shaderc_compilation_status_success) {
-    spdlog::error("{}", compilation_result.GetErrorMessage());
-    return std::unexpected(make_error_code(compilation_status));
-  }
+  ShaderModule m({spirv_data.begin(), spirv_data.end()}, module);
 
-  std::span spirv(compilation_result.cbegin(), compilation_result.cend());
-  ::vk::ShaderModuleCreateInfo create_info({}, spirv);
+  shader->vertex_shader(m);
+  shader->fragment_shader(m);
 
-  auto [res, module] = device.createShaderModule(create_info);
-  if (res != ::vk::Result::eSuccess) {
-    return std::unexpected(make_error_code(res));
-  }
-
-  return ShaderModule{{spirv.begin(), spirv.end()}, module};
+  return shader;
 }
 
 auto Shader::create_graphics_pipeline(const ::vk::Device &device,
@@ -256,11 +270,12 @@ auto Shader::create_graphics_pipeline(const ::vk::Device &device,
 
   // Stages
   auto v_stage_create_info = ::vk::PipelineShaderStageCreateInfo(
-      {}, ::vk::ShaderStageFlagBits::eVertex, vertex_shader_module_.module,
-      "main");
+      {}, ::vk::ShaderStageFlagBits::eVertex, vertex_shader_module_.module(),
+      vertex_shader_module_.get_entry_point(ShaderType::Vertex).c_str());
   auto f_stage_create_info = ::vk::PipelineShaderStageCreateInfo(
-      {}, ::vk::ShaderStageFlagBits::eFragment, fragment_shader_module_.module,
-      "main");
+      {}, ::vk::ShaderStageFlagBits::eFragment,
+      fragment_shader_module_.module(),
+      vertex_shader_module_.get_entry_point(ShaderType::Fragment).c_str());
   std::array shader_stages = {v_stage_create_info, f_stage_create_info};
 
   auto create_info = ::vk::GraphicsPipelineCreateInfo(

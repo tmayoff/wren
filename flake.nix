@@ -1,6 +1,16 @@
 {
   description = "Wren game engine";
 
+  nixConfig = {
+    extra-substituters = [
+      "https://tmayoff.cachix.org"
+    ];
+
+    extra-trusted-public-keys = [
+      "tmayoff.cachix.org-1:MxpzBMSFgtdDe1ZoDdENnwaRGmworx1aSRriKDpXFn8="
+    ];
+  };
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -23,6 +33,8 @@
           inherit system overlays;
         };
 
+        boost = pkgs.boost186;
+
         flecs = pkgs.stdenv.mkDerivation {
           name = "flecs";
           src = pkgs.fetchFromGitHub {
@@ -37,11 +49,30 @@
           ];
         };
 
+        slang = pkgs.stdenv.mkDerivation rec {
+          pname = "slang";
+          version = "v2025.1";
+          src = pkgs.fetchFromGitHub {
+            owner = "shader-slang";
+            repo = "slang";
+            rev = "${version}";
+            hash = "sha256-uTf2GOEaqcZ8ZKGBFit5UU1JycMLYpKSq0Zvxxct+JI=";
+            fetchSubmodules = true;
+          };
+
+          cmakeFlags = ["-DSLANG_SLANG_LLVM_FLAVOR=USE_SYSTEM_LLVM"];
+
+          nativeBuildInputs = with pkgs; [cmake python3];
+
+          buildInputs = with pkgs; [llvmPackages_13.libllvm llvmPackages_13.clang-unwrapped xorg.libX11];
+        };
+
         rawNativeBuildInputs = with pkgs; [
           pkg-config
           meson
           cmake
           ninja
+          slang
         ];
 
         rawBuildInputs = with pkgs; [
@@ -56,7 +87,6 @@
           vulkan-headers
           vulkan-loader
           vulkan-memory-allocator
-          shaderc
           spirv-headers
 
           flecs
@@ -101,6 +131,7 @@
 
               just
 
+              lldb
               gdb
 
               renderdoc

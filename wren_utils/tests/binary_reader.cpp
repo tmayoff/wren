@@ -1,5 +1,6 @@
+#include "wren/utils/binary_reader.hpp"
+
 #include <boost/test/unit_test.hpp>
-#include <wren/utils/binray_reader.hpp>
 
 BOOST_AUTO_TEST_SUITE(binary_reader)
 
@@ -40,7 +41,7 @@ BOOST_AUTO_TEST_CASE(Read) {
 
   std::span span(input);
 
-  auto reader = wren::utils::BinaryReader(span);
+  auto reader = wren::utils::BinaryReader(std::as_bytes(span));
   reader.skip(10);
 
   auto num = reader.read<int32_t>();

@@ -17,5 +17,9 @@ auto fmt::formatter<wren::Err>::format(wren::Err e,
   if (e.extra_msg().has_value()) {
     ss << "(" << e.extra_msg().value() << ")";
   }
+
+  ss << fmt::format("\n{} {}:{}:{}", e.location().function_name(),
+                    e.location().file_name(), e.location().line(),
+                    e.location().column());
   return fmt::formatter<std::string>::format(ss.str(), ctx);
 }
