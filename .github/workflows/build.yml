@@ -25,7 +25,7 @@ jobs:
         authToken: '${{ secrets.CACHIX_AUTH }}'
 
     - name: Setup sccache
-      uses: mozilla-actions/sccache-action@v0.0.8
+      uses: mozilla-actions/sccache-action@v0.0.9
 
     # ninja outputs the relative path to the file from the build dir, requires this action to ignore the first ../
     - uses: misyltoad/gcc-problem-matcher@v3
@@ -74,7 +74,7 @@ jobs:
         name: tmayoff
         authToken: '${{ secrets.CACHIX_AUTH }}'
 
-    - uses: mozilla-actions/sccache-action@v0.0.8
+    - uses: mozilla-actions/sccache-action@v0.0.9
 
     - name: build & test
       run: |
